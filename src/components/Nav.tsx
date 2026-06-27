@@ -1,0 +1,192 @@
+'use client'
+
+import Image from 'next/image'
+import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import useSWR from 'swr'
+import { Link, usePathname, useRouter } from '@/navigation'
+import { useAuth } from '@/lib/auth'
+import { fetcher } from '@/lib/api'
+import type { UnreadCount } from '@/lib/types'
+import { Button } from './ui/button'
+import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { LocaleSwitcher } from './LocaleSwitcher'
+
+interface NavInnerProps {
+  onClose?: () => void
+}
+
+function NavInner({ onClose }: NavInnerProps) {
+  const t = useTranslations('common')
+  const pathname = usePathname()
+  const router = useRouter()
+  const { athlete, logout, isAdmin } = useAuth()
+  const { slug } = useParams<{ slug: string }>()
+  const { data: unread } = useSWR<UnreadCount>(
+    isAdmin ? '/api/messages/unread-count' : null,
+    fetcher,
+    { refreshInterval: 60000 },
+  )
+  const unreadCount = unread?.count ?? 0
+
+  const navItems = [
+    { href: `/t/${slug}/dashboard`, labelKey: 'nav.dashboard' as const, icon: BarChart2 },
+    { href: `/t/${slug}/activities`, labelKey: 'nav.activities' as const, icon: Activity },
+    { href: `/t/${slug}/power`, labelKey: 'nav.power' as const, icon: Zap },
+    { href: `/t/${slug}/records`, labelKey: 'nav.records' as const, icon: Timer },
+    { href: `/t/${slug}/goals`, labelKey: 'nav.goals' as const, icon: Target },
+    { href: `/t/${slug}/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
+    { href: `/t/${slug}/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
+    { href: `/t/${slug}/profile`, labelKey: 'nav.profile' as const, icon: User },
+    { href: `/t/${slug}/settings`, labelKey: 'nav.settings' as const, icon: Settings },
+  ]
+
+  function handleLogout() {
+    logout()
+    router.replace('/')
+  }
+
+  return (
+    <nav className="flex flex-col h-full w-56 border-r bg-card px-3 py-4 gap-1">
+      <div className="px-3 pb-4 mb-2 border-b flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <img src="/logo.svg" alt="" aria-hidden="true" className="h-6 w-6" />
+            <p className="font-semibold text-lg leading-none">openkoutsi</p>
+          </div>
+          {athlete && (
+            <div className="flex items-center gap-2 mt-2">
+              <div className="relative h-7 w-7 shrink-0 rounded-full overflow-hidden bg-muted border">
+                {athlete.avatar_url ? (
+                  <Image
+                    src={athlete.avatar_url}
+                    alt="Avatar"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted-foreground select-none">
+                    {athlete.name ? athlete.name.charAt(0).toUpperCase() : '?'}
+                  </span>
+                )}
+              </div>
+              {athlete.name && (
+                <p className="text-xs text-muted-foreground truncate">{athlete.name}</p>
+              )}
+            </div>
+          )}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 -mt-0.5 -mr-1 rounded text-muted-foreground hover:text-foreground"
+            aria-label={t('nav.closeNavigation')}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 flex flex-col gap-1">
+        {navItems.map(({ href, labelKey, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+              pathname.includes(`/t/${slug}/${href.split('/').pop()}`)
+                ? 'bg-accent text-accent-foreground font-medium'
+                : 'text-muted-foreground',
+            )}
+          >
+            <Icon className="h-4 w-4 shrink-0" />
+            {t(labelKey)}
+          </Link>
+        ))}
+        {isAdmin && (
+          <Link
+            href={`/t/${slug}/admin`}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+              pathname.includes(`/t/${slug}/admin`)
+                ? 'bg-accent text-accent-foreground font-medium'
+                : 'text-muted-foreground',
+            )}
+          >
+            <Shield className="h-4 w-4 shrink-0" />
+            {t('nav.admin')}
+          </Link>
+        )}
+        {isAdmin && (
+          <Link
+            href={`/t/${slug}/inbox`}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+              pathname.includes(`/t/${slug}/inbox`)
+                ? 'bg-accent text-accent-foreground font-medium'
+                : 'text-muted-foreground',
+            )}
+          >
+            <Inbox className="h-4 w-4 shrink-0" />
+            <span className="flex-1">{t('nav.inbox')}</span>
+            {unreadCount > 0 && (
+              <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between px-1 pt-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="justify-start gap-3 text-muted-foreground"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          {t('nav.signOut')}
+        </Button>
+        <LocaleSwitcher />
+      </div>
+    </nav>
+  )
+}
+
+interface NavProps {
+  open?: boolean
+  onClose?: () => void
+}
+
+export function Nav({ open = false, onClose }: NavProps) {
+  return (
+    <>
+      {/* Desktop: always-visible sidebar */}
+      <aside className="hidden md:flex h-full shrink-0">
+        <NavInner />
+      </aside>
+
+      {/* Mobile: overlay drawer */}
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          {/* Drawer */}
+          <aside className="fixed inset-y-0 left-0 z-50 flex md:hidden">
+            <NavInner onClose={onClose} />
+          </aside>
+        </>
+      )}
+    </>
+  )
+}

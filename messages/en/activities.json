@@ -1,0 +1,158 @@
+{
+  "title": "Activities",
+  "noActivities": "No activities yet. Upload a .fit file above.",
+  "loading": "Loading…",
+  "search": {
+    "placeholder": "Search activities…",
+    "filters": "Filters",
+    "all": "All",
+    "sportType": "Sport type",
+    "workoutCategory": "Category",
+    "dateFrom": "From date",
+    "dateTo": "To date",
+    "duration": "Duration",
+    "durationMin": "Min duration",
+    "durationMax": "Max duration",
+    "distance": "Distance",
+    "distanceMin": "Min distance",
+    "distanceMax": "Max distance",
+    "tssMin": "Min TSS",
+    "tssMax": "Max TSS",
+    "hasPowerOnly": "Has power data only",
+    "hasPowerYes": "With power",
+    "hasPowerNo": "Without power",
+    "clearAll": "Clear all"
+  },
+  "upload": {
+    "drop": "Drop .fit files here, or click to browse",
+    "uploading": "Uploading…",
+    "invalidFile": "Invalid file",
+    "invalidFileDesc": "Only .fit files are supported",
+    "someSkipped": "Some files skipped",
+    "someSkippedDesc": "Only .fit files are supported",
+    "uploaded": "Uploaded",
+    "uploadedMultiple": "Uploaded {count} files",
+    "processing": "{name} is being processed",
+    "processingMultiple": "Files are being processed",
+    "uploadFailed": "Failed to upload {name}"
+  },
+  "processing": "Processing…",
+  "detail": {
+    "loading": "Loading…",
+    "notFound": "Activity not found",
+    "clickToRename": "Click to rename",
+    "downloadFit": "Download FIT file",
+    "reprocessIntervals": "Refresh intervals",
+    "reprocessFailed": "Failed to refresh intervals",
+    "renameFailed": "Rename failed",
+    "downloadFailed": "Download failed",
+    "deleteFailed": "Delete failed",
+    "deleted": "Activity deleted",
+    "deleteTitle": "Delete activity?",
+    "deleteDesc": "This will permanently delete the activity and recalculate your fitness metrics.",
+    "stats": {
+      "date": "Date",
+      "duration": "Duration",
+      "distance": "Distance",
+      "avgPower": "Avg power",
+      "np": "NP",
+      "if": "IF",
+      "tss": "TSS",
+      "avgHr": "Avg HR",
+      "maxHr": "Max HR",
+      "elevation": "Elevation"
+    },
+    "zones": {
+      "title": "Zone Distribution",
+      "heartRate": "Heart Rate",
+      "power": "Power"
+    },
+    "streams": "Activity Streams",
+    "powerHr": "Power & Heart Rate",
+    "speedElevation": "Speed & Elevation",
+    "laps": "Laps",
+    "powerBests": "Power Bests",
+    "distanceBests": "Distance Bests",
+    "chart": {
+      "toggleStreams": "Show streams",
+      "fullscreen": "Full screen",
+      "loadingFull": "Loading full data…",
+      "streamLabels": {
+        "power": "Power",
+        "heartrate": "Heart Rate",
+        "speed": "Speed",
+        "altitude": "Elevation",
+        "cadence": "Cadence"
+      },
+      "rollingAvg": "Rolling avg",
+      "rollingAvgWindow": "Window (s)",
+      "resetZoom": "Reset zoom"
+    },
+    "signals": {
+      "title": "Signal Analysis",
+      "totalEnergy": "Total Work",
+      "normalizedPower": "Normalized Power",
+      "customFunctions": "Custom Functions",
+      "addFunction": "Add function",
+      "noFunctions": "No custom functions yet.",
+      "functionType": {
+        "scalar": "Scalar (single value)",
+        "stream": "Stream (new series)"
+      },
+      "sandboxWarning": "Functions run in your browser and can access browser APIs.",
+      "test": "Test",
+      "testResult": "Result",
+      "saved": "Function saved",
+      "deleted": "Function deleted",
+      "editFunction": "Edit function",
+      "deleteFunction": "Delete",
+      "showOverlay": "Show on chart",
+      "hideOverlay": "Hide from chart"
+    },
+    "intervals": {
+      "title": "Intervals",
+      "duration": "Duration",
+      "avgHr": "Avg HR",
+      "avgPower": "Avg Power",
+      "avgSpeed": "Avg Speed",
+      "auto": "Auto"
+    },
+    "category": {
+      "label": "Category",
+      "none": "None",
+      "recovery": "Recovery",
+      "endurance": "Endurance",
+      "tempo": "Tempo",
+      "threshold": "Threshold",
+      "vo2max": "VO2 Max",
+      "anaerobic": "Anaerobic",
+      "sprint": "Sprint",
+      "strength": "Strength",
+      "yoga": "Yoga",
+      "cross_training": "Cross-training"
+    },
+    "labels": {
+      "title": "Labels",
+      "race": "Race",
+      "commute": "Commute"
+    },
+    "notes": {
+      "title": "Notes",
+      "placeholder": "Add notes about this activity…",
+      "saveFailed": "Failed to save notes"
+    },
+    "analysis": {
+      "title": "AI Analysis",
+      "analyse": "Analyse workout",
+      "retry": "Retry",
+      "reanalyse": "Re-analyse",
+      "stop": "Stop",
+      "analysing": "Analysing…",
+      "analysingWait": "Analysing… this may take a few minutes",
+      "failed": "Analysis failed. Please try again.",
+      "noAnalysis": "No analysis yet. Click “Analyse workout” to generate AI coaching feedback.",
+      "analysisFailed": "Analysis failed",
+      "analysisFailedToStart": "Analysis failed to start"
+    }
+  }
+}
