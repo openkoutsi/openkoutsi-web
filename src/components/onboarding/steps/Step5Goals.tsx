@@ -33,7 +33,7 @@ export function Step5Goals({ onNext, onBack, onSkip }: Props) {
     if (!title.trim()) return
     setSaving(true)
     try {
-      await apiFetch('/api/goals/', {
+      await apiFetch('/api/goals', {
         method: 'POST',
         body: JSON.stringify({
           title,

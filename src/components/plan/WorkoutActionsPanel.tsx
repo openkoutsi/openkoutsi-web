@@ -139,7 +139,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
     setLoadingActivities(true)
     try {
       const data = await apiFetch<ActivityListResponse>(
-        `/api/activities/?start=${date}&end=${date}&page_size=50`
+        `/api/activities?start=${date}&end=${date}&page_size=50`
       )
       setActivities(data.items ?? [])
     } catch {

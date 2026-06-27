@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { format, isSameMonth } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -36,13 +35,13 @@ import {
 } from '@/components/ui/dialog'
 
 
-function ActivityListRow({ activity, slug }: { activity: Activity; slug: string }) {
+function ActivityListRow({ activity }: { activity: Activity }) {
   const parts: string[] = [formatDuration(activity.duration_s)]
   if (activity.distance_m != null) parts.push(formatDistance(activity.distance_m))
   if (activity.tss != null) parts.push(`${Math.round(activity.tss)} TSS`)
 
   return (
-    <Link href={`/t/${slug}/activities/${activity.id}`}>
+    <Link href={`/activities/${activity.id}`}>
       <div className="rounded-md border px-3 py-2 hover:bg-muted transition-colors cursor-pointer">
         <p className="text-sm font-medium">{activity.name}</p>
         <p className="text-xs text-muted-foreground mt-0.5">{parts.join(' · ')}</p>
@@ -53,7 +52,6 @@ function ActivityListRow({ activity, slug }: { activity: Activity; slug: string 
 
 export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) {
   const t = useTranslations('dashboard')
-  const { slug } = useParams<{ slug: string }>()
   const { athlete } = useAuth()
 
   const now = new Date()
@@ -68,7 +66,7 @@ export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) 
 
   const { start, end } = monthBounds(year, month)
   const { data, isLoading } = useSWR<PaginatedActivities>(
-    `/api/activities/?start=${start}&end=${end}&page_size=100`,
+    `/api/activities?start=${start}&end=${end}&page_size=100`,
     fetcher,
   )
 
@@ -294,7 +292,7 @@ export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) 
               <>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('calendar.performed')}</p>
                 {selectedActivities.map((a) => (
-                  <ActivityListRow key={a.id} activity={a} slug={slug} />
+                  <ActivityListRow key={a.id} activity={a} />
                 ))}
               </>
             )}

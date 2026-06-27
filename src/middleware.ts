@@ -5,15 +5,15 @@ import { routing } from './i18n/routing'
 
 const intlMiddleware = createMiddleware(routing)
 
-// App-page suffixes that require auth (relative to /t/{slug}/)
-const PROTECTED_SUFFIXES = [
+// Locale-relative path prefixes that require an authenticated session
+const PROTECTED_PREFIXES = [
   '/dashboard', '/activities', '/power', '/records',
   '/goals', '/plan', '/profile', '/settings', '/admin',
-  '/onboarding',
+  '/workouts', '/inbox', '/onboarding',
 ]
 
-// Auth-page suffixes that are public
-const AUTH_SUFFIXES = ['/login', '/register', '/reset-password']
+// Public auth-page prefixes
+const AUTH_PREFIXES = ['/login', '/register', '/reset-password']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -39,20 +39,13 @@ export function middleware(request: NextRequest) {
 
   const hasSession = request.cookies.has('session')
 
-  // Gate /t/{slug}/* app pages — public auth pages under /t/{slug}/ are excluded
-  if (logicalPath.startsWith('/t/')) {
-    const parts = logicalPath.slice(3).split('/') // strip leading /t/
-    if (parts.length >= 2) {
-      const slug = parts[0]
-      const suffix = '/' + parts.slice(1).join('/')
-      const isAuthPage = AUTH_SUFFIXES.some((s) => suffix.startsWith(s))
-      const isProtected = PROTECTED_SUFFIXES.some((s) => suffix.startsWith(s))
-      if (isProtected && !isAuthPage && !hasSession) {
-        const loginUrl = new URL(`/${detectedLocale}/t/${slug}/login`, request.url)
-        loginUrl.searchParams.set('next', pathname)
-        return NextResponse.redirect(loginUrl)
-      }
-    }
+  // Gate authenticated app pages; public auth pages are excluded.
+  const isAuthPage = AUTH_PREFIXES.some((s) => logicalPath.startsWith(s))
+  const isProtected = PROTECTED_PREFIXES.some((s) => logicalPath.startsWith(s))
+  if (isProtected && !isAuthPage && !hasSession) {
+    const loginUrl = new URL(`/${detectedLocale}/login`, request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return intlMiddleware(request)

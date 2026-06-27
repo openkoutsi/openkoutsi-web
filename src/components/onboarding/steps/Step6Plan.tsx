@@ -86,12 +86,12 @@ export function Step6Plan({ onNext, onBack, onSkip }: Props) {
 
       if (useLlm && llmConfig && athlete) {
         const llmWeeks = await generatePlanWeeks(config, numWeeks, goal || null, athlete)
-        await apiFetch('/api/plans/', {
+        await apiFetch('/api/plans', {
           method: 'POST',
           body: JSON.stringify({ name, start_date: startDate, weeks: numWeeks, goal: goal || null, config, llm_weeks: llmWeeks }),
         })
       } else {
-        await apiFetch('/api/plans/', {
+        await apiFetch('/api/plans', {
           method: 'POST',
           body: JSON.stringify({ name, start_date: startDate, weeks: numWeeks, goal: goal || null, config, use_llm: useLlm }),
         })

@@ -5,17 +5,6 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000
 // In-memory access token (not persisted to storage)
 let _accessToken: string | null = null
 
-// Current team slug — set by AuthProvider on mount so attemptRefresh knows which endpoint to call
-let _teamSlug: string | null = null
-
-export function setTeamSlug(slug: string) {
-  _teamSlug = slug
-}
-
-export function getTeamSlug(): string | null {
-  return _teamSlug
-}
-
 export function setAccessToken(token: string | null) {
   _accessToken = token
 }
@@ -45,9 +34,8 @@ export function clearSessionCookie() {
 }
 
 async function attemptRefresh(): Promise<boolean> {
-  if (!_teamSlug) return false
   try {
-    const res = await fetch(`${API_URL}/api/teams/${_teamSlug}/auth/refresh`, {
+    const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     })
@@ -94,7 +82,7 @@ export async function apiFetch<T>(
       const AUTH_PATHS = ['/login', '/register', '/reset-password']
       const onAuthPage = AUTH_PATHS.some((p) => window.location.pathname.includes(p))
       if (!onAuthPage) {
-        window.location.href = _teamSlug ? `/t/${_teamSlug}/login` : '/'
+        window.location.href = '/'
       }
     }
     throw new Error('Unauthorized')
@@ -129,11 +117,11 @@ export async function apiFetch<T>(
 export const fetcher = <T>(path: string) => apiFetch<T>(path)
 
 export async function getPowerBests(): Promise<AllTimePowerBests> {
-  return apiFetch<AllTimePowerBests>('/api/power/bests')
+  return apiFetch<AllTimePowerBests>('/api/metrics/bests/power')
 }
 
 export async function getDistanceBests(): Promise<AllTimeDistanceBests> {
-  return apiFetch<AllTimeDistanceBests>('/api/distance/bests')
+  return apiFetch<AllTimeDistanceBests>('/api/metrics/bests/distance')
 }
 
 export async function apiDownload(
@@ -155,7 +143,7 @@ export async function apiDownload(
     }
     clearTokens()
     if (typeof window !== 'undefined') {
-      window.location.href = _teamSlug ? `/t/${_teamSlug}/login` : '/'
+      window.location.href = '/'
     }
     throw new Error('Unauthorized')
   }

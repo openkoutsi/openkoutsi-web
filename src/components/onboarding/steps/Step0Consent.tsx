@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, apiDownload } from '@/lib/api'
@@ -18,7 +17,6 @@ interface Props {
 export function Step0Consent({ onAccepted }: Props) {
   const t = useTranslations('onboarding')
   const { logout } = useAuth()
-  const { slug } = useParams<{ slug: string }>()
   const [accepted, setAccepted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showDeclinePanel, setShowDeclinePanel] = useState(false)
@@ -31,7 +29,7 @@ export function Step0Consent({ onAccepted }: Props) {
   async function handleAccept() {
     setSaving(true)
     try {
-      await apiFetch(`/api/teams/${slug}/consent`, {
+      await apiFetch(`/api/consent`, {
         method: 'POST',
         body: JSON.stringify({ consent_version: '1.0' }),
       })
@@ -54,7 +52,7 @@ export function Step0Consent({ onAccepted }: Props) {
     setDeleteError('')
     setDeleting(true)
     try {
-      await apiFetch(`/api/teams/${slug}/auth/account`, {
+      await apiFetch(`/api/auth/account`, {
         method: 'DELETE',
         body: JSON.stringify({ password }),
       })

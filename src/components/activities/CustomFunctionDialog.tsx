@@ -110,8 +110,8 @@ export function CustomFunctionDialog({ open, onOpenChange, existing, streams, at
         ? existing_fns.map((f) => (f.id === fn.id ? fn : f))
         : [...existing_fns, fn]
 
-      await apiFetch('/api/athlete/', {
-        method: 'PUT',
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
         body: JSON.stringify({
           app_settings: { ...currentSettings, custom_functions: updated },
         }),

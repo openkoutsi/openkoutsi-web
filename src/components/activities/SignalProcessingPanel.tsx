@@ -39,7 +39,7 @@ export function SignalProcessingPanel({
   onOverlayStreamsChange,
 }: Props) {
   const t = useTranslations('activities')
-  const { data: freshAthlete, mutate: mutateAthlete } = useSWR<AthleteProfile>('/api/athlete/', fetcher)
+  const { data: freshAthlete, mutate: mutateAthlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const effectiveAthlete = freshAthlete ?? athlete
 
   const [rollingWindow, setRollingWindow] = useState(30)
@@ -131,8 +131,8 @@ export function SignalProcessingPanel({
     try {
       const currentSettings = (effectiveAthlete?.app_settings ?? {}) as Record<string, unknown>
       const updated = getCustomFunctions(currentSettings).filter((f) => f.id !== fn.id)
-      await apiFetch('/api/athlete/', {
-        method: 'PUT',
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
         body: JSON.stringify({
           app_settings: { ...currentSettings, custom_functions: updated },
         }),

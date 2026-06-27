@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import useSWR from 'swr'
 import { Link, usePathname, useRouter } from '@/navigation'
@@ -22,7 +21,6 @@ function NavInner({ onClose }: NavInnerProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { athlete, logout, isAdmin } = useAuth()
-  const { slug } = useParams<{ slug: string }>()
   const { data: unread } = useSWR<UnreadCount>(
     isAdmin ? '/api/messages/unread-count' : null,
     fetcher,
@@ -31,15 +29,15 @@ function NavInner({ onClose }: NavInnerProps) {
   const unreadCount = unread?.count ?? 0
 
   const navItems = [
-    { href: `/t/${slug}/dashboard`, labelKey: 'nav.dashboard' as const, icon: BarChart2 },
-    { href: `/t/${slug}/activities`, labelKey: 'nav.activities' as const, icon: Activity },
-    { href: `/t/${slug}/power`, labelKey: 'nav.power' as const, icon: Zap },
-    { href: `/t/${slug}/records`, labelKey: 'nav.records' as const, icon: Timer },
-    { href: `/t/${slug}/goals`, labelKey: 'nav.goals' as const, icon: Target },
-    { href: `/t/${slug}/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
-    { href: `/t/${slug}/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
-    { href: `/t/${slug}/profile`, labelKey: 'nav.profile' as const, icon: User },
-    { href: `/t/${slug}/settings`, labelKey: 'nav.settings' as const, icon: Settings },
+    { href: `/dashboard`, labelKey: 'nav.dashboard' as const, icon: BarChart2 },
+    { href: `/activities`, labelKey: 'nav.activities' as const, icon: Activity },
+    { href: `/power`, labelKey: 'nav.power' as const, icon: Zap },
+    { href: `/records`, labelKey: 'nav.records' as const, icon: Timer },
+    { href: `/goals`, labelKey: 'nav.goals' as const, icon: Target },
+    { href: `/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
+    { href: `/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
+    { href: `/profile`, labelKey: 'nav.profile' as const, icon: User },
+    { href: `/settings`, labelKey: 'nav.settings' as const, icon: Settings },
   ]
 
   function handleLogout() {
@@ -97,7 +95,7 @@ function NavInner({ onClose }: NavInnerProps) {
             onClick={onClose}
             className={cn(
               'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
-              pathname.includes(`/t/${slug}/${href.split('/').pop()}`)
+              pathname.startsWith(href)
                 ? 'bg-accent text-accent-foreground font-medium'
                 : 'text-muted-foreground',
             )}
@@ -108,11 +106,11 @@ function NavInner({ onClose }: NavInnerProps) {
         ))}
         {isAdmin && (
           <Link
-            href={`/t/${slug}/admin`}
+            href={`/admin`}
             onClick={onClose}
             className={cn(
               'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
-              pathname.includes(`/t/${slug}/admin`)
+              pathname.startsWith('/admin')
                 ? 'bg-accent text-accent-foreground font-medium'
                 : 'text-muted-foreground',
             )}
@@ -123,11 +121,11 @@ function NavInner({ onClose }: NavInnerProps) {
         )}
         {isAdmin && (
           <Link
-            href={`/t/${slug}/inbox`}
+            href={`/inbox`}
             onClick={onClose}
             className={cn(
               'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
-              pathname.includes(`/t/${slug}/inbox`)
+              pathname.startsWith('/inbox')
                 ? 'bg-accent text-accent-foreground font-medium'
                 : 'text-muted-foreground',
             )}

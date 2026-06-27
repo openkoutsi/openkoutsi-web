@@ -66,8 +66,8 @@ export function Step1Profile({ onNext, onSkip }: Props) {
     }
     setSaving(true)
     try {
-      await apiFetch('/api/athlete/', {
-        method: 'PUT',
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
         body: JSON.stringify({
           name: name || null,
           weight_kg: weight ? parseFloat(weight) : null,

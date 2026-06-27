@@ -1,6 +1,5 @@
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/navigation'
 import type { Activity } from '@/lib/types'
@@ -23,11 +22,10 @@ const SPORT_ICONS: Record<string, React.ElementType> = {
 
 export function ActivityCard({ activity }: Props) {
   const t = useTranslations('activities')
-  const { slug } = useParams<{ slug: string }>()
   const Icon = SPORT_ICONS[activity.sport_type?.toLowerCase()] ?? SPORT_ICONS.default
 
   return (
-    <Link href={`/t/${slug}/activities/${activity.id}`}>
+    <Link href={`/activities/${activity.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardContent className="pt-4 pb-4">
           <div className="flex items-start justify-between gap-2">

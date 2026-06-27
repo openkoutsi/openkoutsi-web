@@ -10,18 +10,12 @@ export default function SetupPage() {
   const t = useTranslations('landing')
   const router = useRouter()
 
-  const [teamName, setTeamName] = useState('')
-  const [slug, setSlug] = useState('')
   const [adminUsername, setAdminUsername] = useState('')
   const [adminDisplayName, setAdminDisplayName] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
-
-  function handleSlugInput(value: string) {
-    setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-{2,}/g, '-'))
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -33,8 +27,6 @@ export default function SetupPage() {
         {
           method: 'POST',
           body: JSON.stringify({
-            team_name: teamName,
-            slug,
             admin_username: adminUsername,
             admin_display_name: adminDisplayName || undefined,
             admin_password: password,
@@ -43,7 +35,7 @@ export default function SetupPage() {
         false,
       )
       setDone(true)
-      setTimeout(() => router.replace(`/t/${slug}/login`), 1500)
+      setTimeout(() => router.replace(`/login`), 1500)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('setup.failed'))
     } finally {
@@ -67,30 +59,6 @@ export default function SetupPage() {
           <p className="text-center text-sm text-green-600">{t('setup.success')}</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">{t('setup.teamName')}</label>
-              <input
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={t('setup.teamNamePlaceholder')}
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">{t('setup.slug')}</label>
-              <input
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={t('setup.slugPlaceholder')}
-                value={slug}
-                onChange={(e) => handleSlugInput(e.target.value)}
-                required
-                pattern="[a-z0-9-]+"
-              />
-              <p className="text-xs text-muted-foreground">{t('setup.slugHint')}</p>
-            </div>
-
             <div className="space-y-1">
               <label className="text-sm font-medium">{t('setup.adminUsername')}</label>
               <input
