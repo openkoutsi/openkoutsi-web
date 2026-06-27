@@ -3,13 +3,22 @@ export interface TokenPair {
   token_type: string
 }
 
-export interface MemberResponse {
-  user_id: string
+// Shared pagination envelope returned by list endpoints in API v2.
+export interface Page<T> {
+  items: T[]
+  total: number
+  page: number
+  page_size: number
+}
+
+// Instance user as seen by an administrator (GET /api/admin/users).
+export interface UserResponse {
+  id: string
   username: string
   roles: string[]
-  joined_at: string
-  consented_at: string | null
-  consent_version: string | null
+  created_at: string
+  consented_at?: string | null
+  consent_version?: string | null
 }
 
 export interface InvitationResponse {
@@ -24,7 +33,7 @@ export interface InvitationResponse {
   url?: string | null
 }
 
-export interface TeamSettingsResponse {
+export interface InstanceSettingsResponse {
   llm_base_url: string | null
   llm_model: string | null
   llm_api_key_set: boolean
@@ -324,14 +333,4 @@ export interface Message {
 
 export interface UnreadCount {
   count: number
-}
-
-export interface JoinRequest {
-  id: string
-  team_slug: string
-  username: string
-  display_name: string | null
-  message: string | null
-  status: string
-  created_at: string
 }

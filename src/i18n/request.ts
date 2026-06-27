@@ -19,7 +19,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
       app:        (await import(`../../messages/${locale}/app.json`)).default,
       admin:      (await import(`../../messages/${locale}/admin.json`)).default,
       workouts:   (await import(`../../messages/${locale}/workouts.json`)).default,
-      superadmin: (await import(`../../messages/${locale}/superadmin.json`)).default,
       onboarding: (await import(`../../messages/${locale}/onboarding.json`)).default,
       messages:   (await import(`../../messages/${locale}/messages.json`)).default,
     },

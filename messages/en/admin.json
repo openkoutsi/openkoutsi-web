@@ -1,33 +1,23 @@
 {
   "title": "Admin",
   "tabs": {
-    "members": "Members",
+    "users": "Users",
     "invitations": "Invitations",
-    "joinRequests": "Join requests",
     "settings": "Settings"
   },
-  "joinRequests": {
-    "none": "No pending join requests.",
-    "requestedAt": "Requested",
-    "approve": "Approve",
-    "reject": "Reject",
-    "approved": "Request approved",
-    "rejected": "Request rejected",
-    "approveFailed": "Failed to approve request",
-    "rejectFailed": "Failed to reject request"
-  },
-  "members": {
+  "users": {
     "username": "Username",
     "roles": "Roles",
-    "joinedAt": "Joined",
+    "registeredAt": "Registered",
     "consent": "Consent",
     "noConsent": "Not accepted",
     "actions": "Actions",
+    "cancel": "Cancel",
     "editRoles": "Edit roles",
     "saveRoles": "Save",
     "remove": "Remove",
-    "removeConfirmTitle": "Remove member",
-    "removeConfirmDesc": "This will remove {username} from the team. They will lose access immediately.",
+    "removeConfirmTitle": "Remove user",
+    "removeConfirmDesc": "This will permanently delete {username} and all of their data. They will lose access immediately.",
     "removeConfirmAction": "Remove",
     "passwordReset": "Reset password",
     "passwordResetDone": "Link copied to clipboard",
@@ -46,6 +36,7 @@
     "noExpiry": "No expiry",
     "copyLink": "Copy link",
     "copied": "Copied!",
+    "done": "Done",
     "revoke": "Revoke",
     "revokeConfirmTitle": "Revoke invitation",
     "revokeConfirmDesc": "This invitation link will no longer work.",
@@ -70,7 +61,7 @@
   },
   "settings": {
     "llmTitle": "LLM configuration",
-    "llmDesc": "Override the global LLM settings for this team. Leave blank to use the server defaults.",
+    "llmDesc": "Configure the LLM used for activity analysis across this instance. Leave blank to use the server defaults.",
     "baseUrl": "Base URL",
     "baseUrlPlaceholder": "https://api.openai.com/v1",
     "model": "Model",
@@ -92,7 +83,7 @@
     "testModelsAvailable": "Available models",
     "testNoBaseUrl": "Save a base URL first before testing",
     "analysisContext": "Analysis context",
-    "analysisContextDesc": "Optional coaching context injected into every activity analysis for this team. Describe the sport, team culture, training philosophy, or any standing instructions for the AI coach.",
+    "analysisContextDesc": "Optional coaching context injected into every activity analysis for this instance. Describe the sport, training philosophy, or any standing instructions for the AI coach.",
     "analysisContextPlaceholder": "e.g. This is an elite road cycling team. Prioritise power-based metrics and threshold training. Responses should be concise and data-driven."
   }
 }

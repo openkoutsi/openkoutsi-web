@@ -31,8 +31,8 @@ export function Step4Analysis({ onNext, onBack, onSkip }: Props) {
     setSaving(true)
     try {
       const existing = (athlete?.app_settings ?? {}) as Record<string, unknown>
-      await apiFetch('/api/athlete/', {
-        method: 'PUT',
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
         body: JSON.stringify({ app_settings: { ...existing, auto_analyze: checked } }),
       })
       await refreshAthlete()

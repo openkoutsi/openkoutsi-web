@@ -15,7 +15,6 @@ import {
   getAccessToken,
   setSessionCookie,
   clearSessionCookie,
-  setTeamSlug,
 } from './api'
 import type { AthleteProfile, TokenPair } from './types'
 
@@ -33,10 +32,8 @@ function parseJwtRoles(token: string): string[] {
 interface AuthState {
   athlete: AthleteProfile | null
   loading: boolean
-  teamSlug: string
   roles: string[]
   isAdmin: boolean
-  isCoach: boolean
   login: (username: string, password: string) => Promise<void>
   register: (username: string, password: string, inviteToken: string) => Promise<void>
   logout: () => void
@@ -45,25 +42,19 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null)
 
-export function AuthProvider({
-  children,
-  teamSlug,
-}: {
-  children: ReactNode
-  teamSlug: string
-}) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [athlete, setAthlete] = useState<AthleteProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [roles, setRoles] = useState<string[]>([])
 
   const fetchAthlete = useCallback(async () => {
     try {
-      const data = await apiFetch<AthleteProfile>('/api/athlete/')
+      const data = await apiFetch<AthleteProfile>('/api/athlete')
       const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone
       if (detectedTz && data.app_settings?.timezone !== detectedTz) {
         data.app_settings = { ...data.app_settings, timezone: detectedTz }
-        apiFetch('/api/athlete/', {
-          method: 'PUT',
+        apiFetch('/api/athlete', {
+          method: 'PATCH',
           body: JSON.stringify({ app_settings: data.app_settings }),
         }).catch(() => {})
       }
@@ -74,13 +65,11 @@ export function AuthProvider({
   }, [])
 
   useEffect(() => {
-    setTeamSlug(teamSlug)
-
     const restore = async () => {
       if (!getAccessToken()) {
         try {
           const res = await apiFetch<TokenPair>(
-            `/api/teams/${teamSlug}/auth/refresh`,
+            '/api/auth/refresh',
             { method: 'POST' },
             false,
           )
@@ -100,12 +89,12 @@ export function AuthProvider({
       setLoading(false)
     }
     restore()
-  }, [teamSlug, fetchAthlete])
+  }, [fetchAthlete])
 
   const login = useCallback(
     async (username: string, password: string) => {
       const data = await apiFetch<TokenPair>(
-        `/api/teams/${teamSlug}/auth/login`,
+        '/api/auth/login',
         {
           method: 'POST',
           body: JSON.stringify({ username, password }),
@@ -117,13 +106,13 @@ export function AuthProvider({
       setSessionCookie()
       await fetchAthlete()
     },
-    [teamSlug, fetchAthlete],
+    [fetchAthlete],
   )
 
   const register = useCallback(
     async (username: string, password: string, inviteToken: string) => {
       const data = await apiFetch<TokenPair>(
-        `/api/teams/${teamSlug}/auth/register`,
+        '/api/auth/register',
         {
           method: 'POST',
           body: JSON.stringify({ username, password, invite_token: inviteToken }),
@@ -135,7 +124,7 @@ export function AuthProvider({
       setSessionCookie()
       await fetchAthlete()
     },
-    [teamSlug, fetchAthlete],
+    [fetchAthlete],
   )
 
   const logout = useCallback(() => {
@@ -143,19 +132,18 @@ export function AuthProvider({
     clearSessionCookie()
     setAthlete(null)
     setRoles([])
-    apiFetch(`/api/teams/${teamSlug}/auth/logout`, { method: 'POST' }).catch(() => {})
-  }, [teamSlug])
+    apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+  }, [])
 
   const refreshAthlete = useCallback(async () => {
     await fetchAthlete()
   }, [fetchAthlete])
 
   const isAdmin = roles.includes('administrator')
-  const isCoach = roles.includes('coach')
 
   return (
     <AuthContext.Provider
-      value={{ athlete, loading, teamSlug, roles, isAdmin, isCoach, login, register, logout, refreshAthlete }}
+      value={{ athlete, loading, roles, isAdmin, login, register, logout, refreshAthlete }}
     >
       {children}
     </AuthContext.Provider>
