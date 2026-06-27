@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "dashboard": "Kojelauta",
+    "activities": "Harjoitukset",
+    "power": "Teho",
+    "records": "Enn\u00e4tykset",
+    "goals": "Tavoitteet",
+    "plan": "Ohjelma",
+    "workouts": "Treenit",
+    "profile": "Profiili",
+    "settings": "Asetukset",
+    "admin": "Ylläpito",
+    "inbox": "Postilaatikko",
+    "signOut": "Kirjaudu ulos",
+    "closeNavigation": "Sulje navigaatio",
+    "openNavigation": "Avaa navigaatio"
+  },
+  "loading": "Ladataan\u2026",
+  "saving": "Tallennetaan\u2026",
+  "saved": "Tallennettu",
+  "save": "Tallenna",
+  "cancel": "Peruuta",
+  "delete": "Poista",
+  "error": "Virhe",
+  "unknownError": "Tuntematon virhe",
+  "maintenance": {
+    "title": "Vaihdetaan kasettia",
+    "description": "Pieni huoltotoimenpide. Palvelimen matka jatkuu pian.",
+    "retry": "Yritä uudelleen"
+  },
+  "notFound": {
+    "title": "Väärä käänne!",
+    "description": "Hups, näyttää siltä että ajoit väärään suuntaan. Tätä reittiä ei ole — palaa takaisin oikealle reitille.",
+    "home": "Takaisin pelotoniin"
+  }
+}
