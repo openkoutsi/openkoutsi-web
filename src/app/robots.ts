@@ -1,7 +1,11 @@
 import type { MetadataRoute } from 'next'
 
+// Rendered at request time so the sitemap URL reflects the BASE_URL configured
+// for this deployment rather than a value baked in at build time.
+export const dynamic = 'force-dynamic'
+
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? ''
+  const base = process.env.BASE_URL ?? ''
   const result: MetadataRoute.Robots = {
     rules: [
       {

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { API_URL } from './api'
+import { getApiUrl } from './api'
 
 interface BackendStatusContextValue {
   isBackendDown: boolean
@@ -20,7 +20,7 @@ export function BackendStatusProvider({ children }: { children: React.ReactNode 
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 5000)
-      const res = await fetch(`${API_URL}/api/health`, {
+      const res = await fetch(`${getApiUrl()}/api/health`, {
         signal: controller.signal,
         cache: 'no-store',
       })

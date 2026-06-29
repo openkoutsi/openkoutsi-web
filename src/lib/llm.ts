@@ -15,7 +15,7 @@
  */
 
 import type { ActivityDetail, AthleteProfile } from './types'
-import { API_URL, getAccessToken, setAccessToken, clearTokens } from './api'
+import { getApiUrl, getAccessToken, setAccessToken, clearTokens } from './api'
 
 // ── Config ────────────────────────────────────────────────────────────────
 
@@ -56,7 +56,7 @@ async function _proxyFetch(
   signal?: AbortSignal,
   retry = true,
 ): Promise<Response> {
-  const resp = await fetch(`${API_URL}/api/llm/chat`, {
+  const resp = await fetch(`${getApiUrl()}/api/llm/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ..._authHeaders() },
     body: JSON.stringify(body),
@@ -67,7 +67,7 @@ async function _proxyFetch(
   if (resp.status === 401 && retry) {
     // Attempt token refresh (mirrors the logic in apiFetch)
     try {
-      const refresh = await fetch(`${API_URL}/api/auth/refresh`, {
+      const refresh = await fetch(`${getApiUrl()}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
       })

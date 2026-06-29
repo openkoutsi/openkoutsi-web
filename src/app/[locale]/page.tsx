@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
+import { getApiUrl } from '@/lib/api'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { HeroInteractive } from './HeroInteractive'
 import { CopyButton } from './CopyButton'
@@ -14,7 +15,7 @@ const DESCRIPTION =
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? ''
+  const base = process.env.BASE_URL ?? ''
 
   return {
     title: TITLE,
@@ -62,7 +63,7 @@ const jsonLd = {
 export default async function RootPage() {
   const t = await getTranslations('landing')
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+  const apiUrl = getApiUrl()
 
   const [setupResult, versionResult] = await Promise.allSettled([
     fetch(`${apiUrl}/api/setup/status`, { cache: 'no-store' }).then((r) => r.json()),

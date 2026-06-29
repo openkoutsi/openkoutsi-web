@@ -32,9 +32,22 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
 
+  // Inject runtime configuration so the browser can read the backend API URL at
+  // request time instead of having it baked into the bundle at build time. This
+  // runs synchronously before the React bundle, so window.__ENV__ is available
+  // when getApiUrl() (src/lib/api.ts) first executes on the client.
+  const runtimeEnv = {
+    API_URL: process.env.API_URL ?? 'http://localhost:8000',
+  }
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${inter.className}`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__ENV__ = ${JSON.stringify(runtimeEnv)}`,
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

@@ -6,12 +6,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# NEXT_PUBLIC_API_URL is baked into the JS bundle at build time.
-# Set it to the URL your browser will use to reach the backend,
-# e.g. https://api.example.com or http://your-server-ip:8000
-ARG NEXT_PUBLIC_API_URL=http://localhost:8000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
+# The backend API URL is read at runtime (not baked into the bundle), so the
+# image is environment-agnostic — no build args are needed here. See API_URL /
+# BASE_URL in the runtime stage below.
 COPY . .
 RUN npm run build
 
@@ -23,6 +20,11 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
+
+# Runtime configuration (supply via `docker run -e` or compose `environment:`):
+#   API_URL  — URL the browser uses to reach the backend, e.g. https://api.example.com
+#   BASE_URL — public base URL of this frontend, e.g. https://app.example.com
+# Both default to localhost when unset (see getApiUrl() and the SEO routes).
 
 # standalone output contains the server; static assets must be copied in.
 COPY --from=builder /app/.next/standalone ./
