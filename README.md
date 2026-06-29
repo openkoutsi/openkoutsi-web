@@ -13,7 +13,7 @@ self-hosted cycling coaching platform. This is a [Next.js 15](https://nextjs.org
 The backend (FastAPI) lives in a separate repository:
 **[LassiHeikkila/openkoutsi](https://github.com/LassiHeikkila/openkoutsi)**. This
 frontend talks to it purely over HTTP (`/api/*`) — the only coupling is configuration
-(`NEXT_PUBLIC_API_URL`), so the two deploy independently.
+(`API_URL`), so the two deploy independently.
 
 ## Stack
 
@@ -29,7 +29,7 @@ frontend talks to it purely over HTTP (`/api/*`) — the only coupling is config
 
 - Node.js 22+
 - npm
-- A running openkoutsi backend (see the backend repo) reachable at `NEXT_PUBLIC_API_URL`
+- A running openkoutsi backend (see the backend repo) reachable at `API_URL`
 
 ## Local development
 
@@ -49,18 +49,25 @@ npm run dev
 Create a `.env.local` in the repo root:
 
 ```env
-# URL a browser uses to reach the backend API. Baked into the JS bundle at build time.
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# URL a browser uses to reach the backend API. Read at runtime, so the same build
+# works against any backend.
+API_URL=http://localhost:8000
 
-# Public base URL of this frontend.
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
+# Public base URL of this frontend (used for SEO metadata, sitemap, robots). Read
+# at runtime.
+BASE_URL=http://localhost:3000
 
 # Optional: shown to users on the password-reset screen as the admin contact.
 NEXT_PUBLIC_ADMIN_CONTACT="phone up lassi"
 ```
 
-> `NEXT_PUBLIC_*` variables are **baked into the build at build time**, not read at
-> runtime. Rebuild after changing them.
+> `API_URL` and `BASE_URL` are read at **runtime** — the same image can target any
+> environment without rebuilding. The app injects `API_URL` into the page as
+> `window.__ENV__` so the browser reads it at runtime (see `src/lib/api.ts`), and the
+> runtime Content-Security-Policy is set in `src/middleware.ts`.
+>
+> `NEXT_PUBLIC_*` variables (e.g. `NEXT_PUBLIC_ADMIN_CONTACT`) are still **baked into
+> the build at build time**; rebuild after changing them.
 
 ## Scripts
 
@@ -76,12 +83,15 @@ npm run test:coverage  # run tests with coverage
 ## Docker
 
 ```bash
-docker build --build-arg NEXT_PUBLIC_API_URL=https://api.your-domain -t openkoutsi-web .
-docker run -p 3000:3000 openkoutsi-web
+docker build -t openkoutsi-web .
+docker run -p 3000:3000 \
+  -e API_URL=https://api.your-domain \
+  -e BASE_URL=https://app.your-domain \
+  openkoutsi-web
 ```
 
-`NEXT_PUBLIC_API_URL` is a build arg because it is baked into the bundle; set it to the
-URL your browser will use to reach the backend.
+`API_URL` and `BASE_URL` are supplied at **runtime**, so the image is environment-agnostic
+— build once, then point each deployment at its backend and public URL via these env vars.
 
 ## Deployment
 

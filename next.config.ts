@@ -3,8 +3,12 @@ import createNextIntlPlugin from 'next-intl/plugin'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+const API_URL = process.env.API_URL ?? 'http://localhost:8000'
 
+// Static security headers. The Content-Security-Policy depends on the backend
+// API origin, which is configured at runtime (see getApiUrl / window.__ENV__),
+// so it is set in middleware.ts instead — next.config headers are evaluated at
+// build time and baked into the build, so they cannot reflect a runtime value.
 const securityHeaders = [
   {
     key: 'X-Frame-Options',
@@ -21,18 +25,6 @@ const securityHeaders = [
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()',
-  },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // Next.js requires unsafe-inline for hydration scripts and unsafe-eval in dev mode
-      "style-src 'self' 'unsafe-inline'", // 'unsafe-inline' required by Tailwind CSS
-      `connect-src 'self' ${API_URL}`,
-      `img-src 'self' data: https: ${API_URL}`,
-      "font-src 'self'",
-      "frame-ancestors 'none'",
-    ].join('; '),
   },
 ]
 

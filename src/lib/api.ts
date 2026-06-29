@@ -1,6 +1,21 @@
 import type { AllTimeDistanceBests, AllTimePowerBests, TokenPair } from './types'
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+const DEFAULT_API_URL = 'http://localhost:8000'
+
+/**
+ * Resolve the backend API base URL at runtime.
+ *
+ * The URL is no longer baked into the JS bundle at build time. On the server it
+ * comes from the `API_URL` environment variable; in the browser it is read from
+ * `window.__ENV__`, which the root layout injects from the same env var at
+ * request time. This lets a single built image target any environment.
+ */
+export function getApiUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.API_URL ?? DEFAULT_API_URL
+  }
+  return window.__ENV__?.API_URL ?? DEFAULT_API_URL
+}
 
 // In-memory access token (not persisted to storage)
 let _accessToken: string | null = null
@@ -35,7 +50,7 @@ export function clearSessionCookie() {
 
 async function attemptRefresh(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_URL}/api/auth/refresh`, {
+    const res = await fetch(`${getApiUrl()}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     })
@@ -66,7 +81,7 @@ export async function apiFetch<T>(
     headers['Content-Type'] = headers['Content-Type'] ?? 'application/json'
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${getApiUrl()}${path}`, {
     ...options,
     headers,
     credentials: 'include',
@@ -134,7 +149,7 @@ export async function apiDownload(
     headers['Authorization'] = `Bearer ${_accessToken}`
   }
 
-  const res = await fetch(`${API_URL}${path}`, { headers, credentials: 'include' })
+  const res = await fetch(`${getApiUrl()}${path}`, { headers, credentials: 'include' })
 
   if (res.status === 401 && retry) {
     const refreshed = await attemptRefresh()
