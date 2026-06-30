@@ -1,3 +1,8 @@
+# LEGACY: bare-metal deploy unit, kept for reference only.
+# The supported deploy model is now the GHCR container image
+# (ghcr.io/openkoutsi/openkoutsi-web) pulled and run on the VM. This unit ran the
+# rsynced `.next/standalone` build produced by the removed scripts/deploy-frontend.sh.
+
 [Unit]
 Description=openkoutsi frontend
 After=network.target

@@ -95,16 +95,16 @@ docker run -p 3000:3000 \
 
 ## Deployment
 
-The build produces a self-contained server under `.next/standalone/`. For a VPS deploy,
-`scripts/deploy-frontend.sh` builds locally and rsyncs the standalone output to the
-server, and `systemd/openkoutsi-frontend@.service` runs it.
+Deployment is container-based and **poll-driven**. On push to `main`,
+`.github/workflows/build-images.yml` builds the image and publishes it to GHCR as
+`ghcr.io/openkoutsi/openkoutsi-web`, tagged `latest` (the channel the VM tracks) and
+`sha-<sha>` (immutable, for rollback). The VM only *pulls* the finished image on a
+schedule and runs it — there is no inbound CI→VM SSH key and no source build on the
+box. Because `API_URL`/`BASE_URL` are supplied at runtime, the same image serves any
+environment.
 
-> The systemd unit's `ExecStart` uses a hardcoded nvm Node path — adjust it to match the
-> Node version installed on your server.
-
-The `.github/workflows/deploy-frontend.yml` workflow automates this on push to `main`.
-It requires these repository secrets: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_BASE_URL`,
-`VPS_SSH_PRIVATE_KEY`, `VPS_HOST`, `VPS_USER`.
+> The bare-metal `systemd/openkoutsi-frontend@.service` unit is **legacy**, kept for
+> reference only and superseded by the container model above.
 
 ## License
 
