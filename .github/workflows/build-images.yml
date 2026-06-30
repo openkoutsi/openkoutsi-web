@@ -3,6 +3,8 @@ name: Build Images
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # On pull requests we build (to verify the image still builds) but do not
+      # push — so login to GHCR only when we will actually publish.
       - name: Log in to GHCR
+        if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -39,13 +44,14 @@ jobs:
             type=sha,prefix=sha-
 
       # The image is environment-agnostic (API_URL / BASE_URL are read at
-      # runtime, see Dockerfile), so no build-args are needed.
+      # runtime, see Dockerfile), so no build-args are needed. PRs build only;
+      # images are published from `main` (and workflow_dispatch).
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
