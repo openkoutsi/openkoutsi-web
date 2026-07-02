@@ -27,8 +27,11 @@ ENV NODE_ENV=production \
 # Both default to localhost when unset (see getApiUrl() and the SEO routes).
 
 # standalone output contains the server; static assets must be copied in.
+# Next.js does not bundle `public/` or `.next/static` into the standalone
+# output, so both are copied in manually.
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
