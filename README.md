@@ -6,12 +6,12 @@
 
 # openkoutsi-web
 
-The web frontend for [openkoutsi](https://github.com/LassiHeikkila/openkoutsi), a
+The web frontend for [openkoutsi](https://github.com/openkoutsi/openkoutsi), a
 self-hosted cycling coaching platform. This is a [Next.js 15](https://nextjs.org/)
 (App Router) app written in TypeScript with Tailwind CSS and Recharts.
 
 The backend (FastAPI) lives in a separate repository:
-**[LassiHeikkila/openkoutsi](https://github.com/LassiHeikkila/openkoutsi)**. This
+**[openkoutsi/openkoutsi-backend](https://github.com/openkoutsi/openkoutsi-backend)**. This
 frontend talks to it purely over HTTP (`/api/*`) — the only coupling is configuration
 (`API_URL`), so the two deploy independently.
 
