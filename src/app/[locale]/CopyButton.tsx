@@ -9,7 +9,7 @@ export function CopyButton() {
 
   function handleCopy() {
     navigator.clipboard.writeText(
-      'git clone https://github.com/lassiheikkila/openkoutsi\ndocker compose up -d'
+      'git clone https://github.com/openkoutsi/openkoutsi\ndocker compose up -d'
     ).catch(() => {})
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
