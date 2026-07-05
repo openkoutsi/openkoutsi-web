@@ -8,6 +8,7 @@ import { fetcher } from '@/lib/api'
 import type { PaginatedActivities } from '@/lib/types'
 import { ActivityCard } from '@/components/activities/ActivityCard'
 import { UploadDropzone } from '@/components/activities/UploadDropzone'
+import { ManualActivityForm } from '@/components/activities/ManualActivityForm'
 import { ActivitySearchFilter, EMPTY_FILTERS } from '@/components/activities/ActivitySearchFilter'
 import type { ActivityFilters } from '@/components/activities/ActivitySearchFilter'
 import { Button } from '@/components/ui/button'
@@ -91,7 +92,10 @@ export default function ActivitiesPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <ManualActivityForm onCreated={() => { mutate() }} />
+      </div>
 
       <UploadDropzone onUploaded={() => { mutate() }} />
 

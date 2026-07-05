@@ -46,7 +46,7 @@ export const EMPTY_FILTERS: ActivityFilters = {
   has_power: null,
 }
 
-const SPORT_TYPES = ['Ride', 'Run', 'Swim', 'Walk', 'Hike', 'VirtualRide', 'VirtualRun', 'WeightTraining', 'Yoga', 'Workout']
+export const SPORT_TYPES = ['Ride', 'Run', 'Swim', 'Walk', 'Hike', 'VirtualRide', 'VirtualRun', 'WeightTraining', 'Yoga', 'Workout']
 const WORKOUT_CATEGORIES = ['recovery', 'endurance', 'tempo', 'threshold', 'vo2max', 'anaerobic', 'sprint', 'strength', 'yoga', 'cross_training']
 
 function countActiveFilters(filters: ActivityFilters): number {

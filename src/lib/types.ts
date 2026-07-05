@@ -92,6 +92,7 @@ export interface Activity {
   normalized_power: number | null
   avg_hr: number | null
   max_hr: number | null
+  avg_cadence: number | null
   tss: number | null
   intensity_factor: number | null
   workout_category: string | null
@@ -100,6 +101,21 @@ export interface Activity {
   has_fit_file: boolean
   status: string
   created_at: string
+}
+
+export interface ManualActivityCreate {
+  sport_type?: string
+  start_time?: string
+  duration_s?: number
+  name?: string
+  distance_m?: number
+  elevation_m?: number
+  avg_hr?: number
+  max_hr?: number
+  avg_power?: number
+  avg_cadence?: number
+  rpe?: number
+  tss?: number
 }
 
 export interface StreamPoint {
