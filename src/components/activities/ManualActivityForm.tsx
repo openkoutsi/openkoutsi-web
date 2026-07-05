@@ -25,9 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/components/ui/use-toast'
-
-// Mirrors the sport list used by the activity search filter.
-const SPORT_TYPES = ['Ride', 'Run', 'Swim', 'Walk', 'Hike', 'VirtualRide', 'VirtualRun', 'WeightTraining', 'Yoga', 'Workout']
+import { SPORT_TYPES } from '@/components/activities/ActivitySearchFilter'
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
