@@ -50,7 +50,7 @@ const jsonLd = {
   name: 'openkoutsi',
   applicationCategory: 'SportsApplication',
   description: DESCRIPTION,
-  url: 'https://github.com/lassiheikkila/openkoutsi',
+  url: 'https://github.com/openkoutsi/openkoutsi',
   license: 'https://spdx.org/licenses/Apache-2.0.html',
   operatingSystem: 'Linux, macOS, Windows',
   offers: {
@@ -97,7 +97,7 @@ export default async function RootPage() {
               <a href="#features">{t('nav.features')}</a>
               <a href="#selfhost">{t('nav.selfhost')}</a>
               <a
-                href="https://github.com/lassiheikkila/openkoutsi"
+                href="https://github.com/openkoutsi/openkoutsi"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -116,7 +116,7 @@ export default async function RootPage() {
                 <span>{t('hero.eyebrow')}</span>
                 {version && (
                   <a
-                    href="https://github.com/lassiheikkila/openkoutsi/releases"
+                    href="https://github.com/openkoutsi/openkoutsi/releases"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="version-badge"
@@ -262,7 +262,7 @@ export default async function RootPage() {
                 dangerouslySetInnerHTML={{
                   __html:
                     '<span class="c"># clone &amp; run</span>\n' +
-                    '<span class="k">git clone</span> <span class="s">https://github.com/lassiheikkila/openkoutsi</span>\n' +
+                    '<span class="k">git clone</span> <span class="s">https://github.com/openkoutsi/openkoutsi</span>\n' +
                     '<span class="k">docker compose up -d</span>\n\n' +
                     '<span class="c"># open</span>\n' +
                     '<span class="s">http://localhost:8080</span>',
@@ -276,7 +276,7 @@ export default async function RootPage() {
           <div className="container foot-inner">
             <div>
               <a
-                href="https://github.com/lassiheikkila/openkoutsi"
+                href="https://github.com/openkoutsi/openkoutsi"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -286,7 +286,7 @@ export default async function RootPage() {
             </div>
             <div style={{ display: 'flex', gap: 20 }}>
               <a
-                href="https://github.com/lassiheikkila/openkoutsi"
+                href="https://github.com/openkoutsi/openkoutsi"
                 target="_blank"
                 rel="noopener noreferrer"
               >

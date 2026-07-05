@@ -108,5 +108,5 @@ environment.
 
 ## License
 
-Apache-2.0. See the [backend repository](https://github.com/LassiHeikkila/openkoutsi)
+Apache-2.0. See the [backend repository](https://github.com/openkoutsi/openkoutsi)
 for the project license.

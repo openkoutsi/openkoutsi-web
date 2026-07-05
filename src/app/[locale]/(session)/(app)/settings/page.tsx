@@ -20,7 +20,7 @@ export default function SettingsPage() {
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href="https://github.com/LassiHeikkila/openkoutsi"
+              href="https://github.com/openkoutsi/openkoutsi"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-primary underline underline-offset-4 hover:opacity-80"
