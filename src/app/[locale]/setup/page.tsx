@@ -7,7 +7,7 @@ import { apiFetch } from '@/lib/api'
 import type { TokenPair } from '@/lib/types'
 
 export default function SetupPage() {
-  const t = useTranslations('landing')
+  const t = useTranslations('setup')
   const router = useRouter()
 
   const [adminUsername, setAdminUsername] = useState('')
@@ -37,7 +37,7 @@ export default function SetupPage() {
       setDone(true)
       setTimeout(() => router.replace(`/login`), 1500)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('setup.failed'))
+      setError(err instanceof Error ? err.message : t('failed'))
     } finally {
       setLoading(false)
     }
@@ -51,19 +51,19 @@ export default function SetupPage() {
             <img src="/logo.svg" alt="" aria-hidden="true" className="h-8 w-8" />
             <span className="text-xl font-semibold">openkoutsi</span>
           </div>
-          <h1 className="text-2xl font-bold">{t('setup.title')}</h1>
-          <p className="text-muted-foreground text-sm">{t('setup.subtitle')}</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
         </div>
 
         {done ? (
-          <p className="text-center text-sm text-green-600">{t('setup.success')}</p>
+          <p className="text-center text-sm text-green-600">{t('success')}</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium">{t('setup.adminUsername')}</label>
+              <label className="text-sm font-medium">{t('adminUsername')}</label>
               <input
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={t('setup.adminUsernamePlaceholder')}
+                placeholder={t('adminUsernamePlaceholder')}
                 value={adminUsername}
                 onChange={(e) => setAdminUsername(e.target.value)}
                 required
@@ -72,10 +72,10 @@ export default function SetupPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">{t('setup.adminDisplayName')}</label>
+              <label className="text-sm font-medium">{t('adminDisplayName')}</label>
               <input
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={t('setup.adminDisplayNamePlaceholder')}
+                placeholder={t('adminDisplayNamePlaceholder')}
                 value={adminDisplayName}
                 onChange={(e) => setAdminDisplayName(e.target.value)}
                 autoComplete="name"
@@ -83,11 +83,11 @@ export default function SetupPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">{t('setup.password')}</label>
+              <label className="text-sm font-medium">{t('password')}</label>
               <input
                 type="password"
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={t('setup.passwordPlaceholder')}
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -104,7 +104,7 @@ export default function SetupPage() {
               disabled={loading}
               className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {loading ? t('setup.submitting') : t('setup.submit')}
+              {loading ? t('submitting') : t('submit')}
             </button>
           </form>
         )}

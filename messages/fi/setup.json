@@ -1,0 +1,14 @@
+{
+  "title": "Tervetuloa openkoutsiin",
+  "subtitle": "Luo ensimmäinen ylläpitäjätili aloittaaksesi.",
+  "adminUsername": "Ylläpitäjän käyttäjätunnus",
+  "adminUsernamePlaceholder": "admin",
+  "adminDisplayName": "Näyttönimi",
+  "adminDisplayNamePlaceholder": "Nimesi (valinnainen)",
+  "password": "Salasana",
+  "passwordPlaceholder": "Vähintään 8 merkkiä",
+  "submit": "Luo tili",
+  "submitting": "Luodaan…",
+  "success": "Tili luotu! Voit nyt kirjautua sisään.",
+  "failed": "Asennus epäonnistui"
+}
