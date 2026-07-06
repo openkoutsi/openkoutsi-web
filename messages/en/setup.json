@@ -1,0 +1,14 @@
+{
+  "title": "Welcome to openkoutsi",
+  "subtitle": "Create the first administrator account to get started.",
+  "adminUsername": "Admin username",
+  "adminUsernamePlaceholder": "admin",
+  "adminDisplayName": "Display name",
+  "adminDisplayNamePlaceholder": "Your name (optional)",
+  "password": "Password",
+  "passwordPlaceholder": "At least 8 characters",
+  "submit": "Create account",
+  "submitting": "Creating…",
+  "success": "Account created! You can now log in.",
+  "failed": "Setup failed"
+}
