@@ -84,6 +84,11 @@
     "testNoBaseUrl": "Tallenna perus-URL ennen testaamista",
     "analysisContext": "Analyysikonteksti",
     "analysisContextDesc": "Valinnainen valmennuskonteksti, joka lisätään jokaiseen tämän instanssin aktiviteettianalyysiin. Kuvaile laji, harjoittelufilosofia tai pysyvät ohjeet tekoälyvalmentajalle.",
-    "analysisContextPlaceholder": "esim. Tämä on eliittitason maantiepyöräilytiimi. Priorisoi tehopohjaiset mittarit ja kynnysharjoittelu. Vastausten tulee olla tiiviitä ja dataan perustuvia."
+    "analysisContextPlaceholder": "esim. Tämä on eliittitason maantiepyöräilytiimi. Priorisoi tehopohjaiset mittarit ja kynnysharjoittelu. Vastausten tulee olla tiiviitä ja dataan perustuvia.",
+    "instanceTitle": "Instanssin asetukset",
+    "instanceDesc": "Tämän instanssin yleiset asetukset.",
+    "adminContact": "Ylläpitäjän yhteystieto",
+    "adminContactDesc": "Näytetään käyttäjille salasanan palautusnäytöllä. Jätä tyhjäksi piilottaaksesi sen.",
+    "adminContactPlaceholder": "esim. admin@example.com"
   }
 }

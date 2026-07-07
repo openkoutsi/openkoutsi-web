@@ -56,9 +56,6 @@ API_URL=http://localhost:8000
 # Public base URL of this frontend (used for SEO metadata, sitemap, robots). Read
 # at runtime.
 BASE_URL=http://localhost:3000
-
-# Optional: shown to users on the password-reset screen as the admin contact.
-NEXT_PUBLIC_ADMIN_CONTACT="phone up lassi"
 ```
 
 > `API_URL` and `BASE_URL` are read at **runtime** — the same image can target any
@@ -66,8 +63,9 @@ NEXT_PUBLIC_ADMIN_CONTACT="phone up lassi"
 > `window.__ENV__` so the browser reads it at runtime (see `src/lib/api.ts`), and the
 > runtime Content-Security-Policy is set in `src/middleware.ts`.
 >
-> `NEXT_PUBLIC_*` variables (e.g. `NEXT_PUBLIC_ADMIN_CONTACT`) are still **baked into
-> the build at build time**; rebuild after changing them.
+> The admin contact shown on the password-reset screen is no longer a build-time env
+> var — it is an admin-managed instance setting served by the backend
+> (`GET /api/public/instance-info`) and editable in the admin settings UI.
 
 ## Scripts
 

@@ -38,6 +38,11 @@ export interface InstanceSettingsResponse {
   llm_model: string | null
   llm_api_key_set: boolean
   llm_analysis_context: string | null
+  admin_contact: string | null
+}
+
+export interface InstanceInfoResponse {
+  admin_contact: string | null
 }
 
 export interface User {
