@@ -32,6 +32,8 @@ function filtersToParams(filters: ActivityFilters, page: number): URLSearchParam
   if (filters.min_tss) p.set('min_tss', filters.min_tss)
   if (filters.max_tss) p.set('max_tss', filters.max_tss)
   if (filters.has_power !== null) p.set('has_power', filters.has_power ? 'true' : 'false')
+  filters.labels.forEach((l) => p.append('labels', l))
+  filters.exclude_labels.forEach((l) => p.append('exclude_labels', l))
   return p
 }
 
@@ -54,6 +56,8 @@ function paramsToFilters(params: URLSearchParams): ActivityFilters {
     min_tss: params.get('min_tss') ?? '',
     max_tss: params.get('max_tss') ?? '',
     has_power: hasPowerRaw === 'true' ? true : hasPowerRaw === 'false' ? false : null,
+    labels: params.getAll('labels'),
+    exclude_labels: params.getAll('exclude_labels'),
   }
 }
 

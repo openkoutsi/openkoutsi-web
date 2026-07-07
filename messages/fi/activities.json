@@ -21,6 +21,10 @@
     "hasPowerOnly": "Vain tehomittariharjoitukset",
     "hasPowerYes": "Tehodata",
     "hasPowerNo": "Ei teodataa",
+    "labels": "Tunnisteet",
+    "labelAny": "Kaikki",
+    "labelOnly": "Vain",
+    "labelExclude": "Poissulje",
     "clearAll": "Tyhjennä kaikki"
   },
   "upload": {
