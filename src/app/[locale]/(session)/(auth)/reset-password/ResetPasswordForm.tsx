@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import useSWR from 'swr'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/navigation'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fetcher } from '@/lib/api'
+import type { InstanceInfoResponse } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,29 +24,7 @@ export function ResetPasswordForm() {
   const [loading, setLoading] = useState(false)
 
   if (!token) {
-    const adminContact = process.env.NEXT_PUBLIC_ADMIN_CONTACT
-    return (
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">{t('resetPassword.noTokenTitle')}</CardTitle>
-          <CardDescription>{t('resetPassword.noTokenDesc')}</CardDescription>
-        </CardHeader>
-        {adminContact && (
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{t('resetPassword.adminContact')}</p>
-            <p className="text-sm font-medium mt-1">{adminContact}</p>
-          </CardContent>
-        )}
-        <CardFooter>
-          <Link
-            href={`/login`}
-            className="text-sm underline underline-offset-4 hover:text-primary"
-          >
-            {t('resetPassword.backToSignIn')}
-          </Link>
-        </CardFooter>
-      </Card>
-    )
+    return <NoTokenCard />
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -121,6 +101,35 @@ export function ResetPasswordForm() {
           </Link>
         </CardFooter>
       </form>
+    </Card>
+  )
+}
+
+function NoTokenCard() {
+  const t = useTranslations('auth')
+  const { data } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
+  const adminContact = data?.admin_contact
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">{t('resetPassword.noTokenTitle')}</CardTitle>
+        <CardDescription>{t('resetPassword.noTokenDesc')}</CardDescription>
+      </CardHeader>
+      {adminContact && (
+        <CardContent>
+          <p className="text-sm text-muted-foreground">{t('resetPassword.adminContact')}</p>
+          <p className="text-sm font-medium mt-1">{adminContact}</p>
+        </CardContent>
+      )}
+      <CardFooter>
+        <Link
+          href={`/login`}
+          className="text-sm underline underline-offset-4 hover:text-primary"
+        >
+          {t('resetPassword.backToSignIn')}
+        </Link>
+      </CardFooter>
     </Card>
   )
 }

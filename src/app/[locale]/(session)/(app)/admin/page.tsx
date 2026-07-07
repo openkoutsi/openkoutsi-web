@@ -545,6 +545,7 @@ function SettingsTab() {
   const [apiKey, setApiKey] = useState('')
   const [clearKey, setClearKey] = useState(false)
   const [analysisContext, setAnalysisContext] = useState('')
+  const [adminContact, setAdminContact] = useState('')
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<LlmTestResult | null>(null)
@@ -554,6 +555,7 @@ function SettingsTab() {
       setBaseUrl(settings.llm_base_url ?? '')
       setModel(settings.llm_model ?? '')
       setAnalysisContext(settings.llm_analysis_context ?? '')
+      setAdminContact(settings.admin_contact ?? '')
     }
   }, [settings])
 
@@ -569,6 +571,7 @@ function SettingsTab() {
           llm_api_key: apiKey || null,
           clear_llm_api_key: clearKey,
           llm_analysis_context: analysisContext || null,
+          admin_contact: adminContact || null,
         }),
       })
       setApiKey('')
@@ -605,13 +608,33 @@ function SettingsTab() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{t('settings.llmTitle')}</CardTitle>
-        <CardDescription>{t('settings.llmDesc')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSave} className="space-y-4 max-w-md">
+    <form onSubmit={handleSave} className="space-y-6 max-w-md">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('settings.instanceTitle')}</CardTitle>
+          <CardDescription>{t('settings.instanceDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="admin-contact">{t('settings.adminContact')}</Label>
+            <p className="text-xs text-muted-foreground">{t('settings.adminContactDesc')}</p>
+            <Input
+              id="admin-contact"
+              type="text"
+              placeholder={t('settings.adminContactPlaceholder')}
+              value={adminContact}
+              onChange={(e) => setAdminContact(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('settings.llmTitle')}</CardTitle>
+          <CardDescription>{t('settings.llmDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="llm-base-url">{t('settings.baseUrl')}</Label>
             <Input
@@ -681,7 +704,7 @@ function SettingsTab() {
               {testing ? t('settings.testConnectionTesting') : t('settings.testConnection')}
             </Button>
           </div>
-        </form>
+          </div>
 
         {testResult && (
           <div className={`mt-4 max-w-md rounded-lg border p-4 text-sm space-y-2 ${testResult.ok ? 'border-green-500/40 bg-green-500/5' : 'border-destructive/40 bg-destructive/5'}`}>
@@ -708,7 +731,8 @@ function SettingsTab() {
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </form>
   )
 }
 
