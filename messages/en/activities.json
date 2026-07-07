@@ -21,6 +21,10 @@
     "hasPowerOnly": "Has power data only",
     "hasPowerYes": "With power",
     "hasPowerNo": "Without power",
+    "labels": "Labels",
+    "labelAny": "Any",
+    "labelOnly": "Only",
+    "labelExclude": "Exclude",
     "clearAll": "Clear all"
   },
   "upload": {

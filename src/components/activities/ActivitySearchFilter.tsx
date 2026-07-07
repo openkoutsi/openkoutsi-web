@@ -29,6 +29,10 @@ export interface ActivityFilters {
   min_tss: string
   max_tss: string
   has_power: boolean | null
+  // Labels an activity must carry (match any). Filters in only these.
+  labels: string[]
+  // Labels an activity must not carry. Filters these out.
+  exclude_labels: string[]
 }
 
 export const EMPTY_FILTERS: ActivityFilters = {
@@ -44,10 +48,22 @@ export const EMPTY_FILTERS: ActivityFilters = {
   min_tss: '',
   max_tss: '',
   has_power: null,
+  labels: [],
+  exclude_labels: [],
 }
 
 export const SPORT_TYPES = ['Ride', 'Run', 'Swim', 'Walk', 'Hike', 'VirtualRide', 'VirtualRun', 'WeightTraining', 'Yoga', 'Workout']
 const WORKOUT_CATEGORIES = ['recovery', 'endurance', 'tempo', 'threshold', 'vo2max', 'anaerobic', 'sprint', 'strength', 'yoga', 'cross_training']
+// Keep in sync with the backend's set of valid activity labels.
+const ACTIVITY_LABELS = ['race', 'commute']
+
+type LabelMode = 'any' | 'include' | 'exclude'
+
+function labelMode(filters: ActivityFilters, label: string): LabelMode {
+  if (filters.labels.includes(label)) return 'include'
+  if (filters.exclude_labels.includes(label)) return 'exclude'
+  return 'any'
+}
 
 function countActiveFilters(filters: ActivityFilters): number {
   let n = 0
@@ -58,6 +74,7 @@ function countActiveFilters(filters: ActivityFilters): number {
   if (filters.min_distance || filters.max_distance) n++
   if (filters.min_tss || filters.max_tss) n++
   if (filters.has_power !== null) n++
+  n += filters.labels.length + filters.exclude_labels.length
   return n
 }
 
@@ -91,6 +108,17 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
   const set = useCallback(
     (key: keyof ActivityFilters, value: string | boolean | null) => {
       onChange({ ...filters, [key]: value })
+    },
+    [filters, onChange],
+  )
+
+  const setLabelMode = useCallback(
+    (label: string, mode: LabelMode) => {
+      const labels = filters.labels.filter((l) => l !== label)
+      const exclude_labels = filters.exclude_labels.filter((l) => l !== label)
+      if (mode === 'include') labels.push(label)
+      else if (mode === 'exclude') exclude_labels.push(label)
+      onChange({ ...filters, labels, exclude_labels })
     },
     [filters, onChange],
   )
@@ -173,6 +201,18 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
               onRemove={() => set('has_power', null)}
             />
           )}
+          {ACTIVITY_LABELS.map((label) => {
+            const mode = labelMode(filters, label)
+            if (mode === 'any') return null
+            const modeText = mode === 'include' ? t('search.labelOnly') : t('search.labelExclude')
+            return (
+              <FilterPill
+                key={label}
+                label={`${t(`detail.labels.${label}`)}: ${modeText}`}
+                onRemove={() => setLabelMode(label, 'any')}
+              />
+            )
+          })}
           {activeCount > 1 && (
             <button
               onClick={clearAll}
@@ -308,6 +348,31 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
                 value={filters.max_tss}
                 onChange={(e) => set('max_tss', e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* Labels */}
+          <div className="space-y-1.5">
+            <Label>{t('search.labels')}</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+              {ACTIVITY_LABELS.map((label) => (
+                <div key={label} className="flex items-center justify-between gap-2">
+                  <span className="text-sm">{t(`detail.labels.${label}`)}</span>
+                  <Select
+                    value={labelMode(filters, label)}
+                    onValueChange={(v) => setLabelMode(label, v as LabelMode)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">{t('search.labelAny')}</SelectItem>
+                      <SelectItem value="include">{t('search.labelOnly')}</SelectItem>
+                      <SelectItem value="exclude">{t('search.labelExclude')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
             </div>
           </div>
 
