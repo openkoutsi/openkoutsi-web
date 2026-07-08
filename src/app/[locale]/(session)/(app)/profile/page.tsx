@@ -261,7 +261,9 @@ export default function ProfilePage() {
   async function handleModelChange(value: string) {
     try {
       const current = profile?.app_settings ?? {}
-      const updated = { ...current, llm_model: value }
+      // The sentinel clears the saved choice (null → deleted) so the instance
+      // default is used, mirroring the coaching-style control.
+      const updated = { ...current, llm_model: value === '__default__' ? null : value }
       await apiFetch('/api/athlete', {
         method: 'PATCH',
         body: JSON.stringify({ app_settings: updated }),
@@ -768,7 +770,7 @@ export default function ProfilePage() {
                 </p>
               </div>
               <Select
-                value={llmModels.selected ?? undefined}
+                value={(profile?.app_settings?.llm_model as string) ?? '__default__'}
                 onValueChange={handleModelChange}
                 disabled={!profile}
               >
@@ -776,8 +778,9 @@ export default function ProfilePage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__default__">{t('settings.analysis.modelDefault')}</SelectItem>
                   {llmModels.models.map((m) => (
-                    <SelectItem key={m.name} value={m.name}>{m.label}</SelectItem>
+                    <SelectItem key={m.name} value={m.name}>{m.label || m.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

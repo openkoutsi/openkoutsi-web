@@ -109,6 +109,7 @@
     "addBodyParam": "Add param",
     "addModel": "Add model",
     "removeModel": "Remove",
+    "removeRow": "Remove row",
     "analysisContext": "Analysis context",
     "analysisContextDesc": "Optional coaching context injected into every activity analysis for this instance. Describe the sport, training philosophy, or any standing instructions for the AI coach.",
     "analysisContextPlaceholder": "e.g. This is an elite road cycling team. Prioritise power-based metrics and threshold training. Responses should be concise and data-driven.",

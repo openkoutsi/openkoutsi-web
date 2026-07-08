@@ -360,7 +360,8 @@
       "coachingStyleFriendly": "Ystävällinen",
       "coachingStyleEncouraging": "Kannustava",
       "model": "Malli",
-      "modelDesc": "Mitä tekoälymallia käytetään valmennukseen."
+      "modelDesc": "Mitä tekoälymallia käytetään valmennukseen.",
+      "modelDefault": "Oletus"
     }
   }
 }

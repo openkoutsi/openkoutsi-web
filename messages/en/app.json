@@ -360,7 +360,8 @@
       "coachingStyleFriendly": "Friendly",
       "coachingStyleEncouraging": "Encouraging",
       "model": "Model",
-      "modelDesc": "Which AI model to use for coaching."
+      "modelDesc": "Which AI model to use for coaching.",
+      "modelDefault": "Default"
     }
   }
 }

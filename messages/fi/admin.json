@@ -109,6 +109,7 @@
     "addBodyParam": "Lisää parametri",
     "addModel": "Lisää malli",
     "removeModel": "Poista",
+    "removeRow": "Poista rivi",
     "analysisContext": "Analyysikonteksti",
     "analysisContextDesc": "Valinnainen valmennuskonteksti, joka lisätään jokaiseen tämän instanssin aktiviteettianalyysiin. Kuvaile laji, harjoittelufilosofia tai pysyvät ohjeet tekoälyvalmentajalle.",
     "analysisContextPlaceholder": "esim. Tämä on eliittitason maantiepyöräilytiimi. Priorisoi tehopohjaiset mittarit ja kynnysharjoittelu. Vastausten tulee olla tiiviitä ja dataan perustuvia.",

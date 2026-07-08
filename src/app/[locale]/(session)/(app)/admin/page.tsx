@@ -588,6 +588,7 @@ function KeyValueRows({
   valuePlaceholder: string
   addLabel: string
 }) {
+  const t = useTranslations('admin')
   const update = (i: number, patch: Partial<KV>) =>
     onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
   const remove = (i: number) => onChange(rows.filter((_, idx) => idx !== i))
@@ -607,8 +608,14 @@ function KeyValueRows({
             value={row.value}
             onChange={(e) => update(i, { value: e.target.value })}
           />
-          <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)}>
-            ✕
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => remove(i)}
+            aria-label={t('settings.removeRow')}
+          >
+            <span aria-hidden="true">✕</span>
           </Button>
         </div>
       ))}
