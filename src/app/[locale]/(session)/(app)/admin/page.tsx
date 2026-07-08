@@ -528,6 +528,7 @@ interface LlmTestResult {
   ok: boolean
   base_url?: string | null
   model_configured?: string | null
+  prompt_sent?: string | null
   response_text?: string | null
   http_status?: number | null
   error?: string | null
@@ -718,6 +719,14 @@ function SettingsTab() {
                 {t('settings.testModelReplied')}
                 {' '}({testResult.model_configured})
               </p>
+            )}
+            {testResult.prompt_sent && (
+              <div>
+                <p className="text-muted-foreground text-xs mb-1">{t('settings.testPromptSent')}:</p>
+                <p className="text-xs font-mono text-muted-foreground break-words whitespace-pre-wrap">
+                  {testResult.prompt_sent}
+                </p>
+              </div>
             )}
             {testResult.ok && testResult.response_text && (
               <div>

@@ -79,6 +79,7 @@
     "testConnectionOk": "Yhteys toimii",
     "testConnectionFailed": "Yhteys epäonnistui",
     "testModelReplied": "Määritetty malli vastasi",
+    "testPromptSent": "Lähetetty viesti",
     "testResponse": "Mallin vastaus",
     "testNoBaseUrl": "Tallenna perus-URL ennen testaamista",
     "analysisContext": "Analyysikonteksti",

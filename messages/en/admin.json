@@ -79,6 +79,7 @@
     "testConnectionOk": "Connection OK",
     "testConnectionFailed": "Connection failed",
     "testModelReplied": "Configured model replied",
+    "testPromptSent": "Message sent",
     "testResponse": "Model response",
     "testNoBaseUrl": "Save a base URL first before testing",
     "analysisContext": "Analysis context",
