@@ -10,6 +10,7 @@ import type {
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
+  LlmModelConfig,
   Page,
 } from '@/lib/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -534,6 +535,98 @@ interface LlmTestResult {
   error?: string | null
 }
 
+// ── Key/value editors for LLM headers and per-model body params ──────────────
+
+interface KV { key: string; value: string }
+
+function recordToRows(rec: Record<string, string> | undefined): KV[] {
+  return Object.entries(rec ?? {}).map(([key, value]) => ({ key, value: String(value) }))
+}
+
+function rowsToRecord(rows: KV[]): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const { key, value } of rows) {
+    const k = key.trim()
+    if (k) out[k] = value
+  }
+  return out
+}
+
+// Body values are entered as text but stored as JSON where they parse (so
+// `1024` becomes a number and `{"type":"enabled"}` an object); otherwise the
+// raw string is kept.
+function bodyToRows(body: Record<string, unknown> | undefined): KV[] {
+  return Object.entries(body ?? {}).map(([key, value]) => ({
+    key,
+    value: typeof value === 'string' ? value : JSON.stringify(value),
+  }))
+}
+
+function rowsToBody(rows: KV[]): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const { key, value } of rows) {
+    const k = key.trim()
+    if (!k) continue
+    try {
+      out[k] = JSON.parse(value)
+    } catch {
+      out[k] = value
+    }
+  }
+  return out
+}
+
+function KeyValueRows({
+  rows,
+  onChange,
+  keyPlaceholder,
+  valuePlaceholder,
+  addLabel,
+}: {
+  rows: KV[]
+  onChange: (rows: KV[]) => void
+  keyPlaceholder: string
+  valuePlaceholder: string
+  addLabel: string
+}) {
+  const update = (i: number, patch: Partial<KV>) =>
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
+  const remove = (i: number) => onChange(rows.filter((_, idx) => idx !== i))
+  return (
+    <div className="space-y-2">
+      {rows.map((row, i) => (
+        <div key={i} className="flex gap-2">
+          <Input
+            className="font-mono text-sm"
+            placeholder={keyPlaceholder}
+            value={row.key}
+            onChange={(e) => update(i, { key: e.target.value })}
+          />
+          <Input
+            className="font-mono text-sm"
+            placeholder={valuePlaceholder}
+            value={row.value}
+            onChange={(e) => update(i, { value: e.target.value })}
+          />
+          <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)}>
+            ✕
+          </Button>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => onChange([...rows, { key: '', value: '' }])}
+      >
+        {addLabel}
+      </Button>
+    </div>
+  )
+}
+
+interface ModelRow { name: string; body: KV[] }
+
 function SettingsTab() {
   const t = useTranslations('admin')
   const { data: settings, mutate } = useSWR<InstanceSettingsResponse>(
@@ -546,8 +639,11 @@ function SettingsTab() {
   const [clearKey, setClearKey] = useState(false)
   const [analysisContext, setAnalysisContext] = useState('')
   const [adminContact, setAdminContact] = useState('')
+  const [headerRows, setHeaderRows] = useState<KV[]>([])
+  const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [testModel, setTestModel] = useState('')
   const [testResult, setTestResult] = useState<LlmTestResult | null>(null)
 
   useEffect(() => {
@@ -556,6 +652,10 @@ function SettingsTab() {
       setModel(settings.llm_model ?? '')
       setAnalysisContext(settings.llm_analysis_context ?? '')
       setAdminContact(settings.admin_contact ?? '')
+      setHeaderRows(recordToRows(settings.llm_extra_headers))
+      setModelRows(
+        (settings.llm_models ?? []).map((m) => ({ name: m.name, body: bodyToRows(m.body) })),
+      )
     }
   }, [settings])
 
@@ -563,6 +663,9 @@ function SettingsTab() {
     e.preventDefault()
     setSaving(true)
     try {
+      const models: LlmModelConfig[] = modelRows
+        .filter((m) => m.name.trim())
+        .map((m) => ({ name: m.name.trim(), body: rowsToBody(m.body) }))
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
         body: JSON.stringify({
@@ -572,6 +675,8 @@ function SettingsTab() {
           clear_llm_api_key: clearKey,
           llm_analysis_context: analysisContext || null,
           admin_contact: adminContact || null,
+          llm_models: models,
+          llm_extra_headers: rowsToRecord(headerRows),
         }),
       })
       setApiKey('')
@@ -598,7 +703,10 @@ function SettingsTab() {
     setTesting(true)
     setTestResult(null)
     try {
-      const result = await apiFetch('/api/llm/test-connection', { method: 'POST' }) as LlmTestResult
+      const url = testModel
+        ? `/api/llm/test-connection?model=${encodeURIComponent(testModel)}`
+        : '/api/llm/test-connection'
+      const result = await apiFetch(url, { method: 'POST' }) as LlmTestResult
       setTestResult(result)
     } catch (err) {
       setTestResult({ ok: false, error: err instanceof Error ? err.message : 'Unknown error' })
@@ -647,6 +755,7 @@ function SettingsTab() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="llm-model">{t('settings.model')}</Label>
+            <p className="text-xs text-muted-foreground">{t('settings.modelDefaultHint')}</p>
             <Input
               id="llm-model"
               type="text"
@@ -691,10 +800,80 @@ function SettingsTab() {
               className="font-mono text-sm"
             />
           </div>
-          <div className="flex gap-2">
+
+          {/* Extra request headers (e.g. a zero-data-retention header). */}
+          <div className="space-y-2 pt-2 border-t">
+            <Label>{t('settings.extraHeaders')}</Label>
+            <p className="text-xs text-muted-foreground">{t('settings.extraHeadersDesc')}</p>
+            <KeyValueRows
+              rows={headerRows}
+              onChange={(r) => { setHeaderRows(r); setTestResult(null) }}
+              keyPlaceholder={t('settings.headerNamePlaceholder')}
+              valuePlaceholder={t('settings.headerValuePlaceholder')}
+              addLabel={t('settings.addHeader')}
+            />
+          </div>
+
+          {/* Selectable models, each with its own body params. */}
+          <div className="space-y-3 pt-2 border-t">
+            <Label>{t('settings.models')}</Label>
+            <p className="text-xs text-muted-foreground">{t('settings.modelsDesc')}</p>
+            {modelRows.map((m, i) => (
+              <div key={i} className="space-y-2 rounded-md border p-3">
+                <div className="flex gap-2">
+                  <Input
+                    className="font-mono text-sm"
+                    placeholder={t('settings.modelNamePlaceholder')}
+                    value={m.name}
+                    onChange={(e) => {
+                      setModelRows(modelRows.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))
+                      setTestResult(null)
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setModelRows(modelRows.filter((_, idx) => idx !== i))}
+                  >
+                    {t('settings.removeModel')}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('settings.bodyParams')}</p>
+                <KeyValueRows
+                  rows={m.body}
+                  onChange={(r) => setModelRows(modelRows.map((row, idx) => idx === i ? { ...row, body: r } : row))}
+                  keyPlaceholder={t('settings.bodyKeyPlaceholder')}
+                  valuePlaceholder={t('settings.bodyValuePlaceholder')}
+                  addLabel={t('settings.addBodyParam')}
+                />
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setModelRows([...modelRows, { name: '', body: [] }])}
+            >
+              {t('settings.addModel')}
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-2">
             <Button type="submit" disabled={saving}>
               {saving ? t('settings.saving') : t('settings.save')}
             </Button>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              value={testModel}
+              onChange={(e) => setTestModel(e.target.value)}
+              aria-label={t('settings.testModelLabel')}
+            >
+              <option value="">{t('settings.testModelDefault')}</option>
+              {modelRows.filter((m) => m.name.trim()).map((m) => (
+                <option key={m.name} value={m.name.trim()}>{m.name.trim()}</option>
+              ))}
+            </select>
             <Button
               type="button"
               variant="outline"

@@ -358,7 +358,9 @@
       "coachingStyleDefault": "Default",
       "coachingStyleStern": "Stern",
       "coachingStyleFriendly": "Friendly",
-      "coachingStyleEncouraging": "Encouraging"
+      "coachingStyleEncouraging": "Encouraging",
+      "model": "Model",
+      "modelDesc": "Which AI model to use for coaching."
     }
   }
 }

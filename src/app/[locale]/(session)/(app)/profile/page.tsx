@@ -78,6 +78,7 @@ export default function ProfilePage() {
   const { data: profile, mutate: mutateProfile } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const { data: weightLog } = useSWR<WeightLogEntry[]>('/api/athlete/weight-log', fetcher)
   const { data: availableProviders } = useSWR<{ available: string[] }>('/api/integrations/available', fetcher)
+  const { data: llmModels } = useSWR<{ models: string[]; selected: string | null }>('/api/llm/models', fetcher)
 
   const [name, setName] = useState(athlete?.name ?? '')
   const [weight, setWeight] = useState(athlete?.weight_kg?.toString() ?? '')
@@ -243,6 +244,24 @@ export default function ProfilePage() {
     try {
       const current = profile?.app_settings ?? {}
       const updated = { ...current, coaching_style: value === 'default' ? null : value }
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({ app_settings: updated }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleModelChange(value: string) {
+    try {
+      const current = profile?.app_settings ?? {}
+      const updated = { ...current, llm_model: value }
       await apiFetch('/api/athlete', {
         method: 'PATCH',
         body: JSON.stringify({ app_settings: updated }),
@@ -740,6 +759,30 @@ export default function ProfilePage() {
               </SelectContent>
             </Select>
           </div>
+          {llmModels && llmModels.models.length > 1 && (
+            <div className="flex items-start justify-between gap-4 mt-4 pt-4 border-t">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">{t('settings.analysis.model')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('settings.analysis.modelDesc')}
+                </p>
+              </div>
+              <Select
+                value={llmModels.selected ?? undefined}
+                onValueChange={handleModelChange}
+                disabled={!profile}
+              >
+                <SelectTrigger className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {llmModels.models.map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </CardContent>
       </Card>
 

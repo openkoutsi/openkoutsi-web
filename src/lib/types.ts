@@ -33,12 +33,19 @@ export interface InvitationResponse {
   url?: string | null
 }
 
+export interface LlmModelConfig {
+  name: string
+  body: Record<string, unknown>
+}
+
 export interface InstanceSettingsResponse {
   llm_base_url: string | null
   llm_model: string | null
   llm_api_key_set: boolean
   llm_analysis_context: string | null
   admin_contact: string | null
+  llm_models: LlmModelConfig[]
+  llm_extra_headers: Record<string, string>
 }
 
 export interface InstanceInfoResponse {
