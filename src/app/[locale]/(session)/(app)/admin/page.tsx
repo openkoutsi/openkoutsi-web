@@ -10,7 +10,6 @@ import type {
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
-  LlmModelConfig,
   Page,
 } from '@/lib/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -625,7 +624,24 @@ function KeyValueRows({
   )
 }
 
-interface ModelRow { name: string; body: KV[] }
+// A preset row in the admin editor. `name` is the stable id (selection value);
+// `label` is what users see. base URL / model id / key / headers / body are the
+// per-preset connection. `apiKey` is a newly-typed key (write-only); `apiKeySet`
+// reflects whether one is already stored.
+interface ModelRow {
+  name: string
+  label: string
+  baseUrl: string
+  modelId: string
+  apiKey: string
+  apiKeySet: boolean
+  headers: KV[]
+  body: KV[]
+}
+
+function emptyModelRow(): ModelRow {
+  return { name: '', label: '', baseUrl: '', modelId: '', apiKey: '', apiKeySet: false, headers: [], body: [] }
+}
 
 function SettingsTab() {
   const t = useTranslations('admin')
@@ -654,7 +670,16 @@ function SettingsTab() {
       setAdminContact(settings.admin_contact ?? '')
       setHeaderRows(recordToRows(settings.llm_extra_headers))
       setModelRows(
-        (settings.llm_models ?? []).map((m) => ({ name: m.name, body: bodyToRows(m.body) })),
+        (settings.llm_models ?? []).map((m) => ({
+          name: m.name,
+          label: m.label ?? '',
+          baseUrl: m.base_url ?? '',
+          modelId: m.model ?? '',
+          apiKey: '',
+          apiKeySet: Boolean(m.api_key_set),
+          headers: recordToRows(m.headers),
+          body: bodyToRows(m.body),
+        })),
       )
     }
   }, [settings])
@@ -663,9 +688,18 @@ function SettingsTab() {
     e.preventDefault()
     setSaving(true)
     try {
-      const models: LlmModelConfig[] = modelRows
+      const models = modelRows
         .filter((m) => m.name.trim())
-        .map((m) => ({ name: m.name.trim(), body: rowsToBody(m.body) }))
+        .map((m) => ({
+          name: m.name.trim(),
+          label: m.label.trim() || null,
+          base_url: m.baseUrl.trim() || null,
+          model: m.modelId.trim() || null,
+          // Only send a key when a new one was typed; leave stored keys untouched.
+          ...(m.apiKey ? { api_key: m.apiKey } : {}),
+          headers: rowsToRecord(m.headers),
+          body: rowsToBody(m.body),
+        }))
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
         body: JSON.stringify({
@@ -818,18 +852,17 @@ function SettingsTab() {
           <div className="space-y-3 pt-2 border-t">
             <Label>{t('settings.models')}</Label>
             <p className="text-xs text-muted-foreground">{t('settings.modelsDesc')}</p>
-            {modelRows.map((m, i) => (
-              <div key={i} className="space-y-2 rounded-md border p-3">
-                <div className="flex gap-2">
-                  <Input
-                    className="font-mono text-sm"
-                    placeholder={t('settings.modelNamePlaceholder')}
-                    value={m.name}
-                    onChange={(e) => {
-                      setModelRows(modelRows.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))
-                      setTestResult(null)
-                    }}
-                  />
+            {modelRows.map((m, i) => {
+              const patch = (p: Partial<ModelRow>) => {
+                setModelRows(modelRows.map((r, idx) => idx === i ? { ...r, ...p } : r))
+                setTestResult(null)
+              }
+              return (
+              <div key={i} className="space-y-3 rounded-md border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium flex-1">
+                    {m.label.trim() || m.name.trim() || t('settings.newModel')}
+                  </p>
                   <Button
                     type="button"
                     variant="ghost"
@@ -839,21 +872,82 @@ function SettingsTab() {
                     {t('settings.removeModel')}
                   </Button>
                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t('settings.displayName')}</Label>
+                    <Input
+                      className="text-sm"
+                      placeholder={t('settings.displayNamePlaceholder')}
+                      value={m.label}
+                      onChange={(e) => patch({ label: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t('settings.modelIdentifier')}</Label>
+                    <Input
+                      className="font-mono text-sm"
+                      placeholder={t('settings.modelNamePlaceholder')}
+                      value={m.name}
+                      onChange={(e) => patch({ name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t('settings.modelId')}</Label>
+                    <Input
+                      className="font-mono text-sm"
+                      placeholder={t('settings.modelIdPlaceholder')}
+                      value={m.modelId}
+                      onChange={(e) => patch({ modelId: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t('settings.presetBaseUrl')}</Label>
+                    <Input
+                      className="font-mono text-sm"
+                      placeholder={t('settings.presetBaseUrlPlaceholder')}
+                      value={m.baseUrl}
+                      onChange={(e) => patch({ baseUrl: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t('settings.presetApiKey')}</Label>
+                    {m.apiKeySet && !m.apiKey && (
+                      <p className="text-xs text-muted-foreground">{t('settings.apiKeySet')}</p>
+                    )}
+                    <Input
+                      type="password"
+                      className="text-sm"
+                      placeholder={t('settings.apiKeyPlaceholder')}
+                      value={m.apiKey}
+                      onChange={(e) => patch({ apiKey: e.target.value })}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('settings.presetHeaders')}</p>
+                <KeyValueRows
+                  rows={m.headers}
+                  onChange={(r) => patch({ headers: r })}
+                  keyPlaceholder={t('settings.headerNamePlaceholder')}
+                  valuePlaceholder={t('settings.headerValuePlaceholder')}
+                  addLabel={t('settings.addHeader')}
+                />
                 <p className="text-xs text-muted-foreground">{t('settings.bodyParams')}</p>
                 <KeyValueRows
                   rows={m.body}
-                  onChange={(r) => setModelRows(modelRows.map((row, idx) => idx === i ? { ...row, body: r } : row))}
+                  onChange={(r) => patch({ body: r })}
                   keyPlaceholder={t('settings.bodyKeyPlaceholder')}
                   valuePlaceholder={t('settings.bodyValuePlaceholder')}
                   addLabel={t('settings.addBodyParam')}
                 />
               </div>
-            ))}
+              )
+            })}
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setModelRows([...modelRows, { name: '', body: [] }])}
+              onClick={() => setModelRows([...modelRows, emptyModelRow()])}
             >
               {t('settings.addModel')}
             </Button>
@@ -871,7 +965,7 @@ function SettingsTab() {
             >
               <option value="">{t('settings.testModelDefault')}</option>
               {modelRows.filter((m) => m.name.trim()).map((m) => (
-                <option key={m.name} value={m.name.trim()}>{m.name.trim()}</option>
+                <option key={m.name} value={m.name.trim()}>{m.label.trim() || m.name.trim()}</option>
               ))}
             </select>
             <Button

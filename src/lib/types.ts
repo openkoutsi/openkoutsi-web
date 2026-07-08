@@ -33,8 +33,14 @@ export interface InvitationResponse {
   url?: string | null
 }
 
+// A selectable model preset as returned by the API (no secret leaked).
 export interface LlmModelConfig {
   name: string
+  label?: string | null
+  base_url?: string | null
+  model?: string | null
+  api_key_set?: boolean
+  headers: Record<string, string>
   body: Record<string, unknown>
 }
 

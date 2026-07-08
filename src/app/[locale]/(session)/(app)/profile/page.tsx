@@ -78,7 +78,7 @@ export default function ProfilePage() {
   const { data: profile, mutate: mutateProfile } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const { data: weightLog } = useSWR<WeightLogEntry[]>('/api/athlete/weight-log', fetcher)
   const { data: availableProviders } = useSWR<{ available: string[] }>('/api/integrations/available', fetcher)
-  const { data: llmModels } = useSWR<{ models: string[]; selected: string | null }>('/api/llm/models', fetcher)
+  const { data: llmModels } = useSWR<{ models: { name: string; label: string }[]; selected: string | null }>('/api/llm/models', fetcher)
 
   const [name, setName] = useState(athlete?.name ?? '')
   const [weight, setWeight] = useState(athlete?.weight_kg?.toString() ?? '')
@@ -777,7 +777,7 @@ export default function ProfilePage() {
                 </SelectTrigger>
                 <SelectContent>
                   {llmModels.models.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                    <SelectItem key={m.name} value={m.name}>{m.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
