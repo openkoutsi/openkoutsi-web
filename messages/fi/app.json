@@ -358,7 +358,10 @@
       "coachingStyleDefault": "Oletus",
       "coachingStyleStern": "Tiukka",
       "coachingStyleFriendly": "Ystävällinen",
-      "coachingStyleEncouraging": "Kannustava"
+      "coachingStyleEncouraging": "Kannustava",
+      "model": "Malli",
+      "modelDesc": "Mitä tekoälymallia käytetään valmennukseen.",
+      "modelDefault": "Oletus"
     }
   }
 }
