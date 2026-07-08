@@ -528,8 +528,7 @@ interface LlmTestResult {
   ok: boolean
   base_url?: string | null
   model_configured?: string | null
-  models_available?: string[] | null
-  model_found?: boolean
+  response_text?: string | null
   http_status?: number | null
   error?: string | null
 }
@@ -715,16 +714,16 @@ function SettingsTab() {
               <p className="text-muted-foreground">{testResult.error}</p>
             )}
             {testResult.ok && testResult.model_configured && (
-              <p className={testResult.model_found ? 'text-green-700 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
-                {testResult.model_found ? t('settings.testModelFound') : t('settings.testModelNotFound')}
+              <p className="text-green-700 dark:text-green-400">
+                {t('settings.testModelReplied')}
                 {' '}({testResult.model_configured})
               </p>
             )}
-            {testResult.ok && testResult.models_available && testResult.models_available.length > 0 && (
+            {testResult.ok && testResult.response_text && (
               <div>
-                <p className="text-muted-foreground text-xs mb-1">{t('settings.testModelsAvailable')}:</p>
-                <p className="text-xs font-mono text-muted-foreground break-all">
-                  {testResult.models_available.join(', ')}
+                <p className="text-muted-foreground text-xs mb-1">{t('settings.testResponse')}:</p>
+                <p className="text-xs font-mono text-muted-foreground break-words whitespace-pre-wrap">
+                  {testResult.response_text}
                 </p>
               </div>
             )}
