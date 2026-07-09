@@ -32,5 +32,20 @@
     "title": "Wrong Turn!",
     "description": "Oops, looks like you took the wrong turn. This route doesn't exist — head back and find the right trail.",
     "home": "Back to the peloton"
+  },
+  "llm": {
+    "upsellTitle": "AI features require a subscription",
+    "upsellBody": "AI features on this server require a subscription — or connect your own AI model in Settings.",
+    "upsellContactAdmin": "Contact the administrator to get access.",
+    "upsellSettingsLink": "Go to AI settings",
+    "access": {
+      "label": "AI access",
+      "included": "AI features are included on this server.",
+      "subscribed": "Subscription active.",
+      "subscribedUntil": "Subscription active until {date}.",
+      "byok": "Using your own AI server.",
+      "none": "AI features are not available — subscribe or add your own AI server.",
+      "inertHint": "This uses the server's AI model, which isn't available to you right now. The setting stays saved and resumes once you subscribe or add your own AI server."
+    }
   }
 }

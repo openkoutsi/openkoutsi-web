@@ -32,5 +32,20 @@
     "title": "Väärä käänne!",
     "description": "Hups, näyttää siltä että ajoit väärään suuntaan. Tätä reittiä ei ole — palaa takaisin oikealle reitille.",
     "home": "Takaisin pelotoniin"
+  },
+  "llm": {
+    "upsellTitle": "Tekoälyominaisuudet vaativat tilauksen",
+    "upsellBody": "Tämän palvelimen tekoälyominaisuudet vaativat tilauksen — tai yhdistä oma tekoälymallisi asetuksissa.",
+    "upsellContactAdmin": "Pyydä käyttöoikeutta ylläpitäjältä.",
+    "upsellSettingsLink": "Siirry tekoälyasetuksiin",
+    "access": {
+      "label": "Tekoälyn käyttöoikeus",
+      "included": "Tekoälyominaisuudet sisältyvät tähän palvelimeen.",
+      "subscribed": "Tilaus voimassa.",
+      "subscribedUntil": "Tilaus voimassa {date} asti.",
+      "byok": "Käytät omaa tekoälypalvelintasi.",
+      "none": "Tekoälyominaisuudet eivät ole käytettävissä — tilaa tai lisää oma tekoälypalvelin.",
+      "inertHint": "Tämä käyttää palvelimen tekoälymallia, joka ei ole nyt käytettävissäsi. Asetus pysyy tallennettuna ja jatkuu, kun tilaat tai lisäät oman tekoälypalvelimen."
+    }
   }
 }

@@ -32,6 +32,46 @@ export function clearTokens() {
   _accessToken = null
 }
 
+// ── LLM subscription gating (issue #9) ─────────────────────────────────────
+
+/** Stable machine-readable code the backend sends when a gated instance denies
+ *  an LLM feature. Consumers branch on this, never on message text. */
+export const LLM_SUBSCRIPTION_REQUIRED = 'llm_subscription_required'
+
+/** Thrown when an LLM feature is denied because the instance requires a
+ *  subscription and the caller has neither an entitlement nor BYOK. */
+export class LlmSubscriptionRequiredError extends Error {
+  code = LLM_SUBSCRIPTION_REQUIRED
+  constructor(message?: string) {
+    super(message || 'AI features on this server require a subscription.')
+    this.name = 'LlmSubscriptionRequiredError'
+  }
+}
+
+/** Type guard for the structured `{code, message}` 403 detail. */
+export function isSubscriptionRequiredDetail(
+  detail: unknown,
+): detail is { code: string; message?: string } {
+  return (
+    typeof detail === 'object' &&
+    detail !== null &&
+    (detail as { code?: unknown }).code === LLM_SUBSCRIPTION_REQUIRED
+  )
+}
+
+export type LlmAccessMode = 'ungated' | 'byok' | 'entitled' | 'none'
+
+export interface LlmAccess {
+  gated: boolean
+  mode: LlmAccessMode
+  entitlement: { status: string; expires_at: string | null } | null
+}
+
+/** The frontend's single source of truth for the caller's LLM access state. */
+export async function getLlmAccess(): Promise<LlmAccess> {
+  return apiFetch<LlmAccess>('/api/llm/access')
+}
+
 // Non-sensitive session indicator cookie — contains no secret data.
 // Used by the Next.js middleware to gate protected pages before the client-side
 // AuthProvider can run. The real security enforcement is always done by the backend.
@@ -105,9 +145,13 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     let message = `HTTP ${res.status}`
+    let subscriptionRequired: LlmSubscriptionRequiredError | null = null
     try {
       const err = await res.json()
-      if (typeof err.detail === 'string') {
+      if (isSubscriptionRequiredDetail(err?.detail)) {
+        // Issue #9: a gated instance denied an LLM feature.
+        subscriptionRequired = new LlmSubscriptionRequiredError(err.detail.message)
+      } else if (typeof err.detail === 'string') {
         message = err.detail
       } else if (Array.isArray(err.detail) && err.detail.length > 0) {
         // FastAPI/Pydantic validation error format: detail is an array of {msg, loc, type}
@@ -120,6 +164,7 @@ export async function apiFetch<T>(
     } catch {
       // ignore parse errors
     }
+    if (subscriptionRequired) throw subscriptionRequired
     throw new Error(message)
   }
 

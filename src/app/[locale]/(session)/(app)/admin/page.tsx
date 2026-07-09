@@ -10,12 +10,14 @@ import type {
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
+  LlmUsageSummaryResponse,
   Page,
 } from '@/lib/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -108,6 +110,23 @@ function UsersTab() {
     }
   }
 
+  async function setEntitlement(userId: string, status: 'active' | 'revoked') {
+    try {
+      await apiFetch(`/api/admin/users/${userId}/llm-entitlement`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      })
+      toast({ title: t('users.llmEntitlementUpdated') })
+      mutate()
+    } catch (err) {
+      toast({
+        title: t('users.updateFailed'),
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      })
+    }
+  }
+
   async function generatePasswordReset(userId: string) {
     try {
       const res = await apiFetch<{ reset_url: string }>(
@@ -134,6 +153,7 @@ function UsersTab() {
           <tr className="border-b text-left text-muted-foreground">
             <th className="pb-2 pr-4 font-medium">{t('users.username')}</th>
             <th className="pb-2 pr-4 font-medium">{t('users.roles')}</th>
+            <th className="pb-2 pr-4 font-medium">{t('users.llmAccess')}</th>
             <th className="hidden sm:table-cell pb-2 pr-4 font-medium">{t('users.registeredAt')}</th>
             <th className="hidden sm:table-cell pb-2 pr-4 font-medium">{t('users.consent')}</th>
             <th className="pb-2 font-medium">{t('users.actions')}</th>
@@ -168,6 +188,24 @@ function UsersTab() {
                     ))}
                   </div>
                 )}
+              </td>
+              <td className="py-3 pr-4">
+                <div className="flex items-center gap-2">
+                  {u.llm_entitlement?.active ? (
+                    <>
+                      <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                        {t('users.llmGranted')}
+                      </span>
+                      <Button size="sm" variant="ghost" onClick={() => setEntitlement(u.id, 'revoked')}>
+                        {t('users.llmRevoke')}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => setEntitlement(u.id, 'active')}>
+                      {t('users.llmGrant')}
+                    </Button>
+                  )}
+                </div>
               </td>
               <td className="hidden sm:table-cell py-3 pr-4 text-muted-foreground">
                 {new Date(u.created_at).toLocaleDateString()}
@@ -659,6 +697,7 @@ function SettingsTab() {
   const [analysisContext, setAnalysisContext] = useState('')
   const [adminContact, setAdminContact] = useState('')
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
+  const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
   const [testModel, setTestModel] = useState('')
@@ -668,6 +707,7 @@ function SettingsTab() {
     if (settings) {
       setAnalysisContext(settings.llm_analysis_context ?? '')
       setAdminContact(settings.admin_contact ?? '')
+      setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
           name: m.name,
@@ -705,6 +745,7 @@ function SettingsTab() {
           llm_analysis_context: analysisContext || null,
           admin_contact: adminContact || null,
           llm_models: models,
+          llm_requires_subscription: requiresSubscription,
         }),
       })
       setTestResult(null)
@@ -769,6 +810,22 @@ function SettingsTab() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
+            <div className="space-y-1">
+              <Label htmlFor="requires-subscription">{t('settings.requiresSubscription')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.requiresSubscriptionDesc')}</p>
+              {requiresSubscription && (
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  {t('settings.requiresSubscriptionWarning')}
+                </p>
+              )}
+            </div>
+            <Switch
+              id="requires-subscription"
+              checked={requiresSubscription}
+              onCheckedChange={setRequiresSubscription}
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="llm-analysis-context">{t('settings.analysisContext')}</Label>
             <p className="text-xs text-muted-foreground">{t('settings.analysisContextDesc')}</p>
@@ -956,6 +1013,77 @@ function SettingsTab() {
   )
 }
 
+// ── LLM usage tab (issue #9) ────────────────────────────────────────────────
+
+const USAGE_GROUPS = ['user', 'provider', 'feature', 'day', 'week', 'month'] as const
+
+function UsageTab() {
+  const t = useTranslations('admin')
+  const [groupBy, setGroupBy] = useState<(typeof USAGE_GROUPS)[number]>('user')
+  const { data, isLoading } = useSWR<LlmUsageSummaryResponse>(
+    `/api/admin/llm-usage/summary?group_by=${groupBy}`,
+    fetcher,
+  )
+  const buckets = data?.buckets ?? []
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('usage.title')}</CardTitle>
+        <CardDescription>{t('usage.desc')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="usage-group">{t('usage.groupBy')}</Label>
+          <select
+            id="usage-group"
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            value={groupBy}
+            onChange={(e) => setGroupBy(e.target.value as (typeof USAGE_GROUPS)[number])}
+          >
+            {USAGE_GROUPS.map((g) => (
+              <option key={g} value={g}>{t(`usage.group.${g}`)}</option>
+            ))}
+          </select>
+        </div>
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t('usage.loading')}</p>
+        ) : buckets.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('usage.empty')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-2 pr-4 font-medium">{t(`usage.group.${groupBy}`)}</th>
+                  <th className="pb-2 pr-4 font-medium text-right">{t('usage.calls')}</th>
+                  <th className="pb-2 pr-4 font-medium text-right">{t('usage.inputTokens')}</th>
+                  <th className="pb-2 pr-4 font-medium text-right">{t('usage.outputTokens')}</th>
+                  <th className="pb-2 pr-4 font-medium text-right">{t('usage.totalTokens')}</th>
+                  <th className="pb-2 font-medium text-right">{t('usage.unknown')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {buckets.map((b, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="py-2 pr-4 font-mono">{b.key ?? '—'}</td>
+                    <td className="py-2 pr-4 text-right">{b.calls.toLocaleString()}</td>
+                    <td className="py-2 pr-4 text-right">{b.prompt_tokens.toLocaleString()}</td>
+                    <td className="py-2 pr-4 text-right">{b.completion_tokens.toLocaleString()}</td>
+                    <td className="py-2 pr-4 text-right">{b.total_tokens.toLocaleString()}</td>
+                    <td className="py-2 text-right text-muted-foreground">{b.unknown_usage_calls.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -978,6 +1106,7 @@ export default function AdminPage() {
         <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="users">{t('tabs.users')}</TabsTrigger>
           <TabsTrigger value="invitations">{t('tabs.invitations')}</TabsTrigger>
+          <TabsTrigger value="usage">{t('tabs.usage')}</TabsTrigger>
           <TabsTrigger value="settings">{t('tabs.settings')}</TabsTrigger>
         </TabsList>
         <TabsContent value="users" className="mt-4">
@@ -985,6 +1114,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="invitations" className="mt-4">
           <InvitationsTab />
+        </TabsContent>
+        <TabsContent value="usage" className="mt-4">
+          <UsageTab />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
           <SettingsTab />

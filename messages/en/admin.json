@@ -3,7 +3,8 @@
   "tabs": {
     "users": "Users",
     "invitations": "Invitations",
-    "settings": "Settings"
+    "settings": "Settings",
+    "usage": "Usage"
   },
   "users": {
     "username": "Username",
@@ -24,7 +25,12 @@
     "passwordResetFailed": "Failed to generate reset link",
     "rolesUpdated": "Roles updated",
     "updateFailed": "Update failed",
-    "removeFailed": "Remove failed"
+    "removeFailed": "Remove failed",
+    "llmAccess": "AI access",
+    "llmGranted": "Granted",
+    "llmGrant": "Grant",
+    "llmRevoke": "Revoke",
+    "llmEntitlementUpdated": "AI access updated"
   },
   "invitations": {
     "pending": "Pending",
@@ -118,6 +124,29 @@
     "adminContact": "Admin contact",
     "adminContactDesc": "Shown to users on the password-reset screen. Leave blank to hide it.",
     "adminContactPlaceholder": "e.g. admin@example.com",
-    "defaultBadge": "Default"
+    "defaultBadge": "Default",
+    "requiresSubscription": "Require subscription for instance LLM",
+    "requiresSubscriptionDesc": "When on, only users with AI access (or their own AI model via BYOK) can use this instance’s AI features.",
+    "requiresSubscriptionWarning": "Users without AI access or their own AI model will be blocked from AI features until you grant them access."
+  },
+  "usage": {
+    "title": "LLM usage",
+    "desc": "Token usage for instance-paid AI calls. Calls made through users’ own AI models (BYOK) are not counted.",
+    "groupBy": "Group by",
+    "group": {
+      "user": "User",
+      "provider": "Provider",
+      "feature": "Feature",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "calls": "Calls",
+    "inputTokens": "Input tokens",
+    "outputTokens": "Output tokens",
+    "totalTokens": "Total tokens",
+    "unknown": "Unknown",
+    "loading": "Loading…",
+    "empty": "No usage recorded yet."
   }
 }
