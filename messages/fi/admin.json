@@ -61,7 +61,7 @@
   },
   "settings": {
     "llmTitle": "Tekoälymalli-asetukset",
-    "llmDesc": "Määritä aktiviteettianalyysissä käytettävä tekoälymalli koko instanssille. Jätä tyhjäksi käyttääksesi palvelimen oletuksia.",
+    "llmDesc": "Määritä tässä instanssissa käytettävät LLM-esiasetukset. Ensimmäinen esiasetus on oletus.",
     "baseUrl": "Perus-URL",
     "baseUrlPlaceholder": "https://api.openai.com/v1",
     "model": "Malli",
@@ -82,7 +82,7 @@
     "testModelReplied": "Määritetty malli vastasi",
     "testPromptSent": "Lähetetty viesti",
     "testResponse": "Mallin vastaus",
-    "testNoBaseUrl": "Tallenna perus-URL ennen testaamista",
+    "testNoBaseUrl": "Lisää ensin esiasetus ennen testausta",
     "testModelLabel": "Testattava malli",
     "testModelDefault": "Oletusmalli",
     "extraHeaders": "Ylimääräiset pyyntöotsakkeet",
@@ -91,7 +91,7 @@
     "headerValuePlaceholder": "arvo",
     "addHeader": "Lisää otsake",
     "models": "Valittavat mallit",
-    "modelsDesc": "Esiasetukset, joista käyttäjät voivat valita — esim. Anthropic, Mistral. Kullakin on oma perus-URL, malli, avain, otsakkeet ja runkoparametrit; tyhjät kentät käyttävät yllä olevia oletuksia. Runkoarvot luetaan JSON-muodossa mikäli mahdollista.",
+    "modelsDesc": "Esiasetukset, joista käyttäjät voivat valita — esim. Anthropic, Mistral. Ensimmäinen esiasetus on instanssin oletus. Kukin sisältää oman perus-URL:n, mallin, avaimen, otsakkeet ja runkoparametrit. Runkoarvot luetaan JSON-muodossa, kun se on mahdollista.",
     "newModel": "Uusi esiasetus",
     "displayName": "Näyttönimi",
     "displayNamePlaceholder": "esim. Anthropic (US)",
@@ -117,6 +117,7 @@
     "instanceDesc": "Tämän instanssin yleiset asetukset.",
     "adminContact": "Ylläpitäjän yhteystieto",
     "adminContactDesc": "Näytetään käyttäjille salasanan palautusnäytöllä. Jätä tyhjäksi piilottaaksesi sen.",
-    "adminContactPlaceholder": "esim. admin@example.com"
+    "adminContactPlaceholder": "esim. admin@example.com",
+    "defaultBadge": "Oletus"
   }
 }

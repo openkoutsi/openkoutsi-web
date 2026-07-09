@@ -344,7 +344,17 @@
       "cleared": "LLM settings cleared",
       "clearFailed": "Failed to clear LLM settings",
       "configured": "LLM configured — workout analysis and AI plan generation are enabled.",
-      "mixedContent": "Mixed content warning: this page is served over HTTPS but your LLM URL starts with http://. The server will attempt server-to-server requests, but if your LLM is on localhost it must be reachable from the server process."
+      "mixedContent": "Mixed content warning: this page is served over HTTPS but your LLM URL starts with http://. The server will attempt server-to-server requests, but if your LLM is on localhost it must be reachable from the server process.",
+      "test": "Test connection",
+      "testing": "Testing…",
+      "testOk": "Connection successful",
+      "testFailed": "Connection failed",
+      "testModelReplied": "The model replied",
+      "testResponse": "Response",
+      "testNoBaseUrl": "Enter a base URL first before testing",
+      "bannerUsingOwn": "Using your own LLM server.",
+      "bannerUsingInstance": "Using this instance's LLM.",
+      "clearKey": "Clear key"
     },
     "analysis": {
       "title": "Analysis",

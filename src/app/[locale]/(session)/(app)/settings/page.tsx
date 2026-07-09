@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LlmSettingsCard } from '@/components/settings/LlmSettingsCard'
 
 export default function SettingsPage() {
   const t = useTranslations('app')
@@ -9,6 +10,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-xl font-bold">{t('settings.title')}</h1>
+
+      <LlmSettingsCard />
 
       <Card>
         <CardHeader>

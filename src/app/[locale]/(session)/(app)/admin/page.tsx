@@ -656,13 +656,8 @@ function SettingsTab() {
     '/api/admin/settings',
     fetcher,
   )
-  const [baseUrl, setBaseUrl] = useState('')
-  const [model, setModel] = useState('')
-  const [apiKey, setApiKey] = useState('')
-  const [clearKey, setClearKey] = useState(false)
   const [analysisContext, setAnalysisContext] = useState('')
   const [adminContact, setAdminContact] = useState('')
-  const [headerRows, setHeaderRows] = useState<KV[]>([])
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -671,11 +666,8 @@ function SettingsTab() {
 
   useEffect(() => {
     if (settings) {
-      setBaseUrl(settings.llm_base_url ?? '')
-      setModel(settings.llm_model ?? '')
       setAnalysisContext(settings.llm_analysis_context ?? '')
       setAdminContact(settings.admin_contact ?? '')
-      setHeaderRows(recordToRows(settings.llm_extra_headers))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
           name: m.name,
@@ -710,18 +702,11 @@ function SettingsTab() {
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
         body: JSON.stringify({
-          llm_base_url: baseUrl || null,
-          llm_model: model || null,
-          llm_api_key: apiKey || null,
-          clear_llm_api_key: clearKey,
           llm_analysis_context: analysisContext || null,
           admin_contact: adminContact || null,
           llm_models: models,
-          llm_extra_headers: rowsToRecord(headerRows),
         }),
       })
-      setApiKey('')
-      setClearKey(false)
       setTestResult(null)
       mutate()
       toast({ title: t('settings.saved') })
@@ -737,7 +722,7 @@ function SettingsTab() {
   }
 
   async function handleTestConnection() {
-    if (!settings?.llm_base_url) {
+    if (!settings?.llm_models?.length) {
       setTestResult({ ok: false, error: t('settings.testNoBaseUrl') })
       return
     }
@@ -785,51 +770,6 @@ function SettingsTab() {
         <CardContent>
           <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="llm-base-url">{t('settings.baseUrl')}</Label>
-            <Input
-              id="llm-base-url"
-              type="url"
-              placeholder={t('settings.baseUrlPlaceholder')}
-              value={baseUrl}
-              onChange={(e) => { setBaseUrl(e.target.value); setTestResult(null) }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="llm-model">{t('settings.model')}</Label>
-            <p className="text-xs text-muted-foreground">{t('settings.modelDefaultHint')}</p>
-            <Input
-              id="llm-model"
-              type="text"
-              placeholder={t('settings.modelPlaceholder')}
-              value={model}
-              onChange={(e) => { setModel(e.target.value); setTestResult(null) }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="llm-api-key">{t('settings.apiKey')}</Label>
-            {settings?.llm_api_key_set && !clearKey && (
-              <p className="text-xs text-muted-foreground">{t('settings.apiKeySet')}</p>
-            )}
-            <Input
-              id="llm-api-key"
-              type="password"
-              placeholder={t('settings.apiKeyPlaceholder')}
-              value={apiKey}
-              onChange={(e) => { setApiKey(e.target.value); setClearKey(false); setTestResult(null) }}
-              autoComplete="new-password"
-            />
-            {settings?.llm_api_key_set && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => { setClearKey(true); setApiKey(''); setTestResult(null) }}
-              >
-                {t('settings.clearKey')}
-              </Button>
-            )}
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="llm-analysis-context">{t('settings.analysisContext')}</Label>
             <p className="text-xs text-muted-foreground">{t('settings.analysisContextDesc')}</p>
             <Textarea
@@ -842,20 +782,7 @@ function SettingsTab() {
             />
           </div>
 
-          {/* Extra request headers (e.g. a zero-data-retention header). */}
-          <div className="space-y-2 pt-2 border-t">
-            <Label>{t('settings.extraHeaders')}</Label>
-            <p className="text-xs text-muted-foreground">{t('settings.extraHeadersDesc')}</p>
-            <KeyValueRows
-              rows={headerRows}
-              onChange={(r) => { setHeaderRows(r); setTestResult(null) }}
-              keyPlaceholder={t('settings.headerNamePlaceholder')}
-              valuePlaceholder={t('settings.headerValuePlaceholder')}
-              addLabel={t('settings.addHeader')}
-            />
-          </div>
-
-          {/* Selectable models, each with its own body params. */}
+          {/* Selectable presets, each a full connection. First = default. */}
           <div className="space-y-3 pt-2 border-t">
             <Label>{t('settings.models')}</Label>
             <p className="text-xs text-muted-foreground">{t('settings.modelsDesc')}</p>
@@ -870,6 +797,11 @@ function SettingsTab() {
                   <p className="text-sm font-medium flex-1">
                     {m.label.trim() || m.name.trim() || t('settings.newModel')}
                   </p>
+                  {i === 0 && (
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                      {t('settings.defaultBadge')}
+                    </span>
+                  )}
                   <Button
                     type="button"
                     variant="ghost"
