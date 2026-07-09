@@ -30,6 +30,7 @@ function readSetting(app: Record<string, unknown> | undefined, key: string): str
 
 export function LlmSettingsCard() {
   const t = useTranslations('app')
+  const tCommon = useTranslations('common')
   const { athlete, refreshAthlete } = useAuth()
   const { data: serversData } = useSWR<{ servers: string[] }>('/api/llm/servers', fetcher)
   const servers = serversData?.servers ?? []
@@ -133,7 +134,7 @@ export function LlmSettingsCard() {
       })) as LlmTestResult
       setTestResult(result)
     } catch (err) {
-      setTestResult({ ok: false, error: err instanceof Error ? err.message : 'Unknown error' })
+      setTestResult({ ok: false, error: err instanceof Error ? err.message : tCommon('unknownError') })
     } finally {
       setTesting(false)
     }
@@ -236,7 +237,7 @@ export function LlmSettingsCard() {
                 size="sm"
                 onClick={() => { setClearKey(true); setApiKey(''); setTestResult(null) }}
               >
-                {t('settings.llm.clear')}
+                {t('settings.llm.clearKey')}
               </Button>
             )}
           </div>

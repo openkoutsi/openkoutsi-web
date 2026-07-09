@@ -353,7 +353,8 @@
       "testResponse": "Vastaus",
       "testNoBaseUrl": "Syötä ensin perus-URL ennen testausta",
       "bannerUsingOwn": "Käytössä oma LLM-palvelimesi.",
-      "bannerUsingInstance": "Käytössä tämän instanssin LLM."
+      "bannerUsingInstance": "Käytössä tämän instanssin LLM.",
+      "clearKey": "Tyhjennä avain"
     },
     "analysis": {
       "title": "Analyysi",

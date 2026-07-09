@@ -353,7 +353,8 @@
       "testResponse": "Response",
       "testNoBaseUrl": "Enter a base URL first before testing",
       "bannerUsingOwn": "Using your own LLM server.",
-      "bannerUsingInstance": "Using this instance's LLM."
+      "bannerUsingInstance": "Using this instance's LLM.",
+      "clearKey": "Clear key"
     },
     "analysis": {
       "title": "Analysis",
