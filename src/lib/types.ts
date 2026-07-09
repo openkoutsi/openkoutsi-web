@@ -12,6 +12,17 @@ export interface Page<T> {
 }
 
 // Instance user as seen by an administrator (GET /api/admin/users).
+// A user's LLM-access entitlement summary (issue #9).
+export interface LlmEntitlementSummary {
+  status: string
+  active: boolean
+  source: string
+  starts_at?: string | null
+  expires_at?: string | null
+  notes?: string | null
+  updated_at?: string | null
+}
+
 export interface UserResponse {
   id: string
   username: string
@@ -19,6 +30,7 @@ export interface UserResponse {
   created_at: string
   consented_at?: string | null
   consent_version?: string | null
+  llm_entitlement?: LlmEntitlementSummary | null
 }
 
 export interface InvitationResponse {
@@ -49,6 +61,25 @@ export interface InstanceSettingsResponse {
   admin_contact: string | null
   // The instance's entire LLM config: selectable presets, first = default.
   llm_models: LlmModelConfig[]
+  // Issue #9 opt-in gate: require an LLM-access entitlement (or BYOK).
+  llm_requires_subscription: boolean
+}
+
+// One aggregation row of the admin LLM-usage summary (issue #9).
+export interface LlmUsageBucket {
+  key: string | null
+  calls: number
+  prompt_tokens: number
+  completion_tokens: number
+  total_tokens: number
+  unknown_usage_calls: number
+}
+
+export interface LlmUsageSummaryResponse {
+  group_by: string
+  from?: string | null
+  to?: string | null
+  buckets: LlmUsageBucket[]
 }
 
 export interface InstanceInfoResponse {

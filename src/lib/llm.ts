@@ -15,7 +15,28 @@
  */
 
 import type { ActivityDetail, AthleteProfile } from './types'
-import { getApiUrl, getAccessToken, setAccessToken, clearTokens } from './api'
+import {
+  getApiUrl,
+  getAccessToken,
+  setAccessToken,
+  clearTokens,
+  isSubscriptionRequiredDetail,
+  LlmSubscriptionRequiredError,
+} from './api'
+
+/** Inspect a non-OK proxy Response for the gating 403 and throw the typed error. */
+async function _throwIfSubscriptionRequired(resp: Response): Promise<void> {
+  if (resp.status !== 403) return
+  try {
+    const body = await resp.clone().json()
+    if (isSubscriptionRequiredDetail(body?.detail)) {
+      throw new LlmSubscriptionRequiredError(body.detail.message)
+    }
+  } catch (e) {
+    if (e instanceof LlmSubscriptionRequiredError) throw e
+    // not JSON / not the gating error — fall through to the generic path
+  }
+}
 
 // ── Config ────────────────────────────────────────────────────────────────
 
@@ -258,6 +279,7 @@ export async function streamAnalysis(
   )
 
   if (!resp.ok) {
+    await _throwIfSubscriptionRequired(resp)
     const text = await resp.text().catch(() => '')
     throw new Error(`LLM request failed: ${resp.status} ${text}`)
   }
@@ -433,6 +455,7 @@ export async function generatePlanWeeks(
       stream: false,
     })
     if (!resp.ok) {
+      await _throwIfSubscriptionRequired(resp)
       const text = await resp.text().catch(() => '')
       throw new Error(`LLM request failed: ${resp.status} ${text}`)
     }

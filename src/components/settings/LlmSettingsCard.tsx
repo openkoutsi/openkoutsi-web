@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import useSWR from 'swr'
 
-import { apiFetch, fetcher } from '@/lib/api'
+import { apiFetch, fetcher, type LlmAccess } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,6 +35,9 @@ export function LlmSettingsCard() {
   const { data: serversData } = useSWR<{ servers: string[] }>('/api/llm/servers', fetcher)
   const servers = serversData?.servers ?? []
   const restricted = servers.length > 0
+
+  // Issue #9: the instance's AI-access state for this user (source of truth).
+  const { data: access } = useSWR<LlmAccess>('/api/llm/access', fetcher)
 
   const app = athlete?.app_settings
   const savedBaseUrl = readSetting(app, 'llm_base_url')
@@ -161,6 +164,22 @@ export function LlmSettingsCard() {
           >
             {usingOwn ? t('settings.llm.bannerUsingOwn') : t('settings.llm.bannerUsingInstance')}
           </div>
+
+          {/* Issue #9: AI-access state on this instance. */}
+          {access && access.gated && (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{tCommon('llm.access.label')}: </span>
+              {access.mode === 'byok'
+                ? tCommon('llm.access.byok')
+                : access.mode === 'entitled'
+                  ? access.entitlement?.expires_at
+                    ? tCommon('llm.access.subscribedUntil', {
+                        date: new Date(access.entitlement.expires_at).toLocaleDateString(),
+                      })
+                    : tCommon('llm.access.subscribed')
+                  : tCommon('llm.access.none')}
+            </p>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="byok-base-url">{t('settings.llm.baseUrl')}</Label>

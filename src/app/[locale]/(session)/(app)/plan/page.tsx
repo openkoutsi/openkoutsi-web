@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
-import { fetcher, apiFetch } from '@/lib/api'
+import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { AthleteProfile, TrainingPlan, Page } from '@/lib/types'
 import { getLlmConfig, generatePlanWeeks } from '@/lib/llm'
+import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -95,6 +96,7 @@ function GeneratePlanDialog({
   const [intensityPref, setIntensityPref] = useState('moderate')
   const [longDescription, setLongDescription] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [showLlmUpsell, setShowLlmUpsell] = useState(false)
 
   function resetDialog() {
     setStep(1)
@@ -112,6 +114,7 @@ function GeneratePlanDialog({
 
   async function handleSubmit() {
     setGenerating(true)
+    setShowLlmUpsell(false)
     try {
       const dayConfigs = [...selectedDays].map((d) => ({
         day_of_week: d,
@@ -165,6 +168,10 @@ function GeneratePlanDialog({
       resetDialog()
       onGenerated()
     } catch (err) {
+      if (err instanceof LlmSubscriptionRequiredError) {
+        setShowLlmUpsell(true)
+        return
+      }
       toast({
         title: tCommon('error'),
         description: err instanceof Error ? err.message : tCommon('unknownError'),
@@ -297,6 +304,8 @@ function GeneratePlanDialog({
               longDescription={longDescription}
               onLongDescriptionChange={setLongDescription}
             />
+
+            {showLlmUpsell && <LlmUpsell className="mt-4" />}
 
             <DialogFooter className="gap-2 sm:gap-0">
               <Button
@@ -459,6 +468,7 @@ function RegeneratePlanDialog({
   const [intensityPref, setIntensityPref] = useState('moderate')
   const [longDescription, setLongDescription] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [showLlmUpsell, setShowLlmUpsell] = useState(false)
 
   // Prefill structure from the plan's existing config when the dialog opens.
   useEffect(() => {
@@ -485,6 +495,7 @@ function RegeneratePlanDialog({
 
   async function handleRegenerate() {
     setGenerating(true)
+    setShowLlmUpsell(false)
     try {
       const dayConfigs = [...selectedDays].map((d) => ({
         day_of_week: d,
@@ -516,6 +527,10 @@ function RegeneratePlanDialog({
       setOpen(false)
       onRegenerated()
     } catch (err) {
+      if (err instanceof LlmSubscriptionRequiredError) {
+        setShowLlmUpsell(true)
+        return
+      }
       toast({
         title: tCommon('error'),
         description: err instanceof Error ? err.message : tCommon('unknownError'),
@@ -583,6 +598,8 @@ function RegeneratePlanDialog({
             longDescription={longDescription}
             onLongDescriptionChange={setLongDescription}
           />
+
+          {showLlmUpsell && <LlmUpsell className="mt-4" />}
 
           <DialogFooter>
             <AlertDialog>

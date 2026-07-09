@@ -4,9 +4,10 @@ import { use, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/navigation'
-import { fetcher, apiFetch, apiDownload } from '@/lib/api'
+import { fetcher, apiFetch, apiDownload, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { ActivityDetail, AthleteProfile, FitnessCurrent } from '@/lib/types'
 import { getLlmConfig, streamAnalysis, type FatigueContext, type PrBadges } from '@/lib/llm'
+import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -146,6 +147,7 @@ export default function ActivityDetailPage({ params }: Props) {
 
   // Frontend LLM streaming state
   const [streamingText, setStreamingText] = useState<string | null>(null)
+  const [showLlmUpsell, setShowLlmUpsell] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
   const llmConfig = getLlmConfig(athlete?.app_settings)
@@ -216,6 +218,7 @@ export default function ActivityDetailPage({ params }: Props) {
       ? { ctl: fitnessCurrent.ctl, atl: fitnessCurrent.atl, tsb: fitnessCurrent.tsb, form: fitnessCurrent.form }
       : undefined
 
+    setShowLlmUpsell(false)
     if (llmConfig && activity && athlete) {
       // User-configured LLM path: proxied through the backend (/api/llm/chat).
       // The API key is decrypted server-side — it never touches the browser.
@@ -248,6 +251,10 @@ export default function ActivityDetailPage({ params }: Props) {
           return
         }
         setStreamingText(null)
+        if (err instanceof LlmSubscriptionRequiredError) {
+          setShowLlmUpsell(true)
+          return
+        }
         toast({
           title: t('detail.analysis.analysisFailed'),
           description: err instanceof Error ? err.message : tCommon('unknownError'),
@@ -263,6 +270,10 @@ export default function ActivityDetailPage({ params }: Props) {
         })
         mutate()
       } catch (err) {
+        if (err instanceof LlmSubscriptionRequiredError) {
+          setShowLlmUpsell(true)
+          return
+        }
         toast({
           title: t('detail.analysis.analysisFailedToStart'),
           description: err instanceof Error ? err.message : tCommon('unknownError'),
@@ -607,6 +618,7 @@ export default function ActivityDetailPage({ params }: Props) {
           )}
         </CardHeader>
         <CardContent>
+          {showLlmUpsell && <LlmUpsell className="mb-4" />}
           {/* Streaming: build chat bubbles from accumulated text */}
           {isStreaming && (() => {
             const { mood, paragraphs } = parseMoodAndParagraphs(streamingText ?? '')

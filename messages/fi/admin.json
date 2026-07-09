@@ -3,7 +3,8 @@
   "tabs": {
     "users": "Käyttäjät",
     "invitations": "Kutsut",
-    "settings": "Asetukset"
+    "settings": "Asetukset",
+    "usage": "Käyttö"
   },
   "users": {
     "username": "Käyttäjätunnus",
@@ -24,7 +25,12 @@
     "passwordResetFailed": "Palautuslinkin luominen epäonnistui",
     "rolesUpdated": "Roolit päivitetty",
     "updateFailed": "Päivitys epäonnistui",
-    "removeFailed": "Poistaminen epäonnistui"
+    "removeFailed": "Poistaminen epäonnistui",
+    "llmAccess": "Tekoäly",
+    "llmGranted": "Myönnetty",
+    "llmGrant": "Myönnä",
+    "llmRevoke": "Peruuta",
+    "llmEntitlementUpdated": "Tekoälyn käyttöoikeus päivitetty"
   },
   "invitations": {
     "pending": "Odottavat",
@@ -118,6 +124,29 @@
     "adminContact": "Ylläpitäjän yhteystieto",
     "adminContactDesc": "Näytetään käyttäjille salasanan palautusnäytöllä. Jätä tyhjäksi piilottaaksesi sen.",
     "adminContactPlaceholder": "esim. admin@example.com",
-    "defaultBadge": "Oletus"
+    "defaultBadge": "Oletus",
+    "requiresSubscription": "Vaadi tilaus instanssin LLM:lle",
+    "requiresSubscriptionDesc": "Kun päällä, vain käyttäjät joilla on tekoälyn käyttöoikeus (tai oma tekoälymalli BYOK:n kautta) voivat käyttää tämän instanssin tekoälyominaisuuksia.",
+    "requiresSubscriptionWarning": "Käyttäjät joilla ei ole tekoälyn käyttöoikeutta tai omaa tekoälymallia estetään käyttämästä tekoälyominaisuuksia, kunnes myönnät heille käyttöoikeuden."
+  },
+  "usage": {
+    "title": "LLM-käyttö",
+    "desc": "Token-käyttö instanssin maksamille tekoälykutsuille. Käyttäjien omilla tekoälymalleilla (BYOK) tehtyjä kutsuja ei lasketa.",
+    "groupBy": "Ryhmittely",
+    "group": {
+      "user": "Käyttäjä",
+      "provider": "Palveluntarjoaja",
+      "feature": "Ominaisuus",
+      "day": "Päivä",
+      "week": "Viikko",
+      "month": "Kuukausi"
+    },
+    "calls": "Kutsut",
+    "inputTokens": "Syötetokenit",
+    "outputTokens": "Tulostetokenit",
+    "totalTokens": "Tokenit yhteensä",
+    "unknown": "Tuntematon",
+    "loading": "Ladataan…",
+    "empty": "Käyttöä ei ole vielä kirjattu."
   }
 }
