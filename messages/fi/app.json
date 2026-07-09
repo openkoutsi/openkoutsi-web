@@ -344,7 +344,16 @@
       "cleared": "LLM-asetukset tyhjennetty",
       "clearFailed": "LLM-asetusten tyhjentäminen epäonnistui",
       "configured": "LLM määritetty — harjoitusanalyysi ja tekoälyohjelmanluonti ovat käytössä.",
-      "mixedContent": "Varoitus: tämä sivu tarjotaan HTTPS:n yli, mutta LLM-URL alkaa http://. Palvelin yrittää palvelin-palvelin-pyyntöjä, mutta jos LLM on localhostissa, sen täytyy olla saavutettavissa palvelinprosessista."
+      "mixedContent": "Varoitus: tämä sivu tarjotaan HTTPS:n yli, mutta LLM-URL alkaa http://. Palvelin yrittää palvelin-palvelin-pyyntöjä, mutta jos LLM on localhostissa, sen täytyy olla saavutettavissa palvelinprosessista.",
+      "test": "Testaa yhteys",
+      "testing": "Testataan…",
+      "testOk": "Yhteys onnistui",
+      "testFailed": "Yhteys epäonnistui",
+      "testModelReplied": "Malli vastasi",
+      "testResponse": "Vastaus",
+      "testNoBaseUrl": "Syötä ensin perus-URL ennen testausta",
+      "bannerUsingOwn": "Käytössä oma LLM-palvelimesi.",
+      "bannerUsingInstance": "Käytössä tämän instanssin LLM."
     },
     "analysis": {
       "title": "Analyysi",

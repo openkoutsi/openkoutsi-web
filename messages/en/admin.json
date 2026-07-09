@@ -61,7 +61,7 @@
   },
   "settings": {
     "llmTitle": "LLM configuration",
-    "llmDesc": "Configure the LLM used for activity analysis across this instance. Leave blank to use the server defaults.",
+    "llmDesc": "Configure the LLM presets used across this instance. The first preset is the default.",
     "baseUrl": "Base URL",
     "baseUrlPlaceholder": "https://api.openai.com/v1",
     "model": "Model",
@@ -82,7 +82,7 @@
     "testModelReplied": "Configured model replied",
     "testPromptSent": "Message sent",
     "testResponse": "Model response",
-    "testNoBaseUrl": "Save a base URL first before testing",
+    "testNoBaseUrl": "Add a preset first before testing",
     "testModelLabel": "Model to test",
     "testModelDefault": "Default model",
     "extraHeaders": "Extra request headers",
@@ -91,7 +91,7 @@
     "headerValuePlaceholder": "value",
     "addHeader": "Add header",
     "models": "Selectable models",
-    "modelsDesc": "Presets users can choose from — e.g. Anthropic, Mistral. Each carries its own base URL, model, key, headers and body params; blanks fall back to the defaults above. Body values are read as JSON where possible.",
+    "modelsDesc": "The presets users can choose from — e.g. Anthropic, Mistral. The first preset is the instance default. Each carries its own base URL, model, key, headers and body params. Body values are read as JSON where possible.",
     "newModel": "New preset",
     "displayName": "Display name",
     "displayNamePlaceholder": "e.g. Anthropic (US)",
@@ -117,6 +117,7 @@
     "instanceDesc": "General settings for this instance.",
     "adminContact": "Admin contact",
     "adminContactDesc": "Shown to users on the password-reset screen. Leave blank to hide it.",
-    "adminContactPlaceholder": "e.g. admin@example.com"
+    "adminContactPlaceholder": "e.g. admin@example.com",
+    "defaultBadge": "Default"
   }
 }
