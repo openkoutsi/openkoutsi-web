@@ -85,6 +85,9 @@ export default function ProfilePage() {
   const [ftp, setFtp] = useState(athlete?.ftp?.toString() ?? '')
   const [maxHr, setMaxHr] = useState(athlete?.max_hr?.toString() ?? '')
   const [restingHr, setRestingHr] = useState(athlete?.resting_hr?.toString() ?? '')
+  const [experienceLevel, setExperienceLevel] = useState<string>(
+    ((athlete?.app_settings as Record<string, unknown>)?.experience_level as string) ?? '',
+  )
   const [saving, setSaving] = useState(false)
   const [syncingProvider, setSyncingProvider] = useState<string | null>(null)
   const [syncingZones, setSyncingZones] = useState<string | null>(null)
@@ -159,6 +162,7 @@ export default function ProfilePage() {
           ftp: ftp ? parseInt(ftp) : null,
           max_hr: maxHr ? parseInt(maxHr) : null,
           resting_hr: restingHr ? parseInt(restingHr) : null,
+          app_settings: { experience_level: experienceLevel || null },
         }),
       })
       await refreshAthlete()
@@ -501,6 +505,25 @@ export default function ProfilePage() {
                   onChange={(e) => setRestingHr(e.target.value)}
                   placeholder="55"
                 />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="experienceLevel">{t('profile.experienceLevel')}</Label>
+                <Select
+                  value={experienceLevel || 'unset'}
+                  onValueChange={(value) => setExperienceLevel(value === 'unset' ? '' : value)}
+                >
+                  <SelectTrigger id="experienceLevel">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unset">{t('profile.experienceLevelUnset')}</SelectItem>
+                    <SelectItem value="novice">{t('profile.experienceLevelNovice')}</SelectItem>
+                    <SelectItem value="intermediate">{t('profile.experienceLevelIntermediate')}</SelectItem>
+                    <SelectItem value="experienced">{t('profile.experienceLevelExperienced')}</SelectItem>
+                    <SelectItem value="semi-pro">{t('profile.experienceLevelSemiPro')}</SelectItem>
+                    <SelectItem value="elite">{t('profile.experienceLevelElite')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <Button type="submit" disabled={saving}>
