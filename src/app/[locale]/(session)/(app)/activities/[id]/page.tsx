@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/navigation'
 import { fetcher, apiFetch, apiDownload, LlmSubscriptionRequiredError } from '@/lib/api'
-import type { ActivityDetail, AthleteProfile, FitnessCurrent } from '@/lib/types'
+import type { ActivityDetail, AthleteProfile, FitnessCurrent, PowerBestEntry } from '@/lib/types'
 import { getLlmConfig, streamAnalysis, type FatigueContext, type PrBadges } from '@/lib/llm'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,7 +30,7 @@ import { IntervalsTable } from '@/components/activities/IntervalsTable'
 import { SourceBadge } from '@/components/activities/SourceBadge'
 import { WorkoutCategoryBadge } from '@/components/activities/WorkoutCategoryBadge'
 import { formatDate, formatDuration, formatDistance, formatPower, formatHR, formatDistanceLabel, formatTime, formatSpeedKmh } from '@/lib/utils'
-import { formatDuration as formatPeriod } from '@/components/charts/PowerCurveChart'
+import { PowerCurveChart, formatDuration as formatPeriod } from '@/components/charts/PowerCurveChart'
 import { ArrowLeft, ChevronDown, Download, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 
 const PR_WINDOW_ORDER = ['all_time', '12mo', '6mo', '3mo'] as const
@@ -84,6 +84,7 @@ export default function ActivityDetailPage({ params }: Props) {
   const [overlayStreams, setOverlayStreams] = useState<OverlayStream[]>([])
   const [intervalsOpen, setIntervalsOpen] = useState(false)
   const [powerBestsOpen, setPowerBestsOpen] = useState(false)
+  const [powerCurveUnit, setPowerCurveUnit] = useState<'w' | 'wkg'>('w')
   const [distanceBestsOpen, setDistanceBestsOpen] = useState(false)
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
 
@@ -293,6 +294,17 @@ export default function ActivityDetailPage({ params }: Props) {
 
   const isStreaming = streamingText !== null
   const isAnalysisPending = activity.analysis_status === 'pending' && !isStreaming
+
+  const powerCurveEntries: PowerBestEntry[] = Object.entries(activity.power_bests ?? {})
+    .map(([d, w]) => ({
+      duration_s: Number(d),
+      rank: 1,
+      power_w: w,
+      activity_id: id,
+      activity_name: null,
+      activity_start_time: null,
+      weight_kg: athlete?.weight_kg ?? null,
+    }))
 
   const stats = [
     { label: t('detail.stats.date'), value: formatDate(activity.start_time) },
@@ -506,6 +518,32 @@ export default function ActivityDetailPage({ params }: Props) {
               <IntervalsTable intervals={activity.intervals} />
             </CardContent>
           )}
+        </Card>
+      )}
+
+      {/* Power curve (MMP) */}
+      {Object.keys(activity.power_bests ?? {}).length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base">{t('detail.powerCurve')}</CardTitle>
+            <div className="flex items-center rounded-md border overflow-hidden text-sm">
+              <button
+                className={`px-3 py-1 transition-colors ${powerCurveUnit === 'w' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                onClick={() => setPowerCurveUnit('w')}
+              >
+                W
+              </button>
+              <button
+                className={`px-3 py-1 transition-colors ${powerCurveUnit === 'wkg' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                onClick={() => setPowerCurveUnit('wkg')}
+              >
+                W/kg
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <PowerCurveChart bests={powerCurveEntries} unit={powerCurveUnit} />
+          </CardContent>
         </Card>
       )}
 
