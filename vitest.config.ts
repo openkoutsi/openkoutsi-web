@@ -1,9 +1,13 @@
 import { resolve } from 'path'
-import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  plugins: [react()],
+  // Vitest 4 bundles rolldown-vite (oxc transform). The repo's tsconfig sets
+  // `jsx: preserve` (required by Next.js), which oxc would otherwise inherit and
+  // leave `.tsx` JSX untransformed. Force the automatic React runtime for tests.
+  oxc: {
+    jsx: { runtime: 'automatic', importSource: 'react' },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

@@ -59,6 +59,19 @@
       "outcomeNotePlaceholder": "Did you reach the target? Any notes…",
       "confirm": "Mark achieved",
       "saving": "Saving…"
+    },
+    "guidance": {
+      "title": "AI guidance",
+      "getGuidance": "Get AI guidance",
+      "refresh": "Refresh",
+      "thinking": "Koutsi is thinking…",
+      "error": "Guidance failed — try again",
+      "intro": "Ask Koutsi whether this goal is realistic for its timeline and how to reach it.",
+      "verdict": {
+        "realistic": "Realistic",
+        "ambitious": "Ambitious",
+        "unrealistic": "Unrealistic"
+      }
     }
   },
   "plan": {
