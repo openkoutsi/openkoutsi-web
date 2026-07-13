@@ -113,6 +113,8 @@
     "bodyKeyPlaceholder": "max_tokens",
     "bodyValuePlaceholder": "value (JSON)",
     "addBodyParam": "Add param",
+    "structuredOutputs": "Structured outputs (JSON schema)",
+    "structuredOutputsDesc": "Send a strict JSON schema so plan/workout generation conforms exactly. Leave on unless this provider rejects it.",
     "addModel": "Add model",
     "removeModel": "Remove",
     "removeRow": "Remove row",

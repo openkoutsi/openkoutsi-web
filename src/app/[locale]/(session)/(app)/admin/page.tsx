@@ -682,10 +682,11 @@ interface ModelRow {
   apiKeySet: boolean
   headers: KV[]
   body: KV[]
+  structuredOutputs: boolean
 }
 
 function emptyModelRow(): ModelRow {
-  return { name: '', label: '', baseUrl: '', modelId: '', apiKey: '', apiKeySet: false, headers: [], body: [] }
+  return { name: '', label: '', baseUrl: '', modelId: '', apiKey: '', apiKeySet: false, headers: [], body: [], structuredOutputs: true }
 }
 
 function SettingsTab() {
@@ -718,6 +719,8 @@ function SettingsTab() {
           apiKeySet: Boolean(m.api_key_set),
           headers: recordToRows(m.headers),
           body: bodyToRows(m.body),
+          // Absent ⇒ default-on; only an explicit false disables it.
+          structuredOutputs: m.structured_outputs !== false,
         })),
       )
     }
@@ -738,6 +741,7 @@ function SettingsTab() {
           ...(m.apiKey ? { api_key: m.apiKey } : {}),
           headers: rowsToRecord(m.headers),
           body: rowsToBody(m.body),
+          structured_outputs: m.structuredOutputs,
         }))
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
@@ -936,6 +940,16 @@ function SettingsTab() {
                   valuePlaceholder={t('settings.bodyValuePlaceholder')}
                   addLabel={t('settings.addBodyParam')}
                 />
+                <div className="flex items-start justify-between gap-4 pt-1">
+                  <div className="space-y-0.5">
+                    <Label className="text-xs">{t('settings.structuredOutputs')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('settings.structuredOutputsDesc')}</p>
+                  </div>
+                  <Switch
+                    checked={m.structuredOutputs}
+                    onCheckedChange={(v) => patch({ structuredOutputs: v })}
+                  />
+                </div>
               </div>
               )
             })}
