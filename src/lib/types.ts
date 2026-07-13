@@ -54,6 +54,8 @@ export interface LlmModelConfig {
   api_key_set?: boolean
   headers: Record<string, string>
   body: Record<string, unknown>
+  // Send a provider-side strict JSON schema for structured generation. Default on.
+  structured_outputs?: boolean
 }
 
 export interface InstanceSettingsResponse {

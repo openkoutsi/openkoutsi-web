@@ -113,6 +113,8 @@
     "bodyKeyPlaceholder": "max_tokens",
     "bodyValuePlaceholder": "arvo (JSON)",
     "addBodyParam": "Lisää parametri",
+    "structuredOutputs": "Rakenteinen tuloste (JSON-skeema)",
+    "structuredOutputsDesc": "Lähetä tiukka JSON-skeema, jotta ohjelma-/harjoitusgenerointi noudattaa muotoa tarkasti. Pidä päällä, ellei tämä palveluntarjoaja hylkää sitä.",
     "addModel": "Lisää malli",
     "removeModel": "Poista",
     "removeRow": "Poista rivi",
