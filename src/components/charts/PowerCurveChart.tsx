@@ -10,42 +10,10 @@ import {
   CartesianGrid,
 } from 'recharts'
 import type { PowerBestEntry } from '@/lib/types'
+import { DURATIONS, formatDuration, scaledX, buildXTicks } from './powerCurveScale'
 
-// All standard durations in seconds
-const DURATIONS = [
-  1, 3, 5, 10, 15, 30, 45, 60, 120, 180, 300, 480, 600,
-  900, 1200, 1800, 2700, 3600, 7200, 10800, 14400,
-  18000, 21600, 25200, 28800,
-]
-
-export function formatDuration(s: number): string {
-  if (s < 60) return `${s}s`
-  if (s < 3600) {
-    const m = s / 60
-    return Number.isInteger(m) ? `${m}m` : `${Math.round(m)}m`
-  }
-  const h = s / 3600
-  return Number.isInteger(h) ? `${h}h` : `${(h).toFixed(1)}h`
-}
-
-// Squared-log scale: position ∝ (ln x)²
-// This compresses the short-effort end more aggressively than plain log.
-// Approximate axis proportions vs plain log:
-//   1s–30s  : 11% of width  (vs 33% with log)
-//   1s–5m   : 31% of width  (vs 55% with log)
-//   1s–1h   : 64% of width  (vs 80% with log)
-function scaledX(s: number): number {
-  const v = Math.log(Math.max(s, 1))
-  return v * v
-}
-
-// Tick positions and their labels for the x-axis
-const X_TICK_DURATIONS = [1, 15, 60, 300, 900, 3600, 7200, 21600, 28800]
-const X_TICKS = X_TICK_DURATIONS.map(scaledX)
-// Reverse-lookup: pre-built map from scaled value string → label
-const TICK_LABELS = new Map(
-  X_TICK_DURATIONS.map((d) => [scaledX(d).toFixed(6), formatDuration(d)])
-)
+// Re-exported for existing consumers that import it from this module.
+export { formatDuration }
 
 interface Props {
   bests: PowerBestEntry[]
@@ -103,6 +71,10 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
 
   const yLabel = unit === 'wkg' ? 'W/kg' : 'Watts'
 
+  // Scale the x-axis to the longest effort present, instead of always to 8h.
+  const maxDuration = Math.max(...chartData.map((p) => p.duration_s))
+  const { ticks: xTicks, labels: tickLabels } = buildXTicks(maxDuration)
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
@@ -111,9 +83,9 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
           dataKey="x"
           type="number"
           scale="linear"
-          domain={[scaledX(1), scaledX(28800)]}
-          ticks={X_TICKS}
-          tickFormatter={(val: number) => TICK_LABELS.get(val.toFixed(6)) ?? ''}
+          domain={[scaledX(1), scaledX(maxDuration)]}
+          ticks={xTicks}
+          tickFormatter={(val: number) => tickLabels.get(val.toFixed(6)) ?? ''}
           tick={{ fontSize: 11 }}
           tickLine={false}
           label={{ value: 'Duration', position: 'insideBottom', offset: -12, fontSize: 12 }}
