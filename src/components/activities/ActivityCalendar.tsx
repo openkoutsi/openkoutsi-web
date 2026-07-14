@@ -50,7 +50,7 @@ function ActivityListRow({ activity }: { activity: Activity }) {
   )
 }
 
-export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) {
+export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingPlan[] }) {
   const t = useTranslations('dashboard')
   const { athlete } = useAuth()
 
@@ -70,14 +70,16 @@ export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) 
     fetcher,
   )
 
-  const mergedPlan = useMemo<TrainingPlan | undefined>(() => {
-    if (!activePlan) return undefined
-    if (overrides.size === 0) return activePlan
-    return {
-      ...activePlan,
-      workouts: activePlan.workouts.map((w) => overrides.get(w.id) ?? w),
-    }
-  }, [activePlan, overrides])
+  // Several non-overlapping plans can be active at once; merge the workouts of
+  // all of them onto the calendar. Optimistic overrides are keyed by workout id
+  // (unique across plans), so they apply regardless of which plan a workout is in.
+  const mergedPlans = useMemo<TrainingPlan[]>(() => {
+    if (overrides.size === 0) return activePlans
+    return activePlans.map((plan) => ({
+      ...plan,
+      workouts: plan.workouts.map((w) => overrides.get(w.id) ?? w),
+    }))
+  }, [activePlans, overrides])
 
   const applyOverride = (workout: PlannedWorkout) => {
     setOverrides((prev) => {
@@ -89,7 +91,14 @@ export function ActivityCalendar({ activePlan }: { activePlan?: TrainingPlan }) 
 
   const timezone = athlete?.app_settings?.timezone as string | undefined
   const byDate = groupActivitiesByDate(data?.items ?? [], timezone)
-  const plannedByDate = groupPlannedWorkoutsByDate(mergedPlan)
+  const plannedByDate = new Map<string, PlannedWorkout[]>()
+  for (const plan of mergedPlans) {
+    for (const [key, workouts] of groupPlannedWorkoutsByDate(plan)) {
+      const existing = plannedByDate.get(key)
+      if (existing) existing.push(...workouts)
+      else plannedByDate.set(key, [...workouts])
+    }
+  }
   const grid = getCalendarGrid(year, month)
   const currentMonthStart = new Date(year, month, 1)
 

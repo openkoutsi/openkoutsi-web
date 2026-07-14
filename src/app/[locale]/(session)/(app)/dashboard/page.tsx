@@ -195,7 +195,7 @@ export default function DashboardPage() {
   )
   const { data: plansPage } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher)
   const plans = plansPage?.items
-  const activePlan = plans?.find((p) => p.status === 'active')
+  const activePlans = plans?.filter((p) => p.status === 'active') ?? []
   const _rawPlanned = plans ? aggregatePlannedTssByWeek(plans) : undefined
   const plannedByWeek = _rawPlanned?.size ? _rawPlanned : undefined
 
@@ -307,7 +307,7 @@ export default function DashboardPage() {
       )}
 
       {/* Activity calendar */}
-      <ActivityCalendar activePlan={activePlan} />
+      <ActivityCalendar activePlans={activePlans} />
 
       {/* Daily training status feedback */}
       <TrainingStatusCard />
