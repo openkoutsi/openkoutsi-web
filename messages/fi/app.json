@@ -79,6 +79,8 @@
     "generatePlan": "Luo ohjelma",
     "archive": "Arkistoi",
     "archived": "Ohjelma arkistoitu",
+    "unarchive": "Palauta arkistosta",
+    "unarchived": "Ohjelma palautettu",
     "deleted": "Ohjelma poistettu",
     "noPlans": "Ei harjoitusohjelmaa vielä.",
     "noPlansDesc": "Luo ohjelma nähdäksesi viikkoaikataulusi täällä.",

@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp, Trash2, ArchiveRestore } from 'lucide-react'
 import { differenceInWeeks } from 'date-fns'
 
 interface PlanStructureState {
@@ -636,11 +636,12 @@ export default function PlanPage() {
   const { data: athlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
-  const activePlan = plans?.find((p) => p.status === 'active')
+  // Several non-overlapping plans can be active at once, so render them all.
+  const activePlans = plans?.filter((p) => p.status === 'active') ?? []
 
-  const currentWeek = activePlan
-    ? Math.max(1, differenceInWeeks(new Date(), new Date(activePlan.start_date)) + 1)
-    : 1
+  function planWeek(plan: TrainingPlan) {
+    return Math.max(1, differenceInWeeks(new Date(), new Date(plan.start_date)) + 1)
+  }
 
   function toggleExpanded(id: string) {
     setExpanded((prev) => {
@@ -658,6 +659,20 @@ export default function PlanPage() {
       })
       await mutate()
       toast({ title: t('plan.archived') })
+    } catch (err) {
+      toast({
+        title: tCommon('error'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleUnarchive(id: string) {
+    try {
+      await apiFetch(`/api/plans/${id}/unarchive`, { method: 'POST' })
+      await mutate()
+      toast({ title: t('plan.unarchived') })
     } catch (err) {
       toast({
         title: tCommon('error'),
@@ -688,7 +703,7 @@ export default function PlanPage() {
         <GeneratePlanDialog onGenerated={() => mutate()} athlete={athlete} />
       </div>
 
-      {!activePlan && plans?.length === 0 && (
+      {activePlans.length === 0 && plans?.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">{t('plan.noPlans')}</p>
@@ -699,8 +714,8 @@ export default function PlanPage() {
         </Card>
       )}
 
-      {activePlan && (
-        <Card>
+      {activePlans.map((activePlan) => (
+        <Card key={activePlan.id}>
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
@@ -732,13 +747,13 @@ export default function PlanPage() {
             <PlanCalendar
               key={`${activePlan.id}:${activePlan.workouts.map((w) => w.id).join(',')}`}
               plan={activePlan}
-              currentWeek={currentWeek}
+              currentWeek={planWeek(activePlan)}
               showGenerateAction
               onChanged={() => mutate()}
             />
           </CardContent>
         </Card>
-      )}
+      ))}
 
       {plans && plans.filter((p) => p.status !== 'active').length > 0 && (
         <div>
@@ -750,10 +765,6 @@ export default function PlanPage() {
               .filter((p) => p.status !== 'active')
               .map((plan) => {
                 const isOpen = expanded.has(plan.id)
-                const planWeek = Math.max(
-                  1,
-                  differenceInWeeks(new Date(), new Date(plan.start_date)) + 1,
-                )
                 return (
                   <Card key={plan.id}>
                     <CardContent className="py-3">
@@ -778,6 +789,16 @@ export default function PlanPage() {
                             }
                           </span>
                         </button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                          title={t('plan.unarchive')}
+                          onClick={() => handleUnarchive(plan.id)}
+                        >
+                          <ArchiveRestore className="h-3.5 w-3.5" />
+                          <span className="sr-only">{t('plan.unarchive')}</span>
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -809,7 +830,7 @@ export default function PlanPage() {
                       </div>
                       {isOpen && (
                         <div className="mt-4 border-t pt-4">
-                          <PlanCalendar key={plan.id} plan={plan} currentWeek={planWeek} />
+                          <PlanCalendar key={plan.id} plan={plan} currentWeek={planWeek(plan)} />
                         </div>
                       )}
                     </CardContent>
