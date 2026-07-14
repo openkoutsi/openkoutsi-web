@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
-import { apiFetch, apiDownload } from '@/lib/api'
+import { apiFetch, apiDownload, fetcher } from '@/lib/api'
+import type { InstanceInfoResponse } from '@/lib/types'
 import { WizardShell } from '@/components/onboarding/WizardShell'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -17,6 +19,8 @@ interface Props {
 export function Step0Consent({ onAccepted }: Props) {
   const t = useTranslations('onboarding')
   const { logout } = useAuth()
+  const { data: instanceInfo } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
+  const privacyPolicyUrl = instanceInfo?.privacy_policy_url
   const [accepted, setAccepted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showDeclinePanel, setShowDeclinePanel] = useState(false)
@@ -157,6 +161,19 @@ export function Step0Consent({ onAccepted }: Props) {
     <WizardShell step={0} title={t('consent.title')} hideNav>
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">{t('consent.subtitle')}</p>
+
+        {privacyPolicyUrl && (
+          <p className="text-sm">
+            <a
+              href={privacyPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium underline underline-offset-2"
+            >
+              {t('consent.privacyPolicyLink')}
+            </a>
+          </p>
+        )}
 
         <div className="rounded-md border bg-muted/30 p-4 space-y-2">
           <p className="text-sm font-medium">{t('consent.dataTitle')}</p>

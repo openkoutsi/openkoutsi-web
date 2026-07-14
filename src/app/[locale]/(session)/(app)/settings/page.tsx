@@ -1,11 +1,16 @@
 'use client'
 
+import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LlmSettingsCard } from '@/components/settings/LlmSettingsCard'
+import { fetcher } from '@/lib/api'
+import type { InstanceInfoResponse } from '@/lib/types'
 
 export default function SettingsPage() {
   const t = useTranslations('app')
+  const { data: instanceInfo } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
+  const privacyPolicyUrl = instanceInfo?.privacy_policy_url
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -30,6 +35,16 @@ export default function SettingsPage() {
             >
               {t('settings.about.viewOnGitHub')}
             </a>
+            {privacyPolicyUrl && (
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                {t('settings.about.privacyPolicy')}
+              </a>
+            )}
             <a
               href="https://buymeacoffee.com/koutsi"
               target="_blank"

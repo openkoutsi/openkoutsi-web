@@ -10,6 +10,7 @@
   "consent": {
     "title": "Ennen kuin aloitat",
     "subtitle": "Tämä palvelu käsittelee henkilö- ja terveystietojasi. Lue ja hyväksy ehdot ennen jatkamista.",
+    "privacyPolicyLink": "Lue koko tietosuojaseloste",
     "dataTitle": "Tallennettavat ja käsiteltävät tiedot",
     "dataItems": {
       "account": "Tilitiedot: käyttäjänimi ja näyttönimi",
