@@ -86,6 +86,7 @@ export interface LlmUsageSummaryResponse {
 
 export interface InstanceInfoResponse {
   admin_contact: string | null
+  privacy_policy_url: string
 }
 
 export interface User {

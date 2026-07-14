@@ -10,6 +10,7 @@
   "consent": {
     "title": "Before you begin",
     "subtitle": "This service processes your personal and health-related data. Please read and accept the terms before continuing.",
+    "privacyPolicyLink": "Read the full privacy policy",
     "dataTitle": "Data we store and process",
     "dataItems": {
       "account": "Account data: username and display name",
