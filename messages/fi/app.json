@@ -337,7 +337,8 @@
     "about": {
       "title": "Tietoja",
       "desc": "openkoutsi on avoimen lähdekoodin kestävyysharjoittelun tukisovellus. Sen avulla voit ladata ja analysoida harjoituksia FIT-tiedostoista tai Stravasta, seurata kuntomittareita kuten CTL, ATL ja TSB ajan mittaan, hallita syke- ja tehovyöhykkeitä, asettaa tavoitteita ja luoda yksilöllisiä harjoitusohjelmia — kaikki itse hallinnoimaltasi palvelimelta.",
-      "viewOnGitHub": "Katso GitHubissa"
+      "viewOnGitHub": "Katso GitHubissa",
+      "privacyPolicy": "Tietosuojaseloste"
     },
     "llm": {
       "title": "Tekoäly / LLM",
