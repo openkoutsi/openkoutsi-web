@@ -79,6 +79,8 @@
     "generatePlan": "Generate plan",
     "archive": "Archive",
     "archived": "Plan archived",
+    "unarchive": "Unarchive",
+    "unarchived": "Plan unarchived",
     "deleted": "Plan deleted",
     "noPlans": "No training plan yet.",
     "noPlansDesc": "Generate a plan to see your weekly schedule here.",
