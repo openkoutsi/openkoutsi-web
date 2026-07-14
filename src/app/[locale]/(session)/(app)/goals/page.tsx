@@ -33,6 +33,7 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import { Plus, Trash2, CheckCircle2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { GoalGuidanceCard } from '@/components/goals/GoalGuidanceCard'
 
 const STATUS_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   active: 'default',
@@ -361,6 +362,7 @@ export default function GoalsPage() {
                     </AlertDialog>
                   </div>
                 </div>
+                <GoalGuidanceCard goalId={goal.id} />
               </CardContent>
             </Card>
           ))}

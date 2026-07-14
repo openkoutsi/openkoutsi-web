@@ -387,6 +387,13 @@ export interface TrainingStatus {
   generated_date: string | null
 }
 
+export interface GoalGuidance {
+  status: string | null
+  verdict: string | null
+  guidance: string | null
+  updated_at: string | null
+}
+
 export interface Message {
   id: string
   type: string

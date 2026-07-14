@@ -59,6 +59,19 @@
       "outcomeNotePlaceholder": "Saavutitko tavoitteen? Lisätietoja…",
       "confirm": "Merkitse saavutetuksi",
       "saving": "Tallennetaan…"
+    },
+    "guidance": {
+      "title": "Tekoälyopastus",
+      "getGuidance": "Hanki tekoälyopastus",
+      "refresh": "Päivitä",
+      "thinking": "Koutsi miettii…",
+      "error": "Opastuksen haku epäonnistui — yritä uudelleen",
+      "intro": "Kysy Koutsilta, onko tavoite realistinen aikataulussaan ja miten sen voi saavuttaa.",
+      "verdict": {
+        "realistic": "Realistinen",
+        "ambitious": "Kunnianhimoinen",
+        "unrealistic": "Epärealistinen"
+      }
     }
   },
   "plan": {
