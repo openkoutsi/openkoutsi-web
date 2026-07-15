@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/navigation'
 import { apiFetch, fetcher } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
 import type { InstanceInfoResponse } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -106,9 +107,91 @@ export function ResetPasswordForm() {
 }
 
 function NoTokenCard() {
-  const t = useTranslations('auth')
   const { data } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
-  const adminContact = data?.admin_contact
+  // When email is configured, offer the self-serve "email me a link" form;
+  // otherwise fall back to the admin-contact message.
+  if (data?.email_enabled) {
+    return <RequestResetCard />
+  }
+  return <ContactAdminCard adminContact={data?.admin_contact ?? null} />
+}
+
+function RequestResetCard() {
+  const t = useTranslations('auth')
+  const { requestPasswordReset } = useAuth()
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await requestPasswordReset(email)
+    } catch {
+      // Endpoint is non-enumerating and always succeeds; ignore transport errors
+      // so we never reveal whether an account exists.
+    } finally {
+      setLoading(false)
+      setSent(true)
+    }
+  }
+
+  if (sent) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">{t('forgotPassword.sentTitle')}</CardTitle>
+          <CardDescription>{t('forgotPassword.sentDesc')}</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Link href={`/login`} className="text-sm underline underline-offset-4 hover:text-primary">
+            {t('resetPassword.backToSignIn')}
+          </Link>
+        </CardFooter>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">{t('forgotPassword.title')}</CardTitle>
+        <CardDescription>{t('forgotPassword.description')}</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">{t('forgotPassword.email')}</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder={t('forgotPassword.emailPlaceholder')}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-3">
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? t('forgotPassword.submitting') : t('forgotPassword.submit')}
+          </Button>
+          <Link
+            href={`/login`}
+            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-primary"
+          >
+            {t('resetPassword.backToSignIn')}
+          </Link>
+        </CardFooter>
+      </form>
+    </Card>
+  )
+}
+
+function ContactAdminCard({ adminContact }: { adminContact: string | null }) {
+  const t = useTranslations('auth')
 
   return (
     <Card className="w-full max-w-sm">

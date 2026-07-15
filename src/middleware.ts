@@ -30,7 +30,7 @@ const PROTECTED_PREFIXES = [
 ]
 
 // Public auth-page prefixes
-const AUTH_PREFIXES = ['/login', '/register', '/reset-password']
+const AUTH_PREFIXES = ['/login', '/register', '/signup', '/verify-email', '/reset-password']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

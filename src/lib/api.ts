@@ -134,7 +134,7 @@ export async function apiFetch<T>(
     }
     clearTokens()
     if (typeof window !== 'undefined') {
-      const AUTH_PATHS = ['/login', '/register', '/reset-password']
+      const AUTH_PATHS = ['/login', '/register', '/signup', '/verify-email', '/reset-password']
       const onAuthPage = AUTH_PATHS.some((p) => window.location.pathname.includes(p))
       if (!onAuthPage) {
         window.location.href = '/'

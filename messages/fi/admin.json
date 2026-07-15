@@ -8,6 +8,7 @@
   },
   "users": {
     "username": "Käyttäjätunnus",
+    "account": "Tili",
     "roles": "Roolit",
     "registeredAt": "Rekisteröitynyt",
     "consent": "Suostumus",
@@ -126,6 +127,8 @@
     "adminContact": "Ylläpitäjän yhteystieto",
     "adminContactDesc": "Näytetään käyttäjille salasanan palautusnäytöllä. Jätä tyhjäksi piilottaaksesi sen.",
     "adminContactPlaceholder": "esim. admin@example.com",
+    "allowSelfSignup": "Salli itserekisteröinti",
+    "allowSelfSignupDesc": "Kun päällä, kuka tahansa voi rekisteröityä sähköpostiosoitteellaan ja vahvistaa sen. Vaatii määritetyn sähköpostipalvelun; kutsut toimivat aina joka tapauksessa.",
     "defaultBadge": "Oletus",
     "requiresSubscription": "Vaadi tilaus instanssin LLM:lle",
     "requiresSubscriptionDesc": "Kun päällä, vain käyttäjät joilla on tekoälyn käyttöoikeus (tai oma tekoälymalli BYOK:n kautta) voivat käyttää tämän instanssin tekoälyominaisuuksia.",
