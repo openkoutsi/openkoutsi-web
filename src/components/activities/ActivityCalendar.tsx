@@ -38,7 +38,7 @@ import {
 function ActivityListRow({ activity }: { activity: Activity }) {
   const parts: string[] = [formatDuration(activity.duration_s)]
   if (activity.distance_m != null) parts.push(formatDistance(activity.distance_m))
-  if (activity.tss != null) parts.push(`${Math.round(activity.tss)} TSS`)
+  if (activity.load != null) parts.push(`${Math.round(activity.load)} Load`)
 
   return (
     <Link href={`/activities/${activity.id}`}>

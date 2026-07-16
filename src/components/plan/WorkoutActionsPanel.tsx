@@ -72,7 +72,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
   // Edit / delete state
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState<WorkoutFormValues>({
-    workout_type: '', description: '', duration_min: '', target_tss: '',
+    workout_type: '', description: '', duration_min: '', target_load: '',
   })
   const [savingEdit, setSavingEdit] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -82,7 +82,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
       workout_type: workout.workout_type,
       description: workout.description ?? '',
       duration_min: workout.duration_min != null ? String(workout.duration_min) : '',
-      target_tss: workout.target_tss != null ? String(workout.target_tss) : '',
+      target_load: workout.target_load != null ? String(workout.target_load) : '',
     })
     setEditing(true)
   }
@@ -294,7 +294,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
                       <SelectItem key={a.id} value={a.id} className="text-xs">
                         {a.name || a.sport_type}
                         {a.duration_s ? ` · ${formatDuration(a.duration_s)}` : ''}
-                        {a.tss != null ? ` · ${Math.round(a.tss)} TSS` : ''}
+                        {a.load != null ? ` · ${Math.round(a.load)} Load` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>

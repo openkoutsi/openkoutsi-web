@@ -60,10 +60,10 @@ export function WorkoutDefinitionCard({ workout, onEdit, onDelete }: Props) {
               {formatDuration(workout.estimated_duration_s)}
             </span>
           )}
-          {workout.estimated_tss != null && (
+          {workout.estimated_load != null && (
             <span className="flex items-center gap-1 font-medium text-primary">
               <Zap className="h-3 w-3" />
-              {Math.round(workout.estimated_tss)} TSS
+              {Math.round(workout.estimated_load)} Load
             </span>
           )}
         </div>

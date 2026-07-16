@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { totalEnergyKj, normalizedPower, rollingAverage } from '@/lib/streamAnalytics'
+import { totalEnergyKj, weightedPower, rollingAverage } from '@/lib/streamAnalytics'
 
 describe('totalEnergyKj', () => {
   it('returns null when no power stream', () => {
@@ -23,19 +23,19 @@ describe('totalEnergyKj', () => {
   })
 })
 
-describe('normalizedPower', () => {
+describe('weightedPower', () => {
   it('returns null when no power stream', () => {
-    expect(normalizedPower({})).toBeNull()
+    expect(weightedPower({})).toBeNull()
   })
 
   it('returns null for streams shorter than 30 seconds', () => {
-    expect(normalizedPower({ power: new Array(29).fill(300) })).toBeNull()
+    expect(weightedPower({ power: new Array(29).fill(300) })).toBeNull()
   })
 
   it('returns the same value for perfectly constant power', () => {
-    // NP of constant power should equal that power
+    // Weighted Power of constant power should equal that power
     const power = new Array(300).fill(250)
-    expect(normalizedPower({ power })).toBe(250)
+    expect(weightedPower({ power })).toBe(250)
   })
 })
 

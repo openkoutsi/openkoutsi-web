@@ -14,18 +14,18 @@ export function weekKey(date: Date): string {
 }
 
 /**
- * Aggregates target_tss from active plans into a Map of weekKey → total planned TSS.
- * Plans with status !== 'active' and workouts with null target_tss are skipped.
+ * Aggregates target_load from active plans into a Map of weekKey → total planned Load.
+ * Plans with status !== 'active' and workouts with null target_load are skipped.
  */
-export function aggregatePlannedTssByWeek(plans: TrainingPlan[]): Map<string, number> {
+export function aggregatePlannedLoadByWeek(plans: TrainingPlan[]): Map<string, number> {
   const map = new Map<string, number>()
   for (const plan of plans) {
     if (plan.status !== 'active') continue
     for (const workout of plan.workouts) {
-      if (workout.target_tss == null) continue
+      if (workout.target_load == null) continue
       const date = workoutDate(plan.start_date, workout.week_number, workout.day_of_week)
       const key = weekKey(date)
-      map.set(key, (map.get(key) ?? 0) + workout.target_tss)
+      map.set(key, (map.get(key) ?? 0) + workout.target_load)
     }
   }
   return map
@@ -46,7 +46,7 @@ export interface WorkoutFormValues {
   workout_type: string
   description: string
   duration_min: string
-  target_tss: string
+  target_load: string
 }
 
 /** Converts a workout edit/add form's string values into an API payload,
@@ -55,7 +55,7 @@ export function workoutFormToPayload(values: WorkoutFormValues): {
   workout_type: string
   description: string | null
   duration_min: number | null
-  target_tss: number | null
+  target_load: number | null
 } {
   const toInt = (s: string): number | null => {
     const trimmed = s.trim()
@@ -67,7 +67,7 @@ export function workoutFormToPayload(values: WorkoutFormValues): {
     workout_type: values.workout_type,
     description: values.description.trim() || null,
     duration_min: toInt(values.duration_min),
-    target_tss: toInt(values.target_tss),
+    target_load: toInt(values.target_load),
   }
 }
 

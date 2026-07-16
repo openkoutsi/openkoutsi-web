@@ -214,7 +214,7 @@
       "button": "Edit",
       "type": "Type",
       "duration": "Duration (min)",
-      "tss": "Target TSS",
+      "load": "Target load",
       "description": "Description",
       "save": "Save",
       "success": "Workout updated",
@@ -338,7 +338,7 @@
     "title": "Settings",
     "about": {
       "title": "About",
-      "desc": "openkoutsi is an open-source endurance training companion. It lets you upload and analyse workouts from FIT files or Strava, track fitness metrics like CTL, ATL and TSB over time, manage heart rate and power zones, set goals, and generate personalised training plans — all from a self-hosted instance you control.",
+      "desc": "openkoutsi is an open-source endurance training companion. It lets you upload and analyse workouts from FIT files or Strava, track fitness metrics like Fitness, Fatigue and Form over time, manage heart rate and power zones, set goals, and generate personalised training plans — all from a self-hosted instance you control.",
       "viewOnGitHub": "View on GitHub",
       "privacyPolicy": "Privacy policy"
     },

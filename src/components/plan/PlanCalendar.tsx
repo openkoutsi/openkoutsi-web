@@ -53,7 +53,7 @@ function AddWorkoutPanel({
 }) {
   const t = useTranslations('app')
   const [form, setForm] = useState<WorkoutFormValues>({
-    workout_type: 'endurance', description: '', duration_min: '', target_tss: '',
+    workout_type: 'endurance', description: '', duration_min: '', target_load: '',
   })
   const [saving, setSaving] = useState(false)
 

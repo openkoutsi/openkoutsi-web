@@ -154,12 +154,12 @@ export interface Activity {
   distance_m: number | null
   elevation_m: number | null
   avg_power: number | null
-  normalized_power: number | null
+  weighted_power: number | null
   avg_hr: number | null
   max_hr: number | null
   avg_cadence: number | null
-  tss: number | null
-  intensity_factor: number | null
+  load: number | null
+  intensity: number | null
   workout_category: string | null
   labels: string[]
   notes: string | null
@@ -180,7 +180,7 @@ export interface ManualActivityCreate {
   avg_power?: number
   avg_cadence?: number
   rpe?: number
-  tss?: number
+  load?: number
 }
 
 export interface StreamPoint {
@@ -224,18 +224,18 @@ export interface ActivityDetail extends Activity {
 
 export interface FitnessPoint {
   date: string
-  ctl: number
-  atl: number
-  tsb: number
-  daily_tss: number
+  fitness: number
+  fatigue: number
+  form: number
+  daily_load: number
 }
 
 export interface FitnessCurrent {
   date: string
-  ctl: number
-  atl: number
-  tsb: number
-  form: 'peak' | 'fresh' | 'neutral' | 'tired' | 'overreached'
+  fitness: number
+  fatigue: number
+  form: number
+  form_label: 'peak' | 'fresh' | 'neutral' | 'tired' | 'overreached'
 }
 
 export interface ActivitySummary {
@@ -274,7 +274,7 @@ export interface PlannedWorkout {
   workout_type: string
   description: string | null
   duration_min: number | null
-  target_tss: number | null
+  target_load: number | null
   completed_activity_id: string | null
   skip_reason: string | null
   workout_definition_id?: string | null
@@ -322,7 +322,7 @@ export interface WorkoutDefinition {
   sport_type: string
   steps: WorkoutStepOrRepeat[]
   estimated_duration_s: number | null
-  estimated_tss: number | null
+  estimated_load: number | null
   created_at: string
   updated_at: string
 }

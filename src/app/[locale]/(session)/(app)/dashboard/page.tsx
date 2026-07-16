@@ -10,9 +10,9 @@ import { formatHoursMinutes, formatDistance } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
-import { WeeklyTssBar } from '@/components/charts/WeeklyTssBar'
+import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
-import { aggregatePlannedTssByWeek } from '@/lib/planUtils'
+import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
 import { HelpCircle, RefreshCw } from 'lucide-react'
 import {
@@ -33,7 +33,7 @@ const PERIOD_OPTIONS = [
   { label: '5Y',  days: 1825 },
 ] as const
 
-const GLOSSARY_KEYS = ['ctl', 'atl', 'tsb', 'ftp', 'tss'] as const
+const GLOSSARY_KEYS = ['fitness', 'fatigue', 'form', 'ftp', 'load'] as const
 
 function MetricsGlossaryDialog() {
   const t = useTranslations('dashboard')
@@ -165,8 +165,8 @@ function TrainingStatusCard() {
   )
 }
 
-function FormBadge({ form }: { form: FitnessCurrent['form'] }) {
-  const colors: Record<FitnessCurrent['form'], string> = {
+function FormBadge({ form }: { form: FitnessCurrent['form_label'] }) {
+  const colors: Record<FitnessCurrent['form_label'], string> = {
     peak: 'bg-green-100 text-green-800',
     fresh: 'bg-blue-100 text-blue-800',
     neutral: 'bg-gray-100 text-gray-800',
@@ -196,7 +196,7 @@ export default function DashboardPage() {
   const { data: plansPage } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher)
   const plans = plansPage?.items
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
-  const _rawPlanned = plans ? aggregatePlannedTssByWeek(plans) : undefined
+  const _rawPlanned = plans ? aggregatePlannedLoadByWeek(plans) : undefined
   const plannedByWeek = _rawPlanned?.size ? _rawPlanned : undefined
 
   // Automatically fill missing DailyMetric rows (e.g. after a new day begins)
@@ -229,17 +229,17 @@ export default function DashboardPage() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { labelKey: 'metrics.ctl' as const, value: current?.ctl.toFixed(0) ?? '—', isForm: false },
-          { labelKey: 'metrics.atl' as const, value: current?.atl.toFixed(0) ?? '—', isForm: false },
-          { labelKey: 'metrics.tsb' as const, value: current?.tsb.toFixed(0) ?? '—', isForm: true },
+          { labelKey: 'metrics.fitness' as const, value: current?.fitness.toFixed(0) ?? '—', isForm: false },
+          { labelKey: 'metrics.fatigue' as const, value: current?.fatigue.toFixed(0) ?? '—', isForm: false },
+          { labelKey: 'metrics.form' as const, value: current?.form.toFixed(0) ?? '—', isForm: true },
           { labelKey: 'metrics.ftp' as const, value: athlete?.ftp ? `${athlete.ftp} W` : '—', isForm: false },
         ].map(({ labelKey, value, isForm }) => (
           <Card key={labelKey}>
             <CardContent className="pt-4">
               <p className="text-xs text-muted-foreground">{t(labelKey)}</p>
               <p className="text-2xl font-bold mt-1">{value}</p>
-              {isForm && current?.form && (
-                <FormBadge form={current.form} />
+              {isForm && current?.form_label && (
+                <FormBadge form={current.form_label} />
               )}
             </CardContent>
           </Card>
@@ -294,14 +294,14 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Weekly TSS */}
+      {/* Weekly Load */}
       {history && history.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('weeklyTss')}</CardTitle>
+            <CardTitle className="text-base">{t('weeklyLoad')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <WeeklyTssBar data={history} weeks={Math.min(Math.ceil(days / 7), 52)} plannedByWeek={plannedByWeek} />
+            <WeeklyLoadBar data={history} weeks={Math.min(Math.ceil(days / 7), 52)} plannedByWeek={plannedByWeek} />
           </CardContent>
         </Card>
       )}

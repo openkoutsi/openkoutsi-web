@@ -11,7 +11,7 @@ export function totalEnergyKj(streams: Record<string, number[]>): number | null 
   return Math.round(joules / 1000)
 }
 
-export function normalizedPower(streams: Record<string, number[]>): number | null {
+export function weightedPower(streams: Record<string, number[]>): number | null {
   const power = streams['power']
   if (!power || power.length < 30) return null
 

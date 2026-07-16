@@ -47,11 +47,11 @@ export function ActivityCard({ activity }: Props) {
             {activity.distance_m != null && (
               <span className="text-muted-foreground">{formatDistance(activity.distance_m)}</span>
             )}
-            {activity.normalized_power != null && (
-              <span className="font-medium">NP {formatPower(activity.normalized_power)}</span>
+            {activity.weighted_power != null && (
+              <span className="font-medium">Weighted Power {formatPower(activity.weighted_power)}</span>
             )}
-            {activity.tss != null && (
-              <span className="font-medium text-primary">{Math.round(activity.tss)} TSS</span>
+            {activity.load != null && (
+              <span className="font-medium text-primary">{Math.round(activity.load)} Load</span>
             )}
           </div>
         </CardContent>

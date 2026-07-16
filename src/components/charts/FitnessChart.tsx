@@ -42,12 +42,12 @@ export function FitnessChart({ data }: Props) {
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <ReferenceLine yAxisId="left" y={0} stroke="hsl(var(--border))" />
-        <Bar yAxisId="right" dataKey="daily_tss" name="TSS" fill="hsl(var(--muted-foreground))" radius={2} opacity={0.4} />
+        <Bar yAxisId="right" dataKey="daily_load" name="Load" fill="hsl(var(--muted-foreground))" radius={2} opacity={0.4} />
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="ctl"
-          name="CTL (fitness)"
+          dataKey="fitness"
+          name="Fitness"
           stroke="hsl(var(--primary))"
           dot={false}
           strokeWidth={2}
@@ -55,8 +55,8 @@ export function FitnessChart({ data }: Props) {
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="atl"
-          name="ATL (fatigue)"
+          dataKey="fatigue"
+          name="Fatigue"
           stroke="hsl(var(--destructive))"
           dot={false}
           strokeWidth={2}
@@ -64,8 +64,8 @@ export function FitnessChart({ data }: Props) {
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="tsb"
-          name="TSB (form)"
+          dataKey="form"
+          name="Form"
           stroke="hsl(var(--accent-foreground))"
           dot={false}
           strokeWidth={1.5}

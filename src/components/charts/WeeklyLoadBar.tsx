@@ -11,15 +11,15 @@ interface Props {
   plannedByWeek?: Map<string, number>
 }
 
-export function WeeklyTssBar({ data, weeks = 12, plannedByWeek }: Props) {
+export function WeeklyLoadBar({ data, weeks = 12, plannedByWeek }: Props) {
   const t = useTranslations('dashboard')
 
-  // Aggregate daily_tss into weekly buckets
+  // Aggregate daily_load into weekly buckets
   const now = new Date()
   const start = subWeeks(now, weeks)
   const weeks_ = eachWeekOfInterval({ start, end: now }, { weekStartsOn: 1 })
 
-  const byDate = new Map(data.map((d) => [d.date, d.daily_tss]))
+  const byDate = new Map(data.map((d) => [d.date, d.daily_load]))
 
   const weekly = weeks_.map((weekStart) => {
     let total = 0
@@ -30,7 +30,7 @@ export function WeeklyTssBar({ data, weeks = 12, plannedByWeek }: Props) {
     const wKey = format(weekStart, 'yyyy-MM-dd')
     return {
       week: format(weekStart, 'MMM d'),
-      tss: Math.round(total),
+      load: Math.round(total),
       ...(plannedByWeek ? { planned: plannedByWeek.get(wKey) ?? 0 } : {}),
     }
   })
@@ -66,9 +66,9 @@ export function WeeklyTssBar({ data, weeks = 12, plannedByWeek }: Props) {
         <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
         <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
         {plannedByWeek && <Legend wrapperStyle={{ fontSize: 11 }} />}
-        <Bar dataKey="tss" name={t('weeklyTssActual')} fill="hsl(var(--primary))" radius={3} />
+        <Bar dataKey="load" name={t('weeklyLoadActual')} fill="hsl(var(--primary))" radius={3} />
         {plannedByWeek && (
-          <Bar dataKey="planned" name={t('weeklyTssPlanned')} fill="hsl(var(--muted-foreground))" radius={3} opacity={0.5} />
+          <Bar dataKey="planned" name={t('weeklyLoadPlanned')} fill="hsl(var(--muted-foreground))" radius={3} opacity={0.5} />
         )}
       </BarChart>
     </ResponsiveContainer>
