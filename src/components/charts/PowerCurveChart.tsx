@@ -25,8 +25,17 @@ interface ChartPoint {
   duration_s: number
   power_w: number
   weight_kg: number | null
+  w_per_kg: number | null
   activity_id: string
   activity_name: string | null
+}
+
+// W/kg for a point: prefer the backend-ranked value, else divide locally.
+export function pointWkg(
+  p: { power_w: number; weight_kg: number | null; w_per_kg: number | null },
+): number | null {
+  if (p.w_per_kg != null) return p.w_per_kg
+  return p.weight_kg && p.weight_kg > 0 ? p.power_w / p.weight_kg : null
 }
 
 export function PowerCurveChart({ bests, unit = 'w' }: Props) {
@@ -45,6 +54,7 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
         duration_s: d,
         power_w: b.power_w,
         weight_kg: b.weight_kg,
+        w_per_kg: b.w_per_kg,
         activity_id: b.activity_id,
         activity_name: b.activity_name,
       }
@@ -52,7 +62,7 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
 
   // For W/kg mode, filter out points that have no weight data
   const chartData = unit === 'wkg'
-    ? data.filter((p) => p.weight_kg != null && p.weight_kg > 0)
+    ? data.filter((p) => pointWkg(p) != null)
     : data
 
   if (chartData.length === 0) {
@@ -66,7 +76,7 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
   }
 
   const yDataKey = unit === 'wkg'
-    ? (p: ChartPoint) => p.weight_kg ? +(p.power_w / p.weight_kg).toFixed(2) : null
+    ? (p: ChartPoint) => { const v = pointWkg(p); return v != null ? +v.toFixed(2) : null }
     : (p: ChartPoint) => p.power_w
 
   const yLabel = unit === 'wkg' ? 'W/kg' : 'Watts'
@@ -100,8 +110,9 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
           content={({ active, payload }) => {
             if (!active || !payload?.length) return null
             const p = payload[0].payload as ChartPoint
-            const displayVal = unit === 'wkg' && p.weight_kg
-              ? `${(p.power_w / p.weight_kg).toFixed(2)} W/kg`
+            const wkg = pointWkg(p)
+            const displayVal = unit === 'wkg' && wkg != null
+              ? `${wkg.toFixed(2)} W/kg`
               : `${Math.round(p.power_w)} W`
             return (
               <div className="rounded-md border bg-card px-3 py-2 text-sm shadow">
