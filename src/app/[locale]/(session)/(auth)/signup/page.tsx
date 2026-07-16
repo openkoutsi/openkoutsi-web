@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function SignupPage() {
   const t = useTranslations('auth')
   const { signup } = useAuth()
-  const { data: instanceInfo, isLoading } = useSWR<InstanceInfoResponse>(
+  const { data: instanceInfo, isLoading, error: infoError } = useSWR<InstanceInfoResponse>(
     '/api/public/instance-info',
     fetcher,
   )
@@ -45,13 +45,13 @@ export default function SignupPage() {
     }
   }
 
-  // Signup is only offered when the admin has enabled it and email is configured.
-  if (!isLoading && instanceInfo && !instanceInfo.allow_self_signup) {
+  // A successful submit always lands on the "check your email" state.
+  if (sent) {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">{t('signup.unavailableTitle')}</CardTitle>
-          <CardDescription>{t('signup.unavailableDesc')}</CardDescription>
+          <CardTitle className="text-2xl">{t('signup.checkEmailTitle')}</CardTitle>
+          <CardDescription>{t('signup.checkEmailDesc', { email })}</CardDescription>
         </CardHeader>
         <CardFooter>
           <Link href={`/login`} className="text-sm underline underline-offset-4 hover:text-primary">
@@ -62,12 +62,21 @@ export default function SignupPage() {
     )
   }
 
-  if (sent) {
+  // Don't render anything until we can determine availability, so the form never
+  // flashes before the gate resolves.
+  if (isLoading) {
+    return null
+  }
+
+  // Fail closed: show the form only once signup is positively confirmed enabled.
+  // An SWR error or an explicit `false` both land here (the backend enforces the
+  // real gate regardless).
+  if (infoError || !instanceInfo?.allow_self_signup) {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">{t('signup.checkEmailTitle')}</CardTitle>
-          <CardDescription>{t('signup.checkEmailDesc', { email })}</CardDescription>
+          <CardTitle className="text-2xl">{t('signup.unavailableTitle')}</CardTitle>
+          <CardDescription>{t('signup.unavailableDesc')}</CardDescription>
         </CardHeader>
         <CardFooter>
           <Link href={`/login`} className="text-sm underline underline-offset-4 hover:text-primary">

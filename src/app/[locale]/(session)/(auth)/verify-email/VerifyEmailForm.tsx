@@ -23,16 +23,18 @@ export function VerifyEmailForm() {
   useEffect(() => {
     if (!token || started.current) return
     started.current = true
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined
     verifyEmail(token)
       .then(() => {
         setStatus('success')
         // The account is now activated and logged in; continue to onboarding.
-        setTimeout(() => router.replace(`/onboarding?step=0`), 1200)
+        redirectTimer = setTimeout(() => router.replace(`/onboarding?step=0`), 1200)
       })
       .catch((err) => {
         setStatus('error')
         setError(err instanceof Error ? err.message : t('verifyEmail.failed'))
       })
+    return () => clearTimeout(redirectTimer)
   }, [token, verifyEmail, router, t])
 
   const title =

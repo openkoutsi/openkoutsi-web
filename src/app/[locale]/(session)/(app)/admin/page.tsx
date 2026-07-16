@@ -10,6 +10,7 @@ import type {
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
+  InstanceSettingsPatch,
   LlmUsageSummaryResponse,
   Page,
 } from '@/lib/types'
@@ -162,7 +163,7 @@ function UsersTab() {
         <tbody>
           {users.map((u) => (
             <tr key={u.id} className="border-b last:border-0">
-              <td className="py-3 pr-4 font-mono">{u.email ?? u.username}</td>
+              <td className="py-3 pr-4 font-mono">{u.email ?? u.username ?? u.id}</td>
               <td className="py-3 pr-4">
                 {editingId === u.id ? (
                   <div className="flex flex-wrap gap-1">
@@ -745,15 +746,17 @@ function SettingsTab() {
           body: rowsToBody(m.body),
           structured_outputs: m.structuredOutputs,
         }))
+      // Typed so a future backend patch-schema rename is caught at compile time.
+      const payload: InstanceSettingsPatch = {
+        llm_analysis_context: analysisContext || null,
+        admin_contact: adminContact || null,
+        allow_self_signup: allowSelfSignup,
+        llm_models: models,
+        llm_requires_subscription: requiresSubscription,
+      }
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
-        body: JSON.stringify({
-          llm_analysis_context: analysisContext || null,
-          admin_contact: adminContact || null,
-          allow_self_signup: allowSelfSignup,
-          llm_models: models,
-          llm_requires_subscription: requiresSubscription,
-        }),
+        body: JSON.stringify(payload),
       })
       setTestResult(null)
       mutate()
