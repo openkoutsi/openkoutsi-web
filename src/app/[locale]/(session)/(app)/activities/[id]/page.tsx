@@ -216,7 +216,7 @@ export default function ActivityDetailPage({ params }: Props) {
 
   async function handleAnalyze() {
     const fatigue: FatigueContext | undefined = fitnessCurrent
-      ? { ctl: fitnessCurrent.ctl, atl: fitnessCurrent.atl, tsb: fitnessCurrent.tsb, form: fitnessCurrent.form }
+      ? { fitness: fitnessCurrent.fitness, fatigue: fitnessCurrent.fatigue, form: fitnessCurrent.form, form_label: fitnessCurrent.form_label }
       : undefined
 
     setShowLlmUpsell(false)
@@ -311,9 +311,9 @@ export default function ActivityDetailPage({ params }: Props) {
     { label: t('detail.stats.duration'), value: formatDuration(activity.duration_s) },
     { label: t('detail.stats.distance'), value: activity.distance_m != null ? formatDistance(activity.distance_m) : '—' },
     { label: t('detail.stats.avgPower'), value: formatPower(activity.avg_power) },
-    { label: t('detail.stats.np'), value: formatPower(activity.normalized_power) },
-    { label: t('detail.stats.if'), value: activity.intensity_factor != null ? activity.intensity_factor.toFixed(2) : '—' },
-    { label: t('detail.stats.tss'), value: activity.tss != null ? Math.round(activity.tss).toString() : '—' },
+    { label: t('detail.stats.weightedPower'), value: formatPower(activity.weighted_power) },
+    { label: t('detail.stats.intensity'), value: activity.intensity != null ? activity.intensity.toFixed(2) : '—' },
+    { label: t('detail.stats.load'), value: activity.load != null ? Math.round(activity.load).toString() : '—' },
     { label: t('detail.stats.avgHr'), value: formatHR(activity.avg_hr) },
     { label: t('detail.stats.maxHr'), value: formatHR(activity.max_hr) },
     { label: t('detail.stats.elevation'), value: activity.elevation_m != null ? `${Math.round(activity.elevation_m)} m` : '—' },

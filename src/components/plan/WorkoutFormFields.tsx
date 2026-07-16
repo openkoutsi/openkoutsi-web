@@ -52,13 +52,13 @@ export function WorkoutFormFields({ values, onChange }: Props) {
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">{t('plan.editWorkout.tss')}</Label>
+          <Label className="text-xs">{t('plan.editWorkout.load')}</Label>
           <Input
             type="number"
             min="0"
             className="h-8 text-xs"
-            value={values.target_tss}
-            onChange={(e) => onChange({ target_tss: e.target.value })}
+            value={values.target_load}
+            onChange={(e) => onChange({ target_load: e.target.value })}
           />
         </div>
       </div>

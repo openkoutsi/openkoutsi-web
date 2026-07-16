@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from '@/components/ui/use-toast'
-import { totalEnergyKj, normalizedPower, rollingAverage } from '@/lib/streamAnalytics'
+import { totalEnergyKj, weightedPower, rollingAverage } from '@/lib/streamAnalytics'
 import {
   CustomFunction,
   executeCustomFunction,
@@ -48,7 +48,7 @@ export function SignalProcessingPanel({
   const [editingFn, setEditingFn] = useState<CustomFunction | undefined>()
 
   const energy = useMemo(() => totalEnergyKj(streams), [streams])
-  const np = useMemo(() => normalizedPower(streams), [streams])
+  const np = useMemo(() => weightedPower(streams), [streams])
 
   const customFunctions = getCustomFunctions(effectiveAthlete?.app_settings)
 
@@ -171,7 +171,7 @@ export function SignalProcessingPanel({
               )}
               {np !== null && (
                 <div className="rounded-md border px-3 py-2">
-                  <p className="text-xs text-muted-foreground">{t('detail.signals.normalizedPower')}</p>
+                  <p className="text-xs text-muted-foreground">{t('detail.signals.weightedPower')}</p>
                   <p className="font-semibold mt-0.5">{np} W</p>
                 </div>
               )}

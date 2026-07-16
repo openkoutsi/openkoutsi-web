@@ -111,10 +111,10 @@ async function _proxyFetch(
 // ── Activity analysis ─────────────────────────────────────────────────────
 
 export interface FatigueContext {
-  ctl: number
-  atl: number
-  tsb: number
-  form: string
+  fitness: number
+  fatigue: number
+  form: number
+  form_label: string
 }
 
 const ANALYSIS_SYSTEM_PROMPT_BASE =
@@ -209,12 +209,12 @@ function buildAnalysisPrompt(
     lines.push(`  Elevation gain: ${Math.round(activity.elevation_m)} m`)
   if (activity.avg_power != null)
     lines.push(`  Average power: ${Math.round(activity.avg_power)} W`)
-  if (activity.normalized_power != null)
-    lines.push(`  Normalized power: ${Math.round(activity.normalized_power)} W`)
-  if (activity.intensity_factor != null)
-    lines.push(`  Intensity factor: ${activity.intensity_factor.toFixed(3)}`)
-  if (activity.tss != null)
-    lines.push(`  Training stress score (TSS): ${activity.tss.toFixed(1)}`)
+  if (activity.weighted_power != null)
+    lines.push(`  Weighted power: ${Math.round(activity.weighted_power)} W`)
+  if (activity.intensity != null)
+    lines.push(`  Intensity: ${activity.intensity.toFixed(3)}`)
+  if (activity.load != null)
+    lines.push(`  Training load (Load): ${activity.load.toFixed(1)}`)
   if (activity.avg_hr != null)
     lines.push(`  Average heart rate: ${Math.round(activity.avg_hr)} bpm`)
   if (activity.max_hr != null)
@@ -224,9 +224,9 @@ function buildAnalysisPrompt(
 
   if (fatigue) {
     lines.push('', 'Athlete fatigue state prior to this workout:')
-    lines.push(`  Fitness (CTL): ${fatigue.ctl.toFixed(1)}`)
-    lines.push(`  Fatigue (ATL): ${fatigue.atl.toFixed(1)}`)
-    lines.push(`  Form (TSB): ${fatigue.tsb.toFixed(1)} (${fatigue.form})`)
+    lines.push(`  Fitness: ${fatigue.fitness.toFixed(1)}`)
+    lines.push(`  Fatigue: ${fatigue.fatigue.toFixed(1)}`)
+    lines.push(`  Form: ${fatigue.form.toFixed(1)} (${fatigue.form_label})`)
   }
 
   const prLines: string[] = []
@@ -319,7 +319,7 @@ export interface WorkoutDay {
   workout_type: string
   description: string | null
   duration_min: number | null
-  target_tss: number | null
+  target_load: number | null
 }
 
 export interface PlanGenerationConfig {
@@ -346,14 +346,14 @@ const PLAN_SCHEMA_EXAMPLE = `{
           "workout_type": "rest",
           "description": null,
           "duration_min": null,
-          "target_tss": null
+          "target_load": null
         },
         {
           "day_of_week": 2,
           "workout_type": "threshold",
           "description": "2x20 min at threshold power",
           "duration_min": 60,
-          "target_tss": 80
+          "target_load": 80
         }
       ]
     }
@@ -364,9 +364,9 @@ Rules:
 - day_of_week: integer 1 (Monday) to 7 (Sunday)
 - workout_type: one of "easy", "tempo", "threshold", "vo2max", "endurance", "long", "strength", "yoga", "cross-training", "rest"
 - Every week must have exactly 7 workouts, one per day_of_week (1-7)
-- Days not scheduled as training should be "rest" with null duration and tss
-- TSS and duration_min must be null for rest days, integers otherwise
-- Scale TSS and duration progressively across weeks (base building, recovery every 4th week, taper at end)`
+- Days not scheduled as training should be "rest" with null duration and load
+- Load and duration_min must be null for rest days, integers otherwise
+- Scale Load and duration progressively across weeks (base building, recovery every 4th week, taper at end)`
 
 const DAY_NAMES: Record<number, string> = {
   1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday',
@@ -427,7 +427,7 @@ function parsePlanResponse(raw: string, numWeeks: number): WorkoutDay[][] {
         workout_type: String(w.workout_type ?? 'rest'),
         description: (w.description as string | null | undefined) ?? null,
         duration_min: w.duration_min != null ? Number(w.duration_min) : null,
-        target_tss: w.target_tss != null ? Number(w.target_tss) : null,
+        target_load: w.target_load != null ? Number(w.target_load) : null,
       }))
   })
 }

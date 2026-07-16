@@ -191,7 +191,7 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
           )}
           {(filters.min_tss || filters.max_tss) && (
             <FilterPill
-              label={`TSS: ${filters.min_tss || '0'}–${filters.max_tss || '∞'}`}
+              label={`Load: ${filters.min_tss || '0'}–${filters.max_tss || '∞'}`}
               onRemove={() => onChange({ ...filters, min_tss: '', max_tss: '' })}
             />
           )}
@@ -328,9 +328,9 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
               />
             </div>
 
-            {/* TSS */}
+            {/* Load */}
             <div className="space-y-1.5">
-              <Label>{t('search.tssMin')}</Label>
+              <Label>{t('search.loadMin')}</Label>
               <Input
                 type="number"
                 min={0}
@@ -340,7 +340,7 @@ export function ActivitySearchFilter({ filters, onChange }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>{t('search.tssMax')}</Label>
+              <Label>{t('search.loadMax')}</Label>
               <Input
                 type="number"
                 min={0}

@@ -55,7 +55,7 @@ export function ManualActivityForm({ onCreated }: { onCreated: () => void }) {
   const [avgCadence, setAvgCadence] = useState('')
   const [elevation, setElevation] = useState('')
   const [rpe, setRpe] = useState('')
-  const [tss, setTss] = useState('')
+  const [load, setLoad] = useState('')
   const [name, setName] = useState('')
 
   function reset() {
@@ -69,7 +69,7 @@ export function ManualActivityForm({ onCreated }: { onCreated: () => void }) {
     setAvgCadence('')
     setElevation('')
     setRpe('')
-    setTss('')
+    setLoad('')
     setName('')
   }
 
@@ -89,7 +89,7 @@ export function ManualActivityForm({ onCreated }: { onCreated: () => void }) {
       avg_power: num(avgPower),
       avg_cadence: num(avgCadence),
       rpe: num(rpe),
-      tss: num(tss),
+      load: num(load),
       name: name.trim() || undefined,
     }
 
@@ -186,8 +186,8 @@ export function ManualActivityForm({ onCreated }: { onCreated: () => void }) {
               <Input id="ma-rpe" type="number" min="1" max="10" step="1" value={rpe} onChange={(e) => setRpe(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ma-tss">{t('manualEntry.tss')}</Label>
-              <Input id="ma-tss" type="number" min="0" step="any" value={tss} onChange={(e) => setTss(e.target.value)} />
+              <Label htmlFor="ma-load">{t('manualEntry.load')}</Label>
+              <Input id="ma-load" type="number" min="0" step="any" value={load} onChange={(e) => setLoad(e.target.value)} />
             </div>
           </div>
           <div className="space-y-2">

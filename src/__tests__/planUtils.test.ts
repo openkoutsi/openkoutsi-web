@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   workoutDate,
   weekKey,
-  aggregatePlannedTssByWeek,
+  aggregatePlannedLoadByWeek,
   groupPlannedWorkoutsByDate,
   plannedWorkoutStatus,
   workoutFormToPayload,
@@ -16,13 +16,13 @@ describe('workoutFormToPayload', () => {
         workout_type: 'threshold',
         description: '4x8min',
         duration_min: '75',
-        target_tss: '90',
+        target_load: '90',
       }),
     ).toEqual({
       workout_type: 'threshold',
       description: '4x8min',
       duration_min: 75,
-      target_tss: 90,
+      target_load: 90,
     })
   })
 
@@ -32,25 +32,25 @@ describe('workoutFormToPayload', () => {
         workout_type: 'recovery',
         description: '   ',
         duration_min: '',
-        target_tss: '  ',
+        target_load: '  ',
       }),
     ).toEqual({
       workout_type: 'recovery',
       description: null,
       duration_min: null,
-      target_tss: null,
+      target_load: null,
     })
   })
 
-  it('treats non-numeric duration/tss as null', () => {
+  it('treats non-numeric duration/load as null', () => {
     const payload = workoutFormToPayload({
       workout_type: 'long',
       description: 'ride',
       duration_min: 'abc',
-      target_tss: '',
+      target_load: '',
     })
     expect(payload.duration_min).toBeNull()
-    expect(payload.target_tss).toBeNull()
+    expect(payload.target_load).toBeNull()
   })
 })
 
@@ -63,7 +63,7 @@ function makeWorkout(overrides: Partial<PlannedWorkout> = {}): PlannedWorkout {
     workout_type: 'endurance',
     description: null,
     duration_min: 60,
-    target_tss: 50,
+    target_load: 50,
     completed_activity_id: null,
     skip_reason: null,
     ...overrides,
@@ -136,54 +136,54 @@ describe('weekKey', () => {
   })
 })
 
-describe('aggregatePlannedTssByWeek', () => {
+describe('aggregatePlannedLoadByWeek', () => {
   it('returns empty Map for empty plans array', () => {
-    expect(aggregatePlannedTssByWeek([]).size).toBe(0)
+    expect(aggregatePlannedLoadByWeek([]).size).toBe(0)
   })
 
   it('skips plans with status !== "active"', () => {
     const plan = makePlan({
       status: 'draft',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 50, completed_activity_id: null }],
+      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
     })
-    expect(aggregatePlannedTssByWeek([plan]).size).toBe(0)
+    expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
   })
 
-  it('skips workouts with null target_tss', () => {
+  it('skips workouts with null target_load', () => {
     const plan = makePlan({
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: null, completed_activity_id: null }],
+      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: null, completed_activity_id: null }],
     })
-    expect(aggregatePlannedTssByWeek([plan]).size).toBe(0)
+    expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
   })
 
   it('maps a single workout to the correct week key', () => {
     // Plan starts 2025-01-06 (Monday). Week 1 day 1 → 2025-01-06 → weekKey '2025-01-06'
     const plan = makePlan({
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 80, completed_activity_id: null }],
+      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 80, completed_activity_id: null }],
     })
-    const map = aggregatePlannedTssByWeek([plan])
+    const map = aggregatePlannedLoadByWeek([plan])
     expect(map.get('2025-01-06')).toBe(80)
   })
 
   it('sums two workouts in the same week', () => {
     const plan = makePlan({
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 60, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_tss: 100, completed_activity_id: null },
+        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 60, completed_activity_id: null },
+        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_load: 100, completed_activity_id: null },
       ],
     })
-    const map = aggregatePlannedTssByWeek([plan])
+    const map = aggregatePlannedLoadByWeek([plan])
     expect(map.get('2025-01-06')).toBe(160)
   })
 
   it('puts workouts in different weeks into separate keys', () => {
     const plan = makePlan({
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 60, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_tss: 100, completed_activity_id: null },
+        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 60, completed_activity_id: null },
+        { id: 'w2', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_load: 100, completed_activity_id: null },
       ],
     })
-    const map = aggregatePlannedTssByWeek([plan])
+    const map = aggregatePlannedLoadByWeek([plan])
     expect(map.get('2025-01-06')).toBe(60)
     expect(map.get('2025-01-13')).toBe(100)
     expect(map.size).toBe(2)
@@ -192,14 +192,14 @@ describe('aggregatePlannedTssByWeek', () => {
   it('sums workouts from two active plans falling in the same week', () => {
     const plan1 = makePlan({
       id: 'p1',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'easy', description: null, duration_min: 60, target_tss: 50, completed_activity_id: null }],
+      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
     })
     const plan2 = makePlan({
       id: 'p2',
       start_date: '2025-01-06',
-      workouts: [{ id: 'w2', plan_id: 'p2', week_number: 1, day_of_week: 4, workout_type: 'long', description: null, duration_min: 120, target_tss: 70, completed_activity_id: null }],
+      workouts: [{ id: 'w2', plan_id: 'p2', week_number: 1, day_of_week: 4, workout_type: 'long', description: null, duration_min: 120, target_load: 70, completed_activity_id: null }],
     })
-    const map = aggregatePlannedTssByWeek([plan1, plan2])
+    const map = aggregatePlannedLoadByWeek([plan1, plan2])
     expect(map.get('2025-01-06')).toBe(120) // 50 + 70
   })
 })
@@ -212,7 +212,7 @@ describe('groupPlannedWorkoutsByDate', () => {
   it('returns empty map when plan is not active', () => {
     const plan = makePlan({
       status: 'archived',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 50, completed_activity_id: null }],
+      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
     })
     expect(groupPlannedWorkoutsByDate(plan).size).toBe(0)
   })
@@ -221,9 +221,9 @@ describe('groupPlannedWorkoutsByDate', () => {
     const plan = makePlan({
       start_date: '2025-01-06',
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_tss: 50, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'endurance', description: null, duration_min: 90, target_tss: 80, completed_activity_id: null },
-        { id: 'w3', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'tempo', description: null, duration_min: 45, target_tss: 40, completed_activity_id: null },
+        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null },
+        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'endurance', description: null, duration_min: 90, target_load: 80, completed_activity_id: null },
+        { id: 'w3', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'tempo', description: null, duration_min: 45, target_load: 40, completed_activity_id: null },
       ],
     })
 
@@ -237,8 +237,8 @@ describe('groupPlannedWorkoutsByDate', () => {
     const plan = makePlan({
       start_date: '2025-01-06',
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'rest', description: null, duration_min: null, target_tss: null, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'endurance', description: null, duration_min: 90, target_tss: 80, completed_activity_id: null },
+        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'rest', description: null, duration_min: null, target_load: null, completed_activity_id: null },
+        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'endurance', description: null, duration_min: 90, target_load: 80, completed_activity_id: null },
       ],
     })
 

@@ -85,8 +85,8 @@ export function WorkoutCard({ workout, compact = false, onUnlink, onClearSkip }:
         {typeLabel}
         {workout.skip_reason != null
           ? ` · ${t('plan.skipped')}`
-          : workout.target_tss != null
-            ? ` · ${workout.target_tss} TSS`
+          : workout.target_load != null
+            ? ` · ${workout.target_load} Load`
             : null}
       </div>
     )
@@ -100,9 +100,9 @@ export function WorkoutCard({ workout, compact = false, onUnlink, onClearSkip }:
           {workout.duration_min != null && (
             <span className="text-xs opacity-75">{workout.duration_min} min</span>
           )}
-          {workout.target_tss != null && (
+          {workout.target_load != null && (
             <Badge variant="outline" className="text-xs h-5">
-              {workout.target_tss} TSS
+              {workout.target_load} Load
             </Badge>
           )}
           {workout.completed_activity_id != null && (
