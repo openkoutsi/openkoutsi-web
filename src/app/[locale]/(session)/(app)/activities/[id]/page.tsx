@@ -304,6 +304,7 @@ export default function ActivityDetailPage({ params }: Props) {
       activity_name: null,
       activity_start_time: null,
       weight_kg: athlete?.weight_kg ?? null,
+      w_per_kg: null,
     }))
 
   const stats = [

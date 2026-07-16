@@ -34,7 +34,10 @@ function PowerMedalCell({ entry, rank, unit }: { entry: PowerBestEntry | undefin
   if (!entry) {
     return <td className={`px-3 py-2 text-center text-muted-foreground text-sm ${hiddenClass}`}>—</td>
   }
-  const wkg = unit === 'wkg' && entry.weight_kg ? entry.power_w / entry.weight_kg : null
+  // Backend provides w_per_kg for the wkg ranking; fall back to a local divide.
+  const wkg = unit === 'wkg'
+    ? entry.w_per_kg ?? (entry.weight_kg ? entry.power_w / entry.weight_kg : null)
+    : null
   return (
     <td className={`px-3 py-2 text-center text-sm ${hiddenClass}`}>
       <Link
@@ -184,7 +187,12 @@ export default function PowerPage() {
   const [unit, setUnit] = useState<'w' | 'wkg'>('w')
   const [rangeDays, setRangeDays] = useState<number | null>(null)
 
-  const swrKey = rangeDays != null ? `/api/metrics/bests/power?days=${rangeDays}` : '/api/metrics/bests/power'
+  // Rank by W/kg (effective weight at the time of each effort) or by watts.
+  const params = new URLSearchParams()
+  if (rangeDays != null) params.set('days', String(rangeDays))
+  if (unit === 'wkg') params.set('metric', 'wkg')
+  const qs = params.toString()
+  const swrKey = qs ? `/api/metrics/bests/power?${qs}` : '/api/metrics/bests/power'
   const { data: powerData, isLoading: powerLoading } = useSWR<AllTimePowerBests>(swrKey, fetcher)
 
   // Power lookup: duration_s → { rank → entry }
