@@ -36,6 +36,9 @@ interface AuthState {
   isAdmin: boolean
   login: (username: string, password: string) => Promise<void>
   register: (username: string, password: string, inviteToken: string) => Promise<void>
+  signup: (email: string, password: string) => Promise<void>
+  verifyEmail: (token: string) => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
   logout: () => void
   refreshAthlete: () => Promise<void>
 }
@@ -127,6 +130,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [fetchAthlete],
   )
 
+  // Self-serve signup (issue #15). Creates a *pending* account and triggers a
+  // verification email; the account is not logged in until the email is verified.
+  const signup = useCallback(async (email: string, password: string) => {
+    await apiFetch(
+      '/api/auth/signup',
+      { method: 'POST', body: JSON.stringify({ email, password }) },
+      false,
+    )
+  }, [])
+
+  // Consume an email-verification token, which activates the account and logs in.
+  const verifyEmail = useCallback(
+    async (token: string) => {
+      const data = await apiFetch<TokenPair>(
+        '/api/auth/verify-email',
+        { method: 'POST', body: JSON.stringify({ token }) },
+        false,
+      )
+      setAccessToken(data.access_token)
+      setRoles(parseJwtRoles(data.access_token))
+      setSessionCookie()
+      await fetchAthlete()
+    },
+    [fetchAthlete],
+  )
+
+  // Request a password-reset email. Always resolves (no account enumeration).
+  const requestPasswordReset = useCallback(async (email: string) => {
+    await apiFetch(
+      '/api/auth/request-password-reset',
+      { method: 'POST', body: JSON.stringify({ email }) },
+      false,
+    )
+  }, [])
+
   const logout = useCallback(() => {
     clearTokens()
     clearSessionCookie()
@@ -143,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ athlete, loading, roles, isAdmin, login, register, logout, refreshAthlete }}
+      value={{ athlete, loading, roles, isAdmin, login, register, signup, verifyEmail, requestPasswordReset, logout, refreshAthlete }}
     >
       {children}
     </AuthContext.Provider>

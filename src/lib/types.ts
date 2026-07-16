@@ -25,7 +25,9 @@ export interface LlmEntitlementSummary {
 
 export interface UserResponse {
   id: string
-  username: string
+  // Null for self-serve signup accounts, which are keyed by email.
+  username: string | null
+  email?: string | null
   roles: string[]
   created_at: string
   consented_at?: string | null
@@ -65,6 +67,16 @@ export interface InstanceSettingsResponse {
   llm_models: LlmModelConfig[]
   // Issue #9 opt-in gate: require an LLM-access entitlement (or BYOK).
   llm_requires_subscription: boolean
+  // Issue #15: allow self-serve email signup (also needs a configured provider).
+  allow_self_signup: boolean
+}
+
+export interface InstanceSettingsPatch {
+  llm_analysis_context?: string | null
+  admin_contact?: string | null
+  llm_models?: LlmModelConfig[]
+  llm_requires_subscription?: boolean
+  allow_self_signup?: boolean
 }
 
 // One aggregation row of the admin LLM-usage summary (issue #9).
@@ -87,6 +99,10 @@ export interface LlmUsageSummaryResponse {
 export interface InstanceInfoResponse {
   admin_contact: string | null
   privacy_policy_url: string
+  // Issue #15: whether an email provider is configured (gates the self-serve
+  // reset form) and whether self-serve signup is currently offered.
+  email_enabled: boolean
+  allow_self_signup: boolean
 }
 
 export interface User {

@@ -8,6 +8,7 @@
   },
   "users": {
     "username": "Username",
+    "account": "Account",
     "roles": "Roles",
     "registeredAt": "Registered",
     "consent": "Consent",
@@ -126,6 +127,8 @@
     "adminContact": "Admin contact",
     "adminContactDesc": "Shown to users on the password-reset screen. Leave blank to hide it.",
     "adminContactPlaceholder": "e.g. admin@example.com",
+    "allowSelfSignup": "Allow self-serve signup",
+    "allowSelfSignupDesc": "When on, anyone can register with their email address and verify it. Requires a configured email provider; invitations always work regardless.",
     "defaultBadge": "Default",
     "requiresSubscription": "Require subscription for instance LLM",
     "requiresSubscriptionDesc": "When on, only users with AI access (or their own AI model via BYOK) can use this instance’s AI features.",

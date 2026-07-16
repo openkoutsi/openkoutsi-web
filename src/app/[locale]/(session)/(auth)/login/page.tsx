@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import useSWR from 'swr'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/navigation'
 import { useAuth } from '@/lib/auth'
+import { fetcher } from '@/lib/api'
+import type { InstanceInfoResponse } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +18,7 @@ export default function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: instanceInfo } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -87,6 +91,17 @@ export default function LoginPage() {
               {t('login.forgotPassword')}
             </Link>
           </p>
+          {instanceInfo?.allow_self_signup && (
+            <p className="text-sm text-muted-foreground text-center">
+              {t('login.noAccount')}{' '}
+              <Link
+                href={`/signup`}
+                className="underline underline-offset-4 hover:text-primary"
+              >
+                {t('login.signUp')}
+              </Link>
+            </p>
+          )}
         </CardFooter>
       </form>
     </Card>

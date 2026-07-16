@@ -10,6 +10,7 @@ import type {
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
+  InstanceSettingsPatch,
   LlmUsageSummaryResponse,
   Page,
 } from '@/lib/types'
@@ -151,7 +152,7 @@ function UsersTab() {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left text-muted-foreground">
-            <th className="pb-2 pr-4 font-medium">{t('users.username')}</th>
+            <th className="pb-2 pr-4 font-medium">{t('users.account')}</th>
             <th className="pb-2 pr-4 font-medium">{t('users.roles')}</th>
             <th className="pb-2 pr-4 font-medium">{t('users.llmAccess')}</th>
             <th className="hidden sm:table-cell pb-2 pr-4 font-medium">{t('users.registeredAt')}</th>
@@ -162,7 +163,7 @@ function UsersTab() {
         <tbody>
           {users.map((u) => (
             <tr key={u.id} className="border-b last:border-0">
-              <td className="py-3 pr-4 font-mono">{u.username}</td>
+              <td className="py-3 pr-4 font-mono">{u.email ?? u.username ?? u.id}</td>
               <td className="py-3 pr-4">
                 {editingId === u.id ? (
                   <div className="flex flex-wrap gap-1">
@@ -249,7 +250,7 @@ function UsersTab() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>{t('users.removeConfirmTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              {t('users.removeConfirmDesc', { username: u.username })}
+                              {t('users.removeConfirmDesc', { username: u.email ?? u.username ?? u.id })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -697,6 +698,7 @@ function SettingsTab() {
   )
   const [analysisContext, setAnalysisContext] = useState('')
   const [adminContact, setAdminContact] = useState('')
+  const [allowSelfSignup, setAllowSelfSignup] = useState(false)
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -708,6 +710,7 @@ function SettingsTab() {
     if (settings) {
       setAnalysisContext(settings.llm_analysis_context ?? '')
       setAdminContact(settings.admin_contact ?? '')
+      setAllowSelfSignup(Boolean(settings.allow_self_signup))
       setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
@@ -743,14 +746,17 @@ function SettingsTab() {
           body: rowsToBody(m.body),
           structured_outputs: m.structuredOutputs,
         }))
+      // Typed so a future backend patch-schema rename is caught at compile time.
+      const payload: InstanceSettingsPatch = {
+        llm_analysis_context: analysisContext || null,
+        admin_contact: adminContact || null,
+        allow_self_signup: allowSelfSignup,
+        llm_models: models,
+        llm_requires_subscription: requiresSubscription,
+      }
       await apiFetch('/api/admin/settings', {
         method: 'PATCH',
-        body: JSON.stringify({
-          llm_analysis_context: analysisContext || null,
-          admin_contact: adminContact || null,
-          llm_models: models,
-          llm_requires_subscription: requiresSubscription,
-        }),
+        body: JSON.stringify(payload),
       })
       setTestResult(null)
       mutate()
@@ -793,7 +799,7 @@ function SettingsTab() {
           <CardTitle className="text-base">{t('settings.instanceTitle')}</CardTitle>
           <CardDescription>{t('settings.instanceDesc')}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="admin-contact">{t('settings.adminContact')}</Label>
             <p className="text-xs text-muted-foreground">{t('settings.adminContactDesc')}</p>
@@ -803,6 +809,17 @@ function SettingsTab() {
               placeholder={t('settings.adminContactPlaceholder')}
               value={adminContact}
               onChange={(e) => setAdminContact(e.target.value)}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
+            <div className="space-y-1">
+              <Label htmlFor="allow-self-signup">{t('settings.allowSelfSignup')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.allowSelfSignupDesc')}</p>
+            </div>
+            <Switch
+              id="allow-self-signup"
+              checked={allowSelfSignup}
+              onCheckedChange={setAllowSelfSignup}
             />
           </div>
         </CardContent>
