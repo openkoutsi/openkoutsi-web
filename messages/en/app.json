@@ -32,7 +32,7 @@
       "neuromuscular": "Neuromuscular Power (5s)",
       "anaerobic": "Anaerobic Capacity (1min)",
       "map": "Maximal Aerobic Power (5min)",
-      "ftp": "FTP (Critical Power)",
+      "ftp": "FTP (20 min)",
       "paramsHeading": "Model parameters",
       "fit": "fit ±{rmse} W",
       "noData": "Not enough power data to fit models yet.",
