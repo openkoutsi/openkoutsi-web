@@ -8,9 +8,12 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  Legend,
 } from 'recharts'
-import type { PowerBestEntry } from '@/lib/types'
+import { useTranslations } from 'next-intl'
+import type { PowerBestEntry, PowerModelFit } from '@/lib/types'
 import { DURATIONS, formatDuration, scaledX, buildXTicks } from './powerCurveScale'
+import { MODEL_COLORS, modelCurvePoints } from './powerModels'
 
 // Re-exported for existing consumers that import it from this module.
 export { formatDuration }
@@ -18,6 +21,13 @@ export { formatDuration }
 interface Props {
   bests: PowerBestEntry[]
   unit?: 'w' | 'wkg'
+  // Fitted models to overlay (watts only). `visibleModels` selects which of the
+  // available models are drawn. Model curves are omitted in W/kg mode.
+  models?: PowerModelFit[]
+  visibleModels?: Set<string>
+  // Localized display name per model key, for the legend.
+  modelLabels?: Record<string, string>
+  actualLabel?: string
 }
 
 interface ChartPoint {
@@ -38,7 +48,15 @@ export function pointWkg(
   return p.weight_kg && p.weight_kg > 0 ? p.power_w / p.weight_kg : null
 }
 
-export function PowerCurveChart({ bests, unit = 'w' }: Props) {
+export function PowerCurveChart({
+  bests,
+  unit = 'w',
+  models = [],
+  visibleModels,
+  modelLabels = {},
+  actualLabel,
+}: Props) {
+  const t = useTranslations('app')
   // Only rank-1 bests, one per duration
   const rank1 = new Map<number, PowerBestEntry>()
   for (const b of bests) {
@@ -68,12 +86,16 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
   if (chartData.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-        {data.length === 0
-          ? 'No power data yet. Upload a workout with power to see your curve.'
-          : 'No weight data for this period. Set your weight in Profile to see W/kg.'}
+        {data.length === 0 ? t('power.noData') : t('power.noWeightPeriod')}
       </div>
     )
   }
+
+  // Model overlays are watts-based, so only draw them in watts mode.
+  const overlayModels = unit === 'w'
+    ? models.filter((m) => m.available && (visibleModels?.has(m.model) ?? false))
+    : []
+  const showLegend = overlayModels.length > 0
 
   const yDataKey = unit === 'wkg'
     ? (p: ChartPoint) => { const v = pointWkg(p); return v != null ? +v.toFixed(2) : null }
@@ -127,9 +149,27 @@ export function PowerCurveChart({ bests, unit = 'w' }: Props) {
             )
           }}
         />
+        {showLegend && <Legend wrapperStyle={{ fontSize: 12 }} />}
+        {/* Modeled curves (dashed), one Recharts Line per selected model. */}
+        {overlayModels.map((m) => (
+          <Line
+            key={m.model}
+            type="monotone"
+            data={modelCurvePoints(m)}
+            dataKey="power_w"
+            name={modelLabels[m.model] ?? m.model}
+            stroke={MODEL_COLORS[m.model] ?? 'hsl(var(--muted-foreground))'}
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            activeDot={false}
+            isAnimationActive={false}
+          />
+        ))}
         <Line
           type="monotone"
           dataKey={yDataKey}
+          name={actualLabel ?? t('power.models.actual')}
           stroke="hsl(var(--primary))"
           strokeWidth={2}
           dot={{ r: 3, fill: 'hsl(var(--primary))' }}

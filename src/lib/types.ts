@@ -386,6 +386,34 @@ export interface FtpEstimate {
   cp_available: boolean
 }
 
+export interface PowerModelPoint {
+  duration_s: number
+  power_w: number
+}
+
+// One fitted power–duration model. `model` is a stable key
+// ('cp2' | 'cp3' | 'exp' | 'power_law'); parameter fields are populated only
+// for the models that define them.
+export interface PowerModelFit {
+  model: string
+  available: boolean
+  cp: number | null
+  w_prime: number | null
+  k: number | null
+  pmax: number | null
+  tau: number | null
+  a: number | null
+  b: number | null
+  rmse: number | null
+  curve: PowerModelPoint[]
+  predictions: PowerModelPoint[]
+}
+
+export interface PowerModels {
+  models: PowerModelFit[]
+  days: number | null
+}
+
 export interface DistanceBestEntry {
   distance_m: number
   rank: number
