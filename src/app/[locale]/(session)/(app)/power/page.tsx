@@ -414,6 +414,11 @@ export default function PowerPage() {
               <span className="text-xs font-medium text-muted-foreground mr-1">
                 {t('power.models.heading')}
               </span>
+              {/* Static legend entry for the real curve (not toggleable). */}
+              <span className="flex items-center gap-1.5 text-sm py-1 pr-1">
+                <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0 bg-primary" />
+                {t('power.models.actual')}
+              </span>
               {MODEL_KEYS.filter((k) => availableModels.some((m) => m.model === k)).map((k) => (
                 <div key={k} className="flex items-center gap-2">
                   <Checkbox

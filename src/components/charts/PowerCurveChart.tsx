@@ -8,12 +8,11 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from 'recharts'
 import { useTranslations } from 'next-intl'
 import type { PowerBestEntry, PowerModelFit } from '@/lib/types'
 import { DURATIONS, formatDuration, scaledX, buildXTicks } from './powerCurveScale'
-import { MODEL_COLORS, modelCurvePoints } from './powerModels'
+import { MODEL_COLORS, modelCurvePoints, axisMax } from './powerModels'
 
 // Re-exported for existing consumers that import it from this module.
 export { formatDuration }
@@ -95,13 +94,18 @@ export function PowerCurveChart({
   const overlayModels = unit === 'w'
     ? models.filter((m) => m.available && (visibleModels?.has(m.model) ?? false))
     : []
-  const showLegend = overlayModels.length > 0
 
   const yDataKey = unit === 'wkg'
     ? (p: ChartPoint) => { const v = pointWkg(p); return v != null ? +v.toFixed(2) : null }
     : (p: ChartPoint) => p.power_w
 
   const yLabel = unit === 'wkg' ? 'W/kg' : 'Watts'
+
+  // Fix the y-axis to the athlete's real data (with a little headroom) so an
+  // overlaid model can't rescale the axis and squash the real curve. Model
+  // curves that overshoot at short durations are clipped instead.
+  const realMax = Math.max(0, ...chartData.map((p) => yDataKey(p) ?? 0))
+  const yMax = axisMax(realMax, unit === 'wkg' ? 1 : 60)
 
   // Scale the x-axis to the longest effort present, instead of always to 8h.
   const maxDuration = Math.max(...chartData.map((p) => p.duration_s))
@@ -123,6 +127,8 @@ export function PowerCurveChart({
           label={{ value: 'Duration', position: 'insideBottom', offset: -12, fontSize: 12 }}
         />
         <YAxis
+          domain={[0, yMax]}
+          allowDataOverflow
           tick={{ fontSize: 11 }}
           tickLine={false}
           width={48}
@@ -149,8 +155,9 @@ export function PowerCurveChart({
             )
           }}
         />
-        {showLegend && <Legend wrapperStyle={{ fontSize: 12 }} />}
-        {/* Modeled curves (dashed), one Recharts Line per selected model. */}
+        {/* Modeled curves (dashed), one Recharts Line per selected model.
+            The toggle row below the chart doubles as the legend, so no in-chart
+            Legend (it overlapped the x-axis label). */}
         {overlayModels.map((m) => (
           <Line
             key={m.model}

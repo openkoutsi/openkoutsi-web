@@ -32,7 +32,7 @@
       "neuromuscular": "Neuromuskulaarinen teho (5s)",
       "anaerobic": "Anaerobinen kapasiteetti (1min)",
       "map": "Maksimaalinen aerobinen teho (5min)",
-      "ftp": "FTP (kriittinen teho)",
+      "ftp": "FTP (20 min)",
       "paramsHeading": "Mallin parametrit",
       "fit": "sovitus ±{rmse} W",
       "noData": "Ei vielä riittävästi tehodataa mallien sovittamiseen.",
