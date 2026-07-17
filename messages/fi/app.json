@@ -14,7 +14,30 @@
     "ftpAccept": "Hyväksy",
     "ftpAccepted": "FTP asetettu arvoon {ftp} W",
     "ftpInsufficientData": "Ei riittävästi dataa",
-    "ftpCpDetail": "CP {cp} W · W′ {wprime} kJ"
+    "ftpCpDetail": "CP {cp} W · W′ {wprime} kJ",
+    "models": {
+      "heading": "Mallikäyrät",
+      "actual": "Ennätyksesi",
+      "cp2": "Kriittinen teho (2 param.)",
+      "cp3": "Kriittinen teho (3 param.)",
+      "exp": "Eksponentiaalinen",
+      "power_law": "Potenssilaki",
+      "wattsOnly": "Mallikäyrät näytetään watteina."
+    },
+    "profile": {
+      "title": "Arvioitu potentiaali",
+      "subtitle": "Datastasi mallinnettu maksimiteho",
+      "metric": "Ominaisuus",
+      "yourBest": "Ennätyksesi",
+      "neuromuscular": "Neuromuskulaarinen teho (5s)",
+      "anaerobic": "Anaerobinen kapasiteetti (1min)",
+      "map": "Maksimaalinen aerobinen teho (5min)",
+      "ftp": "FTP (kriittinen teho)",
+      "paramsHeading": "Mallin parametrit",
+      "fit": "sovitus ±{rmse} W",
+      "noData": "Ei vielä riittävästi tehodataa mallien sovittamiseen.",
+      "note": "Arviot tallennetuista suorituksistasi, ei erillinen testi."
+    }
   },
   "records": {
     "title": "Matkaennätykset",

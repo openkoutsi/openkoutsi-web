@@ -14,7 +14,30 @@
     "ftpAccept": "Accept",
     "ftpAccepted": "FTP set to {ftp} W",
     "ftpInsufficientData": "Not enough data",
-    "ftpCpDetail": "CP {cp} W · W′ {wprime} kJ"
+    "ftpCpDetail": "CP {cp} W · W′ {wprime} kJ",
+    "models": {
+      "heading": "Model curves",
+      "actual": "Your best",
+      "cp2": "Critical Power (2-param)",
+      "cp3": "Critical Power (3-param)",
+      "exp": "Exponential",
+      "power_law": "Power law",
+      "wattsOnly": "Model curves are shown in watts."
+    },
+    "profile": {
+      "title": "Estimated potential",
+      "subtitle": "Modeled maximum power from your data",
+      "metric": "Metric",
+      "yourBest": "Your best",
+      "neuromuscular": "Neuromuscular Power (5s)",
+      "anaerobic": "Anaerobic Capacity (1min)",
+      "map": "Maximal Aerobic Power (5min)",
+      "ftp": "FTP (Critical Power)",
+      "paramsHeading": "Model parameters",
+      "fit": "fit ±{rmse} W",
+      "noData": "Not enough power data to fit models yet.",
+      "note": "Estimates from your recorded efforts, not a dedicated test."
+    }
   },
   "records": {
     "title": "Distance Records",

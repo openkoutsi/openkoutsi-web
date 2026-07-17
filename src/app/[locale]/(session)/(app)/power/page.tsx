@@ -7,10 +7,19 @@ import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { toast } from '@/components/ui/use-toast'
-import type { AllTimePowerBests, FtpEstimate, PowerBestEntry } from '@/lib/types'
+import type { AllTimePowerBests, FtpEstimate, PowerBestEntry, PowerModels, PowerModelFit } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { PowerCurveChart, formatDuration } from '@/components/charts/PowerCurveChart'
+import {
+  MODEL_KEYS,
+  MODEL_COLORS,
+  DEFAULT_VISIBLE_MODELS,
+  PROFILE_ROWS,
+  predictionAt,
+} from '@/components/charts/powerModels'
 
 // All standard power durations
 const POWER_DURATIONS = [
@@ -182,10 +191,140 @@ function FtpEstimateCard({ rangeDays }: { rangeDays: number | null }) {
   )
 }
 
+function formatParam(value: number | null, digits = 0): string {
+  return value != null ? value.toFixed(digits) : '—'
+}
+
+// Model parameter summary line, e.g. "CP 250 W · W′ 15.0 kJ · Pmax 999 W".
+function modelParamsLine(m: PowerModelFit): string {
+  const parts: string[] = []
+  if (m.cp != null) parts.push(`CP ${Math.round(m.cp)} W`)
+  if (m.w_prime != null) parts.push(`W′ ${(m.w_prime / 1000).toFixed(1)} kJ`)
+  if (m.pmax != null) parts.push(`Pmax ${Math.round(m.pmax)} W`)
+  if (m.a != null && m.b != null) parts.push(`a ${m.a.toFixed(0)} · b ${m.b.toFixed(3)}`)
+  return parts.join(' · ')
+}
+
+function PowerProfileCard({ rangeDays }: { rangeDays: number | null }) {
+  const t = useTranslations('app')
+
+  const suffix = rangeDays != null ? `?days=${rangeDays}` : ''
+  // Same key as the chart's models fetch → SWR dedupes the request.
+  const { data: modelData, isLoading } = useSWR<PowerModels>(
+    `/api/metrics/power-models${suffix}`, fetcher,
+  )
+  // Actual bests always in watts, independent of the page's W/kg toggle.
+  const { data: bestsData } = useSWR<AllTimePowerBests>(
+    `/api/metrics/bests/power${suffix}`, fetcher,
+  )
+
+  const bestWattsAt = (durationS: number): number | null => {
+    const entry = bestsData?.bests.find((b) => b.duration_s === durationS && b.rank === 1)
+    return entry ? entry.power_w : null
+  }
+
+  const available = (modelData?.models ?? []).filter((m) => m.available)
+  const orderedModels = MODEL_KEYS
+    .map((key) => available.find((m) => m.model === key))
+    .filter((m): m is PowerModelFit => m != null)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('power.profile.title')}</CardTitle>
+        <p className="text-xs text-muted-foreground">{t('power.profile.subtitle')}</p>
+      </CardHeader>
+      <CardContent className="p-0">
+        {isLoading ? (
+          <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+            {t('power.loading')}
+          </div>
+        ) : orderedModels.length === 0 ? (
+          <div className="flex h-24 items-center justify-center px-6 text-center text-sm text-muted-foreground">
+            {t('power.profile.noData')}
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/40">
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">{t('power.profile.metric')}</th>
+                    <th className="px-3 py-2 text-right font-medium text-muted-foreground">{t('power.profile.yourBest')}</th>
+                    {orderedModels.map((m) => (
+                      <th key={m.model} className="px-3 py-2 text-right font-medium">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: MODEL_COLORS[m.model] }}
+                          />
+                          {t(`power.models.${m.model}` as never)}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROFILE_ROWS.map(({ key, durationS }) => {
+                    const best = bestWattsAt(durationS)
+                    return (
+                      <tr key={key} className="border-b last:border-0">
+                        <td className="px-3 py-2">{t(`power.profile.${key}` as never)}</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                          {best != null ? `${Math.round(best)} W` : '—'}
+                        </td>
+                        {orderedModels.map((m) => {
+                          const pred = predictionAt(m, durationS)
+                          return (
+                            <td key={m.model} className="px-3 py-2 text-right tabular-nums font-medium">
+                              {pred != null ? `${Math.round(pred)} W` : '—'}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="space-y-1 px-3 py-3 text-xs text-muted-foreground">
+              <div className="font-medium">{t('power.profile.paramsHeading')}</div>
+              {orderedModels.map((m) => (
+                <div key={m.model} className="flex flex-wrap items-center gap-x-2">
+                  <span
+                    className="inline-block h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: MODEL_COLORS[m.model] }}
+                  />
+                  <span className="font-medium">{t(`power.models.${m.model}` as never)}:</span>
+                  <span>{modelParamsLine(m)}</span>
+                  {m.rmse != null && <span>· {t('power.profile.fit', { rmse: Math.round(m.rmse) })}</span>}
+                </div>
+              ))}
+              <p className="pt-1">{t('power.profile.note')}</p>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function PowerPage() {
   const t = useTranslations('app')
   const [unit, setUnit] = useState<'w' | 'wkg'>('w')
   const [rangeDays, setRangeDays] = useState<number | null>(null)
+  const [visibleModels, setVisibleModels] = useState<Set<string>>(
+    () => new Set<string>(DEFAULT_VISIBLE_MODELS),
+  )
+
+  function toggleModel(key: string) {
+    setVisibleModels((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   // Rank by W/kg (effective weight at the time of each effort) or by watts.
   const params = new URLSearchParams()
@@ -194,6 +333,18 @@ export default function PowerPage() {
   const qs = params.toString()
   const swrKey = qs ? `/api/metrics/bests/power?${qs}` : '/api/metrics/bests/power'
   const { data: powerData, isLoading: powerLoading } = useSWR<AllTimePowerBests>(swrKey, fetcher)
+
+  // Fitted models for the curve overlay (watts-based); same key as the profile
+  // card so SWR dedupes the request.
+  const modelsKey = rangeDays != null
+    ? `/api/metrics/power-models?days=${rangeDays}`
+    : '/api/metrics/power-models'
+  const { data: modelData } = useSWR<PowerModels>(modelsKey, fetcher)
+
+  const modelLabels: Record<string, string> = Object.fromEntries(
+    MODEL_KEYS.map((k) => [k, t(`power.models.${k}` as never)]),
+  )
+  const availableModels = (modelData?.models ?? []).filter((m) => m.available)
 
   // Power lookup: duration_s → { rank → entry }
   const byDuration = new Map<number, Map<number, PowerBestEntry>>()
@@ -248,10 +399,51 @@ export default function PowerPage() {
               {t('power.loading')}
             </div>
           ) : (
-            <PowerCurveChart bests={powerData?.bests ?? []} unit={unit} />
+            <PowerCurveChart
+              bests={powerData?.bests ?? []}
+              unit={unit}
+              models={modelData?.models ?? []}
+              visibleModels={visibleModels}
+              modelLabels={modelLabels}
+              actualLabel={t('power.models.actual')}
+            />
+          )}
+          {/* Model curve toggles (watts only) */}
+          {unit === 'w' && availableModels.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="text-xs font-medium text-muted-foreground mr-1">
+                {t('power.models.heading')}
+              </span>
+              {MODEL_KEYS.filter((k) => availableModels.some((m) => m.model === k)).map((k) => (
+                <div key={k} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`model-${k}`}
+                    checked={visibleModels.has(k)}
+                    onCheckedChange={() => toggleModel(k)}
+                    className="h-5 w-5"
+                  />
+                  <Label
+                    htmlFor={`model-${k}`}
+                    className="flex items-center gap-1.5 cursor-pointer text-sm py-1 pr-1"
+                  >
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: MODEL_COLORS[k] }}
+                    />
+                    {modelLabels[k]}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          )}
+          {unit === 'wkg' && availableModels.length > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">{t('power.models.wattsOnly')}</p>
           )}
         </CardContent>
       </Card>
+
+      {/* Estimated potential (power profile) */}
+      <PowerProfileCard rangeDays={rangeDays} />
 
       {/* FTP estimate */}
       <FtpEstimateCard rangeDays={rangeDays} />
