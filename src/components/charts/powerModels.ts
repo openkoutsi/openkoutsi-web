@@ -48,3 +48,12 @@ export function predictionAt(fit: PowerModelFit, durationS: number): number | nu
   const point = fit.predictions.find((p) => p.duration_s === durationS)
   return point ? point.power_w : null
 }
+
+// Round a data maximum up to a "nice" axis ceiling (multiple of `step`) with a
+// little headroom. Used to pin the power chart's y-axis to the athlete's real
+// bests so an overlaid model can't rescale the axis; overshooting model curves
+// are then clipped instead of squashing the real curve.
+export function axisMax(dataMax: number, step: number): number {
+  const safeMax = Math.max(0, dataMax)
+  return Math.max(step, Math.ceil((safeMax * 1.08) / step) * step)
+}

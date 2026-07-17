@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   modelCurvePoints,
   predictionAt,
+  axisMax,
   MODEL_KEYS,
   MODEL_COLORS,
   DEFAULT_VISIBLE_MODELS,
@@ -71,5 +72,27 @@ describe('model metadata', () => {
 
   it('anchors profile rows to the expected durations', () => {
     expect(PROFILE_ROWS.map((r) => r.durationS)).toEqual([5, 60, 300, 1200])
+  })
+})
+
+describe('axisMax', () => {
+  it('rounds up to the next step with headroom', () => {
+    // 360 * 1.08 = 388.8 → next multiple of 60 is 420.
+    expect(axisMax(360, 60)).toBe(420)
+  })
+
+  it('is driven only by the real data max, so a taller model cannot rescale it', () => {
+    const realOnly = axisMax(360, 60)
+    // The overlaid model curve is not passed in, so the ceiling is unchanged.
+    expect(realOnly).toBe(420)
+  })
+
+  it('never returns less than one step', () => {
+    expect(axisMax(0, 60)).toBe(60)
+    expect(axisMax(-100, 60)).toBe(60)
+  })
+
+  it('supports a fractional step for W/kg', () => {
+    expect(axisMax(4.6, 1)).toBe(5)
   })
 })
