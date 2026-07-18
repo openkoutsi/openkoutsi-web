@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
 import { defaultHrZones, defaultPowerZones } from '@/lib/zoneDefaults'
+import { zonesAreValid } from '@/lib/zoneValidation'
 import { ZoneEditor } from '@/components/profile/ZoneEditor'
 import { WizardShell } from '@/components/onboarding/WizardShell'
 import { useCompleteOnboarding } from '@/components/onboarding/useCompleteOnboarding'
@@ -23,6 +24,7 @@ interface Props {
 export function Step2Zones({ onNext, onBack, onSkip }: Props) {
   const t = useTranslations('onboarding')
   const tCommon = useTranslations('common')
+  const tApp = useTranslations('app')
   const { athlete, refreshAthlete } = useAuth()
   const completeOnboarding = useCompleteOnboarding()
 
@@ -35,6 +37,10 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
   async function handleNext() {
     if (!maxHr && !ftp && hrZones.length === 0 && powerZones.length === 0) {
       onNext()
+      return
+    }
+    if (!zonesAreValid(hrZones) || !zonesAreValid(powerZones)) {
+      toast({ title: tApp('profile.zoneEditor.errors.invalidTitle'), description: tApp('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
       return
     }
     setSaving(true)

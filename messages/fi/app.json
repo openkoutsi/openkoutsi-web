@@ -361,7 +361,14 @@
       "name": "Nimi",
       "low": "Alaraja ({unit})",
       "high": "Yläraja ({unit})",
-      "addZone": "Lisää vyöhyke"
+      "addZone": "Lisää vyöhyke",
+      "errors": {
+        "required": "Molemmat rajat vaaditaan",
+        "lowGteHigh": "Alarajan on oltava ylärajaa pienempi",
+        "lowBelowPrev": "Alaraja ei voi olla edellisen vyöhykkeen ylärajaa pienempi",
+        "invalidTitle": "Virheelliset vyöhykkeet",
+        "invalid": "Korjaa korostetut vyöhykkeet ennen tallennusta"
+      }
     }
   },
   "settings": {

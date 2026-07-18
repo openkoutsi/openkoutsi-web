@@ -361,7 +361,14 @@
       "name": "Name",
       "low": "Low ({unit})",
       "high": "High ({unit})",
-      "addZone": "Add zone"
+      "addZone": "Add zone",
+      "errors": {
+        "required": "Both bounds are required",
+        "lowGteHigh": "Low must be below high",
+        "lowBelowPrev": "Low can't be below the previous zone's high",
+        "invalidTitle": "Invalid zones",
+        "invalid": "Fix the highlighted zones before saving"
+      }
     }
   },
   "settings": {
