@@ -85,7 +85,7 @@
     },
     "form": {
       "term": "Muoto",
-      "description": "Lasketaan kunto − väsymä. Positiivinen arvo tarkoittaa, että olet levänyt suhteessa kuntotasoosi (virkeä/huipussa). Negatiivinen arvo tarkoittaa, että väsymä ylittää kunnon (väsynyt/ylikuormittunut). Pyri hieman positiiviseen muotoon ennen tärkeää kilpailua."
+      "description": "Lasketaan kunto − väsymä käyttäen edellisen päivän lopun arvoja (virkeytesi tämän päivän alussa, ennen tämän päivän harjoittelua). Koska tämän päivän kunto ja väsymä sisältävät jo tämän päivän kuormituksen, näytetty muoto ei täsmälleen vastaa vieressä olevia kunto- ja väsymälukuja. Positiivinen arvo tarkoittaa, että olet levänyt suhteessa kuntotasoosi (virkeä/huipussa). Negatiivinen arvo tarkoittaa, että väsymä ylittää kunnon (väsynyt/ylikuormittunut). Pyri hieman positiiviseen muotoon ennen tärkeää kilpailua."
     },
     "ftp": {
       "term": "FTP — Functional Threshold Power",
