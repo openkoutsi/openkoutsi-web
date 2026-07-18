@@ -95,5 +95,13 @@
       "term": "Harjoituskuormitus",
       "description": "Yksittäinen luku, joka kuvaa yhden harjoituksen kuormitusta ottaen huomioon sekä keston että intensiteetin. Yksi tunti täsmälleen FTP:llä = 100. Helpot ajot pisteytyvät matalammin; kovat intervalliharjoitukset korkeammin."
     }
+  },
+  "adherence": {
+    "title": "{name} — toteutuma",
+    "chartLabel": "Toteutuma",
+    "completed": "{count} tehty",
+    "missed": "{count} väliin jäänyt",
+    "skipped": "{count} ohitettu",
+    "noTrend": "Trendin piirtämiseen ei ole vielä riittävästi tietoa."
   }
 }

@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { AthleteProfile, TrainingPlan, Page } from '@/lib/types'
 import { getLlmConfig, generatePlanWeeks } from '@/lib/llm'
+import { adherenceBadgeClass, formatAdherence } from '@/lib/adherence'
+import { cn } from '@/lib/utils'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -723,6 +725,17 @@ export default function PlanPage() {
                 {activePlan.generation_method === 'llm' && (
                   <span className="text-xs rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 font-medium shrink-0">
                     {t('plan.aiTag')}
+                  </span>
+                )}
+                {activePlan.adherence_score != null && (
+                  <span
+                    className={cn(
+                      'text-xs rounded-full px-2 py-0.5 font-medium shrink-0',
+                      adherenceBadgeClass(activePlan.adherence_score),
+                    )}
+                    title={t('plan.adherence.tooltip')}
+                  >
+                    {t('plan.adherence.soFar', { score: formatAdherence(activePlan.adherence_score) })}
                   </span>
                 )}
               </div>

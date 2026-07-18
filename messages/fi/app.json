@@ -258,6 +258,11 @@
       "confirm": "Poista",
       "success": "Harjoitus poistettu",
       "failed": "Harjoituksen poisto epäonnistui"
+    },
+    "matchScoreLabel": "Harjoituksen osumapisteet",
+    "adherence": {
+      "soFar": "{score} tähän mennessä",
+      "tooltip": "Kuinka tarkasti olet noudattanut suunnitelmaa tähän mennessä"
     }
   },
   "profile": {
