@@ -12,7 +12,7 @@ import {
 import { useTranslations } from 'next-intl'
 import type { PowerBestEntry, PowerModelFit } from '@/lib/types'
 import { DURATIONS, formatDuration, scaledX, buildXTicks } from './powerCurveScale'
-import { MODEL_COLORS, modelCurvePoints, axisMax } from './powerModels'
+import { MODEL_COLORS, modelCurvePoints, modelValueAt, axisMax } from './powerModels'
 
 // Re-exported for existing consumers that import it from this module.
 export { formatDuration }
@@ -136,18 +136,57 @@ export function PowerCurveChart({
         />
         <Tooltip
           content={({ active, payload }) => {
-            if (!active || !payload?.length) return null
-            const p = payload[0].payload as ChartPoint
+            if (!active || !payload?.length || chartData.length === 0) return null
+            // Overlay (model) curve points and the real record share the x-axis,
+            // but overlay points carry no duration/record fields — so resolve the
+            // hover to the nearest real record by x-position rather than trusting
+            // payload[0]. (Reading duration_s off a model point produced the
+            // "NaNh" heading when a model was shown.)
+            const x = (payload[0]?.payload as { x?: number } | undefined)?.x
+            if (x == null) return null
+            const p = chartData.reduce((best, c) =>
+              Math.abs(c.x - x) < Math.abs(best.x - x) ? c : best,
+            )
             const wkg = pointWkg(p)
-            const displayVal = unit === 'wkg' && wkg != null
+            const recordVal = unit === 'wkg' && wkg != null
               ? `${wkg.toFixed(2)} W/kg`
               : `${Math.round(p.power_w)} W`
             return (
               <div className="rounded-md border bg-card px-3 py-2 text-sm shadow">
                 <p className="font-semibold">{formatDuration(p.duration_s)}</p>
-                <p>{displayVal}</p>
+                <div className="mt-1 space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ background: 'hsl(var(--primary))' }}
+                    />
+                    <span className="text-muted-foreground">
+                      {actualLabel ?? t('power.models.actual')}
+                    </span>
+                    <span className="ml-auto font-medium tabular-nums">{recordVal}</span>
+                  </div>
+                  {/* Modeled value(s) at the same time point (watts mode only). */}
+                  {overlayModels.map((m) => {
+                    const v = modelValueAt(m, p.duration_s)
+                    if (v == null) return null
+                    return (
+                      <div key={m.model} className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: MODEL_COLORS[m.model] ?? 'hsl(var(--muted-foreground))' }}
+                        />
+                        <span className="text-muted-foreground">
+                          {modelLabels[m.model] ?? m.model}
+                        </span>
+                        <span className="ml-auto font-medium tabular-nums">
+                          {Math.round(v)} W
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
                 {p.activity_name && (
-                  <p className="text-muted-foreground text-xs truncate max-w-48">
+                  <p className="text-muted-foreground text-xs truncate max-w-48 mt-1">
                     {p.activity_name}
                   </p>
                 )}
