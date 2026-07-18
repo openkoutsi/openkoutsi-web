@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   modelCurvePoints,
   predictionAt,
+  modelValueAt,
   axisMax,
   MODEL_KEYS,
   MODEL_COLORS,
@@ -54,6 +55,35 @@ describe('predictionAt', () => {
 
   it('returns null when the model has no prediction at that duration', () => {
     expect(predictionAt(f, 5)).toBeNull()
+  })
+})
+
+describe('modelValueAt', () => {
+  const f = fit({
+    curve: [
+      { duration_s: 60, power_w: 400 },
+      { duration_s: 300, power_w: 320 },
+      { duration_s: 1200, power_w: 260 },
+    ],
+  })
+
+  it('returns the exact value at a sampled duration', () => {
+    expect(modelValueAt(f, 300)).toBe(320)
+  })
+
+  it('interpolates log-linearly between samples', () => {
+    // Midpoint in log-space between 300 and 1200 is 600.
+    // t = (ln600 - ln300) / (ln1200 - ln300) = 0.5, so power = (320 + 260) / 2.
+    expect(modelValueAt(f, 600)).toBeCloseTo(290, 6)
+  })
+
+  it('returns null outside the sampled range', () => {
+    expect(modelValueAt(f, 5)).toBeNull()
+    expect(modelValueAt(f, 3600)).toBeNull()
+  })
+
+  it('returns null for a model with no curve', () => {
+    expect(modelValueAt(fit({ curve: [] }), 300)).toBeNull()
   })
 })
 

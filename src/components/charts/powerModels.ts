@@ -49,6 +49,31 @@ export function predictionAt(fit: PowerModelFit, durationS: number): number | nu
   return point ? point.power_w : null
 }
 
+// The model's power (watts) at an arbitrary duration, read off its sampled
+// curve (the same points the chart draws). Interpolates log-linearly between
+// samples and returns null when the duration falls outside the sampled range
+// (e.g. unbounded models that aren't defined in the sprint range). Used by the
+// tooltip to report each model's value at the hovered time point.
+export function modelValueAt(fit: PowerModelFit, durationS: number): number | null {
+  const c = fit.curve
+  if (c.length === 0) return null
+  if (durationS < c[0].duration_s || durationS > c[c.length - 1].duration_s) {
+    return null
+  }
+  for (let i = 1; i < c.length; i++) {
+    const a = c[i - 1]
+    const b = c[i]
+    if (durationS <= b.duration_s) {
+      if (b.duration_s === a.duration_s) return b.power_w
+      const t =
+        (Math.log(durationS) - Math.log(a.duration_s)) /
+        (Math.log(b.duration_s) - Math.log(a.duration_s))
+      return a.power_w + t * (b.power_w - a.power_w)
+    }
+  }
+  return c[c.length - 1].power_w
+}
+
 // Round a data maximum up to a "nice" axis ceiling (multiple of `step`) with a
 // little headroom. Used to pin the power chart's y-axis to the athlete's real
 // bests so an overlaid model can't rescale the axis; overshooting model curves
