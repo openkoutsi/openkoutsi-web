@@ -27,7 +27,7 @@ interface Props {
 }
 
 // Colour progression: cool (easy) → warm (hard), up to 7 zones.
-const ZONE_COLORS = [
+export const ZONE_COLORS = [
   '#60a5fa', // Z1 recovery    — blue
   '#4ade80', // Z2 endurance   — green
   '#facc15', // Z3 tempo       — yellow
@@ -37,7 +37,7 @@ const ZONE_COLORS = [
   '#e879f9', // Z7 max         — fuchsia
 ]
 
-function zoneColor(index: number) {
+export function zoneColor(index: number) {
   return ZONE_COLORS[index] ?? ZONE_COLORS[ZONE_COLORS.length - 1]
 }
 

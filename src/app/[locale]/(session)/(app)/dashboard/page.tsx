@@ -5,12 +5,13 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { fetcher, apiFetch } from '@/lib/api'
-import type { FitnessPoint, FitnessCurrent, TrainingPlan, TrainingStatus, ActivitySummary, Page } from '@/lib/types'
+import type { FitnessPoint, FitnessCurrent, TrainingPlan, TrainingStatus, ActivitySummary, WeeklyZoneBucket, Page } from '@/lib/types'
 import { formatHoursMinutes, formatDistance } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
 import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
+import { WeeklyZones } from '@/components/charts/WeeklyZones'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
@@ -195,6 +196,10 @@ export default function DashboardPage() {
     `/api/metrics/activity-summary?days=${days}`,
     fetcher,
   )
+  const { data: weeklyZones } = useSWR<WeeklyZoneBucket[]>(
+    `/api/metrics/zones/weekly?days=${days}`,
+    fetcher,
+  )
   const { data: plansPage } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher)
   const plans = plansPage?.items
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
@@ -304,6 +309,19 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <WeeklyLoadBar data={history} weeks={Math.min(Math.ceil(days / 7), 52)} plannedByWeek={plannedByWeek} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Accumulated time in zones (issue #27) */}
+      {weeklyZones && weeklyZones.some((w) => Object.keys(w.power).length || Object.keys(w.hr).length) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t('timeInZones')}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-6 sm:grid-cols-2">
+            <WeeklyZones data={weeklyZones} kind="power" title={t('timeInZonesPower')} />
+            <WeeklyZones data={weeklyZones} kind="hr" title={t('timeInZonesHr')} />
           </CardContent>
         </Card>
       )}

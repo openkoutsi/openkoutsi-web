@@ -23,6 +23,9 @@
   "weeklyLoad": "Weekly load",
   "weeklyLoadActual": "Actual load",
   "weeklyLoadPlanned": "Planned load",
+  "timeInZones": "Time in zones",
+  "timeInZonesPower": "Power",
+  "timeInZonesHr": "Heart rate",
   "calendar": {
     "title": "Activity Calendar",
     "noActivities": "No activities this month",
