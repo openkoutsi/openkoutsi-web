@@ -2,7 +2,7 @@
   "title": "Dashboard",
   "welcomeBack": "Welcome back, {name}",
   "recalculate": "Recalculate fitness",
-  "recalculating": "Recalculating\u2026",
+  "recalculating": "Recalculating…",
   "recalcStarted": "Recalculation started",
   "recalcStartedDesc": "Fitness metrics will update in a moment",
   "recalcFailed": "Recalculation failed",
@@ -27,13 +27,34 @@
     "title": "Activity Calendar",
     "noActivities": "No activities this month",
     "loading": "Loading activities…",
-    "dayNames": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "dayNames": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "monthNames": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
     "performed": "Performed",
     "planned": "Planned",
     "skipped": "Skipped"
   },
-  "noHistory": "No data yet \u2014 upload activities to start tracking",
+  "noHistory": "No data yet — upload activities to start tracking",
   "recentActivities": "Recent activities",
   "noActivities": "No activities yet",
   "explainMetrics": "Explain fitness metrics",
@@ -56,7 +77,7 @@
   "glossary": {
     "fitness": {
       "term": "Fitness",
-      "description": "A 42-day exponentially weighted average of your daily training load. It represents your long-term fitness level \u2014 the higher the number, the more training your body has adapted to."
+      "description": "A 42-day exponentially weighted average of your daily training load. It represents your long-term fitness level — the higher the number, the more training your body has adapted to."
     },
     "fatigue": {
       "term": "Fatigue",
@@ -64,15 +85,23 @@
     },
     "form": {
       "term": "Form",
-      "description": "Calculated as fitness \u2212 fatigue. A positive value means you are rested relative to your fitness (fresh/peak). A negative value means fatigue outweighs fitness (tired/overreached). Aim for a slightly positive form before a key event."
+      "description": "Calculated as fitness − fatigue. A positive value means you are rested relative to your fitness (fresh/peak). A negative value means fatigue outweighs fitness (tired/overreached). Aim for a slightly positive form before a key event."
     },
     "ftp": {
-      "term": "FTP \u2014 Functional Threshold Power",
+      "term": "FTP — Functional Threshold Power",
       "description": "The highest average power (in watts) you can sustain for approximately one hour. FTP is used to define training zones and to calculate training load for power-based workouts."
     },
     "load": {
       "term": "Training load",
       "description": "A single number that quantifies the training load of one workout, taking into account both duration and intensity. A one-hour ride at exactly FTP = 100. Easy rides score lower; hard interval sessions score higher."
     }
+  },
+  "adherence": {
+    "title": "{name} — adherence",
+    "chartLabel": "Adherence",
+    "completed": "{count} completed",
+    "missed": "{count} missed",
+    "skipped": "{count} skipped",
+    "noTrend": "Not enough data yet to chart the trend."
   }
 }

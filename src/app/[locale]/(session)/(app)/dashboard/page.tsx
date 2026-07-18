@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
 import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
+import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
@@ -305,6 +306,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Plan adherence (deterministic, always available) */}
+      {activePlans
+        .filter((p) => p.adherence_score != null)
+        .map((p) => (
+          <PlanAdherenceCard key={p.id} plan={p} />
+        ))}
 
       {/* Activity calendar */}
       <ActivityCalendar activePlans={activePlans} />

@@ -258,6 +258,11 @@
       "confirm": "Delete",
       "success": "Workout deleted",
       "failed": "Could not delete workout"
+    },
+    "matchScoreLabel": "Workout match score",
+    "adherence": {
+      "soFar": "{score} so far",
+      "tooltip": "How closely you've followed this plan so far"
     }
   },
   "profile": {

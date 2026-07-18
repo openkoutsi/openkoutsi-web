@@ -283,6 +283,9 @@ export interface PlannedWorkout {
   completed_activity_id: string | null
   skip_reason: string | null
   workout_definition_id?: string | null
+  // Derived per-workout adherence match score (0–100); null until the workout
+  // is completed or past (issue #26).
+  match_score?: number | null
 }
 
 // ---- Structured workout definitions ----
@@ -352,6 +355,26 @@ export interface TrainingPlan {
   workouts: PlannedWorkout[]
   config: Record<string, unknown> | null
   generation_method: string | null
+  // Current "so far" adherence score (0–100) and breakdown (issue #26); null
+  // when the plan has nothing contributing yet.
+  adherence_score?: number | null
+  adherence_summary?: PlanAdherenceSummary | null
+}
+
+export interface PlanAdherenceSummary {
+  completed: number
+  missed: number
+  skipped: number
+  pending: number
+}
+
+export interface PlanAdherencePoint {
+  date: string
+  score: number | null
+  completed: number
+  missed: number
+  skipped: number
+  pending: number
 }
 
 export interface PaginatedActivities {

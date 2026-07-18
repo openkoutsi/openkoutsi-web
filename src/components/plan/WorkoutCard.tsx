@@ -6,6 +6,7 @@ import type { PlannedWorkout } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { linkedActivityIds } from '@/lib/planUtils'
+import { adherenceBadgeClass, formatAdherence } from '@/lib/adherence'
 import { cn } from '@/lib/utils'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -89,6 +90,14 @@ export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
           {completed && (
             <Badge variant="secondary" className="text-xs h-5">
               {t('plan.done')}{linkedCount > 1 ? ` ·${linkedCount}` : ''}
+            </Badge>
+          )}
+          {workout.match_score != null && (
+            <Badge
+              className={cn('text-xs h-5 border-transparent', adherenceBadgeClass(workout.match_score))}
+              title={t('plan.matchScoreLabel')}
+            >
+              {formatAdherence(workout.match_score)}
             </Badge>
           )}
           {workout.skip_reason != null && !completed && (
