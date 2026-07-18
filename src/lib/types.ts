@@ -244,6 +244,14 @@ export interface ActivitySummary {
   total_distance_m: number
 }
 
+// Accumulated time-in-zone for one ISO week (Monday-based). `hr` and `power`
+// map zone name → seconds; either may be empty. See GET /api/metrics/zones/weekly.
+export interface WeeklyZoneBucket {
+  week_start: string
+  hr: Record<string, number>
+  power: Record<string, number>
+}
+
 export interface Goal {
   id: string
   athlete_id: string

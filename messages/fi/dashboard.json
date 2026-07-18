@@ -23,6 +23,9 @@
   "weeklyLoad": "Viikottainen kuormitus",
   "weeklyLoadActual": "Toteutunut kuormitus",
   "weeklyLoadPlanned": "Suunniteltu kuormitus",
+  "timeInZones": "Aika vyöhykkeillä",
+  "timeInZonesPower": "Teho",
+  "timeInZonesHr": "Syke",
   "calendar": {
     "title": "Harjoituskalenteri",
     "noActivities": "Ei harjoituksia tässä kuussa",
