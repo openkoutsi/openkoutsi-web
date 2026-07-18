@@ -33,10 +33,20 @@ export function aggregatePlannedLoadByWeek(plans: TrainingPlan[]): Map<string, n
 
 export type PlannedWorkoutStatus = 'completed' | 'skipped' | 'planned'
 
+/** Returns the activity ids linked to a workout, tolerating older payloads
+ *  that only carried the single `completed_activity_id`. */
+export function linkedActivityIds(workout: PlannedWorkout): string[] {
+  if (workout.linked_activity_ids && workout.linked_activity_ids.length > 0) {
+    return workout.linked_activity_ids
+  }
+  return workout.completed_activity_id != null ? [workout.completed_activity_id] : []
+}
+
 /** Derives the status of a planned workout.
- *  A linked completed activity takes precedence over a skip reason. */
+ *  Any linked activity marks the workout completed and takes precedence over a
+ *  skip reason. */
 export function plannedWorkoutStatus(workout: PlannedWorkout): PlannedWorkoutStatus {
-  if (workout.completed_activity_id != null) return 'completed'
+  if (linkedActivityIds(workout).length > 0) return 'completed'
   if (workout.skip_reason != null) return 'skipped'
   return 'planned'
 }

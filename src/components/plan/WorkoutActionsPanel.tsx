@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Activity, PlannedWorkout } from '@/lib/types'
 import { WorkoutCard } from './WorkoutCard'
@@ -26,13 +26,18 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { apiFetch } from '@/lib/api'
-import { workoutFormToPayload, type WorkoutFormValues } from '@/lib/planUtils'
+import { linkedActivityIds, workoutFormToPayload, type WorkoutFormValues } from '@/lib/planUtils'
 import { formatDuration } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 
 interface ActivityListResponse {
   items: Activity[]
   total: number
+}
+
+/** Returns a copy of `w` with the link fields set consistently from `ids`. */
+function withLinks(w: PlannedWorkout, ids: string[]): PlannedWorkout {
+  return { ...w, linked_activity_ids: ids, completed_activity_id: ids[0] ?? null }
 }
 
 const SKIP_REASON_KEYS = [
@@ -56,12 +61,27 @@ interface Props {
 export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkoutDeleted }: Props) {
   const t = useTranslations('app')
 
+  const linkedIds = linkedActivityIds(workout)
+  const isCompleted = linkedIds.length > 0
+
   // Mark-as-completed state
   const [activities, setActivities] = useState<Activity[]>([])
   const [loadingActivities, setLoadingActivities] = useState(false)
   const [selectedActivityId, setSelectedActivityId] = useState<string>('')
   const [linking, setLinking] = useState(false)
   const [showLinkPicker, setShowLinkPicker] = useState(false)
+
+  // Load the day's activities once when the workout already has links, so the
+  // linked list can show activity names rather than bare ids.
+  useEffect(() => {
+    if (linkedIds.length === 0 || activities.length > 0) return
+    let cancelled = false
+    apiFetch<ActivityListResponse>(`/api/activities?start=${date}&end=${date}&page_size=50`)
+      .then((data) => { if (!cancelled) setActivities(data.items ?? []) })
+      .catch(() => { /* names fall back to ids */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, linkedIds.length])
 
   // Skip flow state
   const [showSkipForm, setShowSkipForm] = useState(false)
@@ -121,12 +141,16 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
     }
   }
 
-  const handleUnlink = async (w: PlannedWorkout) => {
+  const handleUnlink = async (activityId?: string) => {
+    const query = activityId ? `?activity_id=${encodeURIComponent(activityId)}` : ''
     try {
-      await apiFetch(`/api/plans/${w.plan_id}/workouts/${w.id}/link`, {
+      await apiFetch(`/api/plans/${workout.plan_id}/workouts/${workout.id}/link${query}`, {
         method: 'DELETE',
       })
-      onWorkoutUpdated({ ...w, completed_activity_id: null })
+      const remaining = activityId
+        ? linkedIds.filter((id) => id !== activityId)
+        : []
+      onWorkoutUpdated(withLinks(workout, remaining))
       toast({ title: t('plan.unlinkSuccess') })
     } catch {
       toast({ title: t('plan.unlinkFailed'), variant: 'destructive' })
@@ -157,7 +181,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
         method: 'PUT',
         body: JSON.stringify({ activity_id: selectedActivityId }),
       })
-      onWorkoutUpdated({ ...workout, completed_activity_id: selectedActivityId })
+      onWorkoutUpdated(withLinks(workout, [...linkedIds, selectedActivityId]))
       setShowLinkPicker(false)
       setSelectedActivityId('')
       toast({ title: t('plan.linkSuccess') })
@@ -219,13 +243,94 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
     setCustomReason('')
   }
 
+  const activityLabel = (id: string): string => {
+    const a = activities.find((x) => x.id === id)
+    return a ? (a.name || a.sport_type) : id.slice(0, 8)
+  }
+
+  // Activities on the day that are not already linked to this workout.
+  const linkableActivities = activities.filter((a) => !linkedIds.includes(a.id))
+
+  const linkPickerNode = (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">{t('plan.selectActivity')}</p>
+      {loadingActivities ? (
+        <p className="text-xs text-muted-foreground">{t('plan.loadingActivities')}</p>
+      ) : linkableActivities.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{t('plan.noActivitiesOnDay')}</p>
+      ) : (
+        <Select value={selectedActivityId} onValueChange={setSelectedActivityId}>
+          <SelectTrigger className="text-xs h-8">
+            <SelectValue placeholder={t('plan.chooseActivity')} />
+          </SelectTrigger>
+          <SelectContent>
+            {linkableActivities.map((a) => (
+              <SelectItem key={a.id} value={a.id} className="text-xs">
+                {a.name || a.sport_type}
+                {a.duration_s ? ` · ${formatDuration(a.duration_s)}` : ''}
+                {a.load != null ? ` · ${Math.round(a.load)} Load` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          className="flex-1 text-xs"
+          disabled={!selectedActivityId || linking}
+          onClick={handleLink}
+        >
+          {linking ? t('plan.linking') : t('plan.confirmLink')}
+        </Button>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={cancelLink}>
+          {t('plan.unlinkCancel')}
+        </Button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-3">
       <WorkoutCard
         workout={workout}
-        onUnlink={handleUnlink}
         onClearSkip={handleClearSkip}
       />
+
+      {/* Linked activities — a workout may be completed by several activities
+          (for example a ride recorded in two parts). */}
+      {isCompleted && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground">{t('plan.linkedActivities')}</p>
+          <ul className="space-y-1">
+            {linkedIds.map((id) => (
+              <li key={id} className="flex items-center justify-between gap-2 text-xs">
+                <span className="truncate">{activityLabel(id)}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                  onClick={() => handleUnlink(id)}
+                >
+                  {t('plan.unlink')}
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {showLinkPicker ? (
+            linkPickerNode
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs"
+              onClick={openLinkPicker}
+            >
+              {t('plan.linkAnother')}
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Inline edit form (completed workouts are locked from editing) */}
       {editing && (
@@ -256,7 +361,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
       )}
 
       {/* Action buttons — only when not yet completed and not skipped */}
-      {!editing && workout.completed_activity_id == null && workout.skip_reason == null && (
+      {!editing && !isCompleted && workout.skip_reason == null && (
         <div className="space-y-2">
           {!showLinkPicker && !showSkipForm ? (
             <>
@@ -278,47 +383,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
               </Button>
             </>
           ) : showLinkPicker ? (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">{t('plan.selectActivity')}</p>
-              {loadingActivities ? (
-                <p className="text-xs text-muted-foreground">{t('plan.loadingActivities')}</p>
-              ) : activities.length === 0 ? (
-                <p className="text-xs text-muted-foreground">{t('plan.noActivitiesOnDay')}</p>
-              ) : (
-                <Select value={selectedActivityId} onValueChange={setSelectedActivityId}>
-                  <SelectTrigger className="text-xs h-8">
-                    <SelectValue placeholder={t('plan.chooseActivity')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activities.map((a) => (
-                      <SelectItem key={a.id} value={a.id} className="text-xs">
-                        {a.name || a.sport_type}
-                        {a.duration_s ? ` · ${formatDuration(a.duration_s)}` : ''}
-                        {a.load != null ? ` · ${Math.round(a.load)} Load` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="flex-1 text-xs"
-                  disabled={!selectedActivityId || linking}
-                  onClick={handleLink}
-                >
-                  {linking ? t('plan.linking') : t('plan.confirmLink')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs"
-                  onClick={cancelLink}
-                >
-                  {t('plan.unlinkCancel')}
-                </Button>
-              </div>
-            </div>
+            linkPickerNode
           ) : (
             <div className="space-y-2">
               <p className="text-xs font-medium text-foreground">{t('plan.skipTitle')}</p>
@@ -367,7 +432,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
       )}
 
       {/* Edit / delete — available whenever the workout is not completed */}
-      {!editing && workout.completed_activity_id == null && !showLinkPicker && !showSkipForm && (
+      {!editing && !isCompleted && !showLinkPicker && !showSkipForm && (
         <div className="flex gap-2 border-t pt-2">
           <Button
             variant="outline"
