@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
 import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
+import { showAdherenceScores } from '@/lib/adherence'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
@@ -307,12 +308,11 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* Plan adherence (deterministic, always available) */}
-      {activePlans
-        .filter((p) => p.adherence_score != null)
-        .map((p) => (
-          <PlanAdherenceCard key={p.id} plan={p} />
-        ))}
+      {/* Plan adherence (deterministic, always computed; display is opt-out) */}
+      {showAdherenceScores(athlete?.app_settings) &&
+        activePlans
+          .filter((p) => p.adherence_score != null)
+          .map((p) => <PlanAdherenceCard key={p.id} plan={p} />)}
 
       {/* Activity calendar */}
       <ActivityCalendar activePlans={activePlans} />

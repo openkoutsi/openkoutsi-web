@@ -6,7 +6,13 @@ import type { PlannedWorkout } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { linkedActivityIds } from '@/lib/planUtils'
-import { adherenceBadgeClass, formatAdherence } from '@/lib/adherence'
+import {
+  adherenceAccentClass,
+  adherenceBadgeClass,
+  formatAdherence,
+  showAdherenceScores,
+} from '@/lib/adherence'
+import { useAuth } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -40,8 +46,14 @@ interface Props {
 
 export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
   const t = useTranslations('app')
+  const { athlete } = useAuth()
   const [clearing, setClearing] = useState(false)
   const colorClass = TYPE_COLORS[workout.workout_type] ?? 'bg-muted text-muted-foreground'
+
+  // Adherence display is a per-user preference (default on); the score itself is
+  // always computed on the backend.
+  const adherenceVisible = showAdherenceScores(athlete?.app_settings)
+  const showMatchScore = adherenceVisible && workout.match_score != null
 
   const linkedCount = linkedActivityIds(workout).length
   const completed = linkedCount > 0
@@ -63,7 +75,14 @@ export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
 
   if (compact) {
     return (
-      <div className={cn('rounded px-2 py-1 text-xs font-medium truncate', colorClass)}>
+      <div
+        className={cn(
+          'rounded px-2 py-1 text-xs font-medium truncate',
+          colorClass,
+          showMatchScore && adherenceAccentClass(workout.match_score),
+        )}
+        title={showMatchScore ? t('plan.matchScoreLabel') : undefined}
+      >
         {typeLabel}
         {workout.skip_reason != null
           ? ` · ${t('plan.skipped')}`
@@ -92,7 +111,7 @@ export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
               {t('plan.done')}{linkedCount > 1 ? ` ·${linkedCount}` : ''}
             </Badge>
           )}
-          {workout.match_score != null && (
+          {showMatchScore && (
             <Badge
               className={cn('text-xs h-5 border-transparent', adherenceBadgeClass(workout.match_score))}
               title={t('plan.matchScoreLabel')}
