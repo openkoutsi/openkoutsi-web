@@ -100,7 +100,7 @@
     "title": "{name} — toteutuma",
     "chartLabel": "Toteutuma",
     "completed": "{count} tehty",
-    "missed": "{count} väliin jäänyt",
+    "notMarked": "{count} merkitsemättä",
     "skipped": "{count} ohitettu",
     "noTrend": "Trendin piirtämiseen ei ole vielä riittävästi tietoa."
   }

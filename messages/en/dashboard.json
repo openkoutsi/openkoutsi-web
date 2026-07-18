@@ -100,7 +100,7 @@
     "title": "{name} — adherence",
     "chartLabel": "Adherence",
     "completed": "{count} completed",
-    "missed": "{count} missed",
+    "notMarked": "{count} not marked",
     "skipped": "{count} skipped",
     "noTrend": "Not enough data yet to chart the trend."
   }
