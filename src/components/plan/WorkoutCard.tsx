@@ -5,17 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { PlannedWorkout } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { linkedActivityIds } from '@/lib/planUtils'
 import { cn } from '@/lib/utils'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -44,30 +34,21 @@ const SKIP_REASON_KEYS = [
 interface Props {
   workout: PlannedWorkout
   compact?: boolean
-  onUnlink?: (workout: PlannedWorkout) => Promise<void>
   onClearSkip?: (workout: PlannedWorkout) => Promise<void>
 }
 
-export function WorkoutCard({ workout, compact = false, onUnlink, onClearSkip }: Props) {
+export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
   const t = useTranslations('app')
-  const [unlinking, setUnlinking] = useState(false)
   const [clearing, setClearing] = useState(false)
   const colorClass = TYPE_COLORS[workout.workout_type] ?? 'bg-muted text-muted-foreground'
+
+  const linkedCount = linkedActivityIds(workout).length
+  const completed = linkedCount > 0
 
   const typeKey = WORKOUT_TYPE_KEYS.find((k) => k === workout.workout_type)
   const typeLabel = typeKey
     ? t(`plan.generate.workoutTypes.${typeKey}` as never)
     : workout.workout_type
-
-  const handleUnlink = async () => {
-    if (!onUnlink) return
-    setUnlinking(true)
-    try {
-      await onUnlink(workout)
-    } finally {
-      setUnlinking(false)
-    }
-  }
 
   const handleClearSkip = async () => {
     if (!onClearSkip) return
@@ -105,10 +86,12 @@ export function WorkoutCard({ workout, compact = false, onUnlink, onClearSkip }:
               {workout.target_load} Load
             </Badge>
           )}
-          {workout.completed_activity_id != null && (
-            <Badge variant="secondary" className="text-xs h-5">{t('plan.done')}</Badge>
+          {completed && (
+            <Badge variant="secondary" className="text-xs h-5">
+              {t('plan.done')}{linkedCount > 1 ? ` ·${linkedCount}` : ''}
+            </Badge>
           )}
-          {workout.skip_reason != null && workout.completed_activity_id == null && (
+          {workout.skip_reason != null && !completed && (
             <Badge className="text-xs h-5 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
               {t('plan.skipped')}
             </Badge>
@@ -118,37 +101,14 @@ export function WorkoutCard({ workout, compact = false, onUnlink, onClearSkip }:
       {workout.description && (
         <p className="text-xs mt-1 opacity-80">{workout.description}</p>
       )}
-      {workout.completed_activity_id != null && onUnlink && (
-        <div className="mt-2 flex justify-end">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs h-6 px-2 opacity-70 hover:opacity-100">
-                {t('plan.unlink')}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('plan.unlinkTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('plan.unlinkDesc')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('plan.unlinkCancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleUnlink} disabled={unlinking}>
-                  {t('plan.unlinkConfirm')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      )}
-      {workout.skip_reason != null && workout.completed_activity_id == null && (
+      {workout.skip_reason != null && !completed && (
         <p className="text-xs mt-1 opacity-70 italic">
           {SKIP_REASON_KEYS.includes(workout.skip_reason as typeof SKIP_REASON_KEYS[number])
             ? t(`plan.skipReasons.${workout.skip_reason}` as never)
             : workout.skip_reason}
         </p>
       )}
-      {workout.skip_reason != null && workout.completed_activity_id == null && onClearSkip && (
+      {workout.skip_reason != null && !completed && onClearSkip && (
         <div className="mt-2 flex justify-end">
           <Button
             variant="ghost"

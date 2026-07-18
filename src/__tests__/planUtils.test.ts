@@ -258,6 +258,16 @@ describe('plannedWorkoutStatus', () => {
     expect(plannedWorkoutStatus(makeWorkout({ completed_activity_id: 'act-1' }))).toBe('completed')
   })
 
+  it('returns "completed" when several activities are linked', () => {
+    const w = makeWorkout({ linked_activity_ids: ['act-1', 'act-2'], completed_activity_id: 'act-1' })
+    expect(plannedWorkoutStatus(w)).toBe('completed')
+  })
+
+  it('returns "planned" when the linked list is empty', () => {
+    const w = makeWorkout({ linked_activity_ids: [], completed_activity_id: null })
+    expect(plannedWorkoutStatus(w)).toBe('planned')
+  })
+
   it('returns "skipped" when a skip reason is set', () => {
     expect(plannedWorkoutStatus(makeWorkout({ skip_reason: 'illness' }))).toBe('skipped')
   })

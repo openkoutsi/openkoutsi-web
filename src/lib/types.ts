@@ -275,6 +275,11 @@ export interface PlannedWorkout {
   description: string | null
   duration_min: number | null
   target_load: number | null
+  // All activities linked to this workout. One session recorded as several
+  // activities can link them all here so their combined duration/Load count.
+  // Optional so older cached payloads (single link only) still type-check.
+  linked_activity_ids?: string[]
+  // Derived from the first linked activity; kept for backward compatibility.
   completed_activity_id: string | null
   skip_reason: string | null
   workout_definition_id?: string | null
