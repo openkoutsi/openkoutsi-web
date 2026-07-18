@@ -44,7 +44,7 @@ export function PlanAdherenceCard({ plan }: Props) {
         {summary && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-3">
             <span>{t('adherence.completed', { count: summary.completed })}</span>
-            <span>{t('adherence.missed', { count: summary.missed })}</span>
+            <span>{t('adherence.notMarked', { count: summary.missed })}</span>
             <span>{t('adherence.skipped', { count: summary.skipped })}</span>
           </div>
         )}
