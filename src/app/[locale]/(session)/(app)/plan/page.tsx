@@ -719,8 +719,8 @@ export default function PlanPage() {
       {activePlans.map((activePlan) => (
         <Card key={activePlan.id}>
           <CardHeader>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <CardTitle className="text-base truncate">{activePlan.name}</CardTitle>
                 {activePlan.generation_method === 'llm' && (
                   <span className="text-xs rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 font-medium shrink-0">
@@ -739,7 +739,7 @@ export default function PlanPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <EditPlanDialog plan={activePlan} onSaved={() => mutate()} />
                 <RegeneratePlanDialog
                   plan={activePlan}
