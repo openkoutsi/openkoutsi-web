@@ -85,7 +85,7 @@
     },
     "form": {
       "term": "Form",
-      "description": "Calculated as fitness − fatigue. A positive value means you are rested relative to your fitness (fresh/peak). A negative value means fatigue outweighs fitness (tired/overreached). Aim for a slightly positive form before a key event."
+      "description": "Calculated as fitness − fatigue, using the values from the end of the previous day (your freshness at the start of today, before today's training). Because today's fitness and fatigue already include today's load, the form shown won't exactly equal the fitness and fatigue numbers next to it. A positive value means you are rested relative to your fitness (fresh/peak). A negative value means fatigue outweighs fitness (tired/overreached). Aim for a slightly positive form before a key event."
     },
     "ftp": {
       "term": "FTP — Functional Threshold Power",
