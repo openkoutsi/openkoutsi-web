@@ -23,6 +23,7 @@ import { Suspense } from 'react'
 import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { CustomFunctionDialog } from '@/components/activities/CustomFunctionDialog'
 import { getCustomFunctions, CustomFunction } from '@/lib/customFunctions'
+import { showAdherenceScores } from '@/lib/adherence'
 import { useTranslations as useActivityTranslations } from 'next-intl'
 
 // ── Default zone templates ────────────────────────────────────────────────
@@ -238,6 +239,25 @@ export default function ProfilePage() {
     } catch (err) {
       toast({
         title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleShowAdherenceToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), show_adherence: checked },
+        }),
+      })
+      mutateProfile()
+      refreshAthlete()
+    } catch (err) {
+      toast({
+        title: t('settings.adherence.saveFailed'),
         description: err instanceof Error ? err.message : tCommon('unknownError'),
         variant: 'destructive',
       })
@@ -730,6 +750,27 @@ export default function ProfilePage() {
       )}
 
       {/* Auto-analyse */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('settings.adherence.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.adherence.showScores')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.adherence.showScoresDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={showAdherenceScores(profile?.app_settings)}
+              onCheckedChange={handleShowAdherenceToggle}
+              disabled={!profile}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t('settings.analysis.title')}</CardTitle>

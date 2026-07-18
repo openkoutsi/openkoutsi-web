@@ -425,6 +425,12 @@
       "model": "Malli",
       "modelDesc": "Mitä tekoälymallia käytetään valmennukseen.",
       "modelDefault": "Oletus"
+    },
+    "adherence": {
+      "title": "Suunnitelman toteutuma",
+      "showScores": "Näytä toteutumapisteet",
+      "showScoresDesc": "Näytä suunnitelman toteutumaprosentti, harjoituskohtaiset osumapisteet ja kalenterin väripalkit. Pisteet lasketaan aina; tämä säätää vain niiden näyttämistä.",
+      "saveFailed": "Asetuksen tallennus epäonnistui"
     }
   }
 }

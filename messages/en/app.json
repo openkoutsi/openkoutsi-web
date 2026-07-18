@@ -425,6 +425,12 @@
       "model": "Model",
       "modelDesc": "Which AI model to use for coaching.",
       "modelDefault": "Default"
+    },
+    "adherence": {
+      "title": "Plan adherence",
+      "showScores": "Show adherence scores",
+      "showScoresDesc": "Display the plan adherence percentage, per-workout match scores, and the calendar colour bands. The scores are always calculated; this only controls whether they are shown.",
+      "saveFailed": "Could not save the setting"
     }
   }
 }

@@ -10,6 +10,29 @@ export function formatAdherence(score: number | null | undefined): string {
 }
 
 /**
+ * Whether the UI should surface adherence scores, from the athlete's
+ * `app_settings.show_adherence` preference. The score is always computed on the
+ * backend; this only gates display. Defaults to **on** (an unset preference
+ * shows the scores).
+ */
+export function showAdherenceScores(
+  appSettings: Record<string, unknown> | null | undefined,
+): boolean {
+  return appSettings?.show_adherence !== false
+}
+
+/**
+ * Tailwind left-border accent class for a score band, used to stripe the plan
+ * calendar's workout chips. Empty string when the score is null (no accent).
+ */
+export function adherenceAccentClass(score: number | null | undefined): string {
+  if (score == null) return ''
+  if (score >= 85) return 'border-l-4 border-l-emerald-500'
+  if (score >= 60) return 'border-l-4 border-l-amber-500'
+  return 'border-l-4 border-l-red-500'
+}
+
+/**
  * Tailwind classes (badge background/text) for a score band. Green ≥ 85,
  * amber ≥ 60, red below. Neutral when the score is null.
  */

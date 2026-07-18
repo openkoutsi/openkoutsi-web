@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { AthleteProfile, TrainingPlan, Page } from '@/lib/types'
 import { getLlmConfig, generatePlanWeeks } from '@/lib/llm'
-import { adherenceBadgeClass, formatAdherence } from '@/lib/adherence'
+import { adherenceBadgeClass, formatAdherence, showAdherenceScores } from '@/lib/adherence'
 import { cn } from '@/lib/utils'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -638,6 +638,8 @@ export default function PlanPage() {
   const { data: athlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
+  const adherenceVisible = showAdherenceScores(athlete?.app_settings)
+
   // Several non-overlapping plans can be active at once, so render them all.
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
 
@@ -727,7 +729,7 @@ export default function PlanPage() {
                     {t('plan.aiTag')}
                   </span>
                 )}
-                {activePlan.adherence_score != null && (
+                {adherenceVisible && activePlan.adherence_score != null && (
                   <span
                     className={cn(
                       'text-xs rounded-full px-2 py-0.5 font-medium shrink-0',
