@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/navigation'
 import type { Activity, PlannedWorkout } from '@/lib/types'
 import { WorkoutCard } from './WorkoutCard'
 import { WorkoutFormFields } from './WorkoutFormFields'
@@ -305,7 +306,12 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
           <ul className="space-y-1">
             {linkedIds.map((id) => (
               <li key={id} className="flex items-center justify-between gap-2 text-xs">
-                <span className="truncate">{activityLabel(id)}</span>
+                <Link
+                  href={`/activities/${id}`}
+                  className="truncate text-primary hover:underline"
+                >
+                  {activityLabel(id)}
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"
