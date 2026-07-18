@@ -187,6 +187,7 @@ export default function DashboardPage() {
   const t = useTranslations('dashboard')
   const { athlete } = useAuth()
   const [days, setDays] = useState(90)
+  const [zoneKind, setZoneKind] = useState<'power' | 'hr'>('power')
   const { data: current, mutate: mutateCurrent } = useSWR<FitnessCurrent>('/api/metrics/fitness/current', fetcher)
   const { data: history, mutate: mutateHistory } = useSWR<FitnessPoint[]>(
     `/api/metrics/fitness?days=${days}`,
@@ -314,17 +315,43 @@ export default function DashboardPage() {
       )}
 
       {/* Accumulated time in zones (issue #27) */}
-      {weeklyZones && weeklyZones.some((w) => Object.keys(w.power).length || Object.keys(w.hr).length) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('timeInZones')}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6 sm:grid-cols-2">
-            <WeeklyZones data={weeklyZones} kind="power" title={t('timeInZonesPower')} />
-            <WeeklyZones data={weeklyZones} kind="hr" title={t('timeInZonesHr')} />
-          </CardContent>
-        </Card>
-      )}
+      {(() => {
+        const hasPower = weeklyZones?.some((w) => Object.keys(w.power).length) ?? false
+        const hasHr = weeklyZones?.some((w) => Object.keys(w.hr).length) ?? false
+        if (!weeklyZones || (!hasPower && !hasHr)) return null
+        // Power is the default; fall back to whichever kind actually has data.
+        const shownKind = zoneKind === 'power' ? (hasPower ? 'power' : 'hr') : hasHr ? 'hr' : 'power'
+        return (
+          <Card>
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-2">
+              <CardTitle className="text-base">{t('timeInZones')}</CardTitle>
+              {hasPower && hasHr && (
+                <div className="flex items-center rounded-md border overflow-hidden text-xs self-start sm:self-auto">
+                  <button
+                    className={`px-2.5 py-1.5 transition-colors ${shownKind === 'power' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                    onClick={() => setZoneKind('power')}
+                  >
+                    {t('timeInZonesPower')}
+                  </button>
+                  <button
+                    className={`px-2.5 py-1.5 transition-colors ${shownKind === 'hr' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                    onClick={() => setZoneKind('hr')}
+                  >
+                    {t('timeInZonesHr')}
+                  </button>
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <WeeklyZones
+                data={weeklyZones}
+                kind={shownKind}
+                title={shownKind === 'power' ? t('timeInZonesPower') : t('timeInZonesHr')}
+              />
+            </CardContent>
+          </Card>
+        )
+      })()}
 
       {/* Plan adherence (deterministic, always computed; display is opt-out) */}
       {showAdherenceScores(athlete?.app_settings) &&
