@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth'
 import { apiFetch, apiDownload, fetcher } from '@/lib/api'
 import type { AthleteProfile, WeightLogEntry, Zone } from '@/lib/types'
 import { defaultHrZones, defaultPowerZones } from '@/lib/zoneDefaults'
+import { zonesAreValid } from '@/lib/zoneValidation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -180,6 +181,10 @@ export default function ProfilePage() {
   }
 
   async function handleSaveHrZones() {
+    if (!zonesAreValid(hrZones)) {
+      toast({ title: t('profile.zoneEditor.errors.invalidTitle'), description: t('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
+      return
+    }
     setSavingHr(true)
     try {
       await apiFetch('/api/athlete', {
@@ -195,6 +200,10 @@ export default function ProfilePage() {
   }
 
   async function handleSavePowerZones() {
+    if (!zonesAreValid(powerZones)) {
+      toast({ title: t('profile.zoneEditor.errors.invalidTitle'), description: t('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
+      return
+    }
     setSavingPower(true)
     try {
       await apiFetch('/api/athlete', {
