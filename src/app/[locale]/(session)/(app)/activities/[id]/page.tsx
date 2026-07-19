@@ -146,6 +146,19 @@ export default function ActivityDetailPage({ params }: Props) {
     }
   }
 
+  async function handleRpeSave(value: number | null) {
+    if (value === (activity?.rpe ?? null)) return
+    try {
+      await apiFetch(`/api/activities/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ rpe: value }),
+      })
+      await mutate()
+    } catch {
+      toast({ title: t('detail.rpe.saveFailed'), variant: 'destructive' })
+    }
+  }
+
   // Frontend LLM streaming state
   const [streamingText, setStreamingText] = useState<string | null>(null)
   const [showLlmUpsell, setShowLlmUpsell] = useState(false)
@@ -437,6 +450,27 @@ export default function ActivityDetailPage({ params }: Props) {
                 </button>
               )
             })}
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1.5">{t('detail.rpe.title')}</p>
+            <div className="flex flex-wrap items-center gap-1">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+                const active = activity.rpe === n
+                return (
+                  <button
+                    key={n}
+                    onClick={() => handleRpeSave(active ? null : n)}
+                    className={`h-8 w-8 rounded-md text-sm font-medium border transition-colors ${
+                      active
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                )
+              })}
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1.5">{t('detail.notes.title')}</p>

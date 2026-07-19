@@ -9,6 +9,7 @@ import type { PaginatedActivities } from '@/lib/types'
 import { ActivityCard } from '@/components/activities/ActivityCard'
 import { UploadDropzone } from '@/components/activities/UploadDropzone'
 import { ManualActivityForm } from '@/components/activities/ManualActivityForm'
+import { RpePrompt } from '@/components/activities/RpePrompt'
 import { ActivitySearchFilter, EMPTY_FILTERS } from '@/components/activities/ActivitySearchFilter'
 import type { ActivityFilters } from '@/components/activities/ActivitySearchFilter'
 import { Button } from '@/components/ui/button'
@@ -68,6 +69,8 @@ export default function ActivitiesPage() {
 
   const [filters, setFilters] = useState<ActivityFilters>(() => paramsToFilters(searchParams))
   const [page, setPage] = useState(() => Number(searchParams.get('page') ?? '1'))
+  // Bumped after an upload/manual entry to re-prompt for RPE on new rides.
+  const [rpeSignal, setRpeSignal] = useState(0)
 
   const apiParams = filtersToParams(filters, page)
   const apiUrl = `/api/activities?${apiParams.toString()}`
@@ -98,10 +101,12 @@ export default function ActivitiesPage() {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <ManualActivityForm onCreated={() => { mutate() }} />
+        <ManualActivityForm onCreated={() => { mutate(); setRpeSignal((n) => n + 1) }} />
       </div>
 
-      <UploadDropzone onUploaded={() => { mutate() }} />
+      <UploadDropzone onUploaded={() => { mutate(); setRpeSignal((n) => n + 1) }} />
+
+      <RpePrompt reloadSignal={rpeSignal} />
 
       <ActivitySearchFilter filters={filters} onChange={handleFiltersChange} />
 

@@ -63,6 +63,18 @@
     "created": "Activity added",
     "emptyError": "Enter at least one field"
   },
+  "rpePrompt": {
+    "title": "How hard did that feel?",
+    "scaleLow": "Easy",
+    "scaleHigh": "Maximal",
+    "notesPlaceholder": "Add a note (optional)…",
+    "markCommute": "This was a commute",
+    "rate": "Rate",
+    "skip": "Skip",
+    "askLater": "Ask again later",
+    "remaining": "{count} more to rate",
+    "saveFailed": "Failed to save your rating"
+  },
   "processing": "Processing…",
   "detail": {
     "loading": "Loading…",
@@ -169,6 +181,10 @@
       "title": "Notes",
       "placeholder": "Add notes about this activity…",
       "saveFailed": "Failed to save notes"
+    },
+    "rpe": {
+      "title": "Perceived effort (RPE)",
+      "saveFailed": "Failed to save RPE"
     },
     "analysis": {
       "title": "AI Analysis",

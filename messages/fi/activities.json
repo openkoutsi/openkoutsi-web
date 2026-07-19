@@ -63,6 +63,18 @@
     "created": "Suoritus lisätty",
     "emptyError": "Anna vähintään yksi kenttä"
   },
+  "rpePrompt": {
+    "title": "Miltä se tuntui?",
+    "scaleLow": "Helppo",
+    "scaleHigh": "Maksimaalinen",
+    "notesPlaceholder": "Lisää muistiinpano (valinnainen)…",
+    "markCommute": "Tämä oli työmatka",
+    "rate": "Arvioi",
+    "skip": "Ohita",
+    "askLater": "Kysy myöhemmin",
+    "remaining": "{count} arvioitavaa jäljellä",
+    "saveFailed": "Arvion tallentaminen epäonnistui"
+  },
   "processing": "Käsitellään…",
   "detail": {
     "loading": "Ladataan…",
@@ -169,6 +181,10 @@
       "title": "Muistiinpanot",
       "placeholder": "Lisää muistiinpanoja tästä harjoituksesta…",
       "saveFailed": "Muistiinpanojen tallentaminen epäonnistui"
+    },
+    "rpe": {
+      "title": "Koettu rasitus (RPE)",
+      "saveFailed": "RPE:n tallentaminen epäonnistui"
     },
     "analysis": {
       "title": "Tekoälyanalyysi",
