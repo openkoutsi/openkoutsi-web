@@ -562,21 +562,24 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Sync zones from provider */}
-      {profile?.connected_providers && profile.connected_providers.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('profile.syncZones')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {(
-              [
-                { provider: 'strava', name: 'Strava' },
-                { provider: 'wahoo',  name: 'Wahoo'  },
-              ] as const
-            )
-              .filter(({ provider }) => profile.connected_providers.includes(provider))
-              .map(({ provider, name }) => (
+      {/* Sync zones from provider.
+          Wahoo is intentionally excluded: its /power_zones API returns an empty
+          array even when zones are configured in the Wahoo app, so zone sync
+          cannot work for it (see openkoutsi-backend issue #56). */}
+      {(() => {
+        const zoneSyncProviders = (
+          [{ provider: 'strava', name: 'Strava' }] as const
+        ).filter(({ provider }) => profile?.connected_providers?.includes(provider))
+
+        if (zoneSyncProviders.length === 0) return null
+
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t('profile.syncZones')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {zoneSyncProviders.map(({ provider, name }) => (
                 <div key={provider} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-muted-foreground">
                     {name}: {t(`profile.syncZonesProvides.${provider}`)}
@@ -595,9 +598,10 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               ))}
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )
+      })()}
 
       {/* Heart rate zones */}
       <Card>
