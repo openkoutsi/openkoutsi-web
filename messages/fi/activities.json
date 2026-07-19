@@ -110,7 +110,8 @@
         "heartrate": "Syke",
         "speed": "Nopeus",
         "altitude": "Korkeus",
-        "cadence": "Kadenssi"
+        "cadence": "Kadenssi",
+        "torque": "Vääntömomentti"
       },
       "rollingAvg": "Liukuva keskiarvo",
       "rollingAvgWindow": "Ikkuna (s)",
