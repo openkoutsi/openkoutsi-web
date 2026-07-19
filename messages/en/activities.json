@@ -110,7 +110,8 @@
         "heartrate": "Heart Rate",
         "speed": "Speed",
         "altitude": "Elevation",
-        "cadence": "Cadence"
+        "cadence": "Cadence",
+        "torque": "Torque"
       },
       "rollingAvg": "Rolling avg",
       "rollingAvgWindow": "Window (s)",
