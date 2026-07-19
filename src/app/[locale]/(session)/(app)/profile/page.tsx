@@ -236,6 +236,24 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleAskForRpeToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), ask_for_rpe: checked },
+        }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
   async function handleAutoTrainingStatusToggle(checked: boolean) {
     try {
       await apiFetch('/api/athlete', {
@@ -812,6 +830,19 @@ export default function ProfilePage() {
             <Switch
               checked={Boolean(profile?.app_settings?.auto_training_status)}
               onCheckedChange={handleAutoTrainingStatusToggle}
+              disabled={!profile}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 mt-4 pt-4 border-t">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.analysis.askForRpe')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.analysis.askForRpeDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={profile?.app_settings?.ask_for_rpe !== false}
+              onCheckedChange={handleAskForRpeToggle}
               disabled={!profile}
             />
           </div>

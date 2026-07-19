@@ -15,6 +15,7 @@ import { WeeklyZones } from '@/components/charts/WeeklyZones'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
+import { RpePrompt } from '@/components/activities/RpePrompt'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
 import { HelpCircle, RefreshCw } from 'lucide-react'
@@ -364,6 +365,9 @@ export default function DashboardPage() {
 
       {/* Daily training status feedback */}
       <TrainingStatusCard />
+
+      {/* Perceived-effort (RPE) prompt for recent significant cycling rides */}
+      <RpePrompt />
     </div>
   )
 }

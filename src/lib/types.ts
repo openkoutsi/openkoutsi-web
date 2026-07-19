@@ -163,6 +163,7 @@ export interface Activity {
   workout_category: string | null
   labels: string[]
   notes: string | null
+  rpe: number | null
   has_fit_file: boolean
   status: string
   created_at: string
