@@ -65,10 +65,14 @@
     "subtitle": "Connect Strava or Wahoo to automatically import your workouts. This step is optional — you can connect them later in your profile."
   },
   "step4": {
-    "title": "Automatic AI analysis",
-    "subtitle": "When enabled, new workouts will be automatically analysed by AI after upload. You can change this at any time in your profile.",
+    "title": "Features",
+    "subtitle": "Choose which features to enable. You can change any of these at any time in your profile.",
     "toggle": "Enable auto-analysis",
-    "toggleDesc": "Automatically analyse each new workout with AI."
+    "toggleDesc": "Automatically analyse each new workout with AI.",
+    "weeklyLoadToggle": "Show weekly load",
+    "weeklyLoadToggleDesc": "Display the weekly training-load chart on your dashboard.",
+    "adherenceToggle": "Show plan adherence",
+    "adherenceToggleDesc": "Display how closely you follow your training plan (adherence scores)."
   },
   "step5": {
     "title": "Set a goal",

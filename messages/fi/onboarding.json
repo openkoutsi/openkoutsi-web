@@ -65,10 +65,14 @@
     "subtitle": "Yhdistä Strava tai Wahoo tuodaksesi harjoituksesi automaattisesti. Tämä vaihe on vapaaehtoinen – voit yhdistää ne myöhemmin profiilissasi."
   },
   "step4": {
-    "title": "Automaattinen tekoälyanalyysi",
-    "subtitle": "Kun tämä on käytössä, uudet harjoitukset analysoidaan automaattisesti tekoälyllä latauksen jälkeen. Voit muuttaa tätä asetusta milloin tahansa profiilissasi.",
+    "title": "Ominaisuudet",
+    "subtitle": "Valitse käyttöön otettavat ominaisuudet. Voit muuttaa näitä asetuksia milloin tahansa profiilissasi.",
     "toggle": "Ota automaattinen analyysi käyttöön",
-    "toggleDesc": "Analysoi jokainen uusi harjoitus automaattisesti tekoälyllä."
+    "toggleDesc": "Analysoi jokainen uusi harjoitus automaattisesti tekoälyllä.",
+    "weeklyLoadToggle": "Näytä viikkokuormitus",
+    "weeklyLoadToggleDesc": "Näytä viikoittaisen harjoituskuormituksen kaavio koontinäytölläsi.",
+    "adherenceToggle": "Näytä suunnitelman toteutuma",
+    "adherenceToggleDesc": "Näytä kuinka tarkasti noudatat harjoitussuunnitelmaasi (toteutumapisteet)."
   },
   "step5": {
     "title": "Aseta tavoite",

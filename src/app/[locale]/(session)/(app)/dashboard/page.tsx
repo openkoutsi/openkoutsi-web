@@ -14,6 +14,7 @@ import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
 import { WeeklyZones } from '@/components/charts/WeeklyZones'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
+import { showWeeklyLoad } from '@/lib/weeklyLoad'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { RpePrompt } from '@/components/activities/RpePrompt'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
@@ -304,7 +305,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Weekly Load */}
-      {history && history.length > 0 && (
+      {showWeeklyLoad(athlete?.app_settings) && history && history.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t('weeklyLoad')}</CardTitle>
