@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/navigation'
 import type { Activity, PlannedWorkout } from '@/lib/types'
@@ -45,6 +46,19 @@ const SKIP_REASON_KEYS = [
   'illness', 'injury', 'fatigue', 'busy', 'lazy', 'travel', 'weather', 'other',
 ] as const
 
+/**
+ * Manual linking lets an activity complete a planned workout even when it was done
+ * up to this many days either side of the planned day — plans routinely shift by a
+ * day or two in practice. Automatic matching stays strictly same-day (see the
+ * backend activity_workout_matcher); this window only widens the manual picker.
+ */
+const LINK_WINDOW_DAYS = 2
+
+/** An activity's calendar date as yyyy-MM-dd (UTC date prefix, matching the calendar). */
+function activityDate(a: Activity): string {
+  return a.start_time.slice(0, 10)
+}
+
 interface Props {
   workout: PlannedWorkout
   /** ISO date string yyyy-MM-dd of the workout's calendar day. */
@@ -65,6 +79,11 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
   const linkedIds = linkedActivityIds(workout)
   const isCompleted = linkedIds.length > 0
 
+  // Candidate activities are drawn from a ±LINK_WINDOW_DAYS window around the
+  // workout's planned day, so a session done a day or two off can still be linked.
+  const windowStart = format(addDays(parseISO(date), -LINK_WINDOW_DAYS), 'yyyy-MM-dd')
+  const windowEnd = format(addDays(parseISO(date), LINK_WINDOW_DAYS), 'yyyy-MM-dd')
+
   // Mark-as-completed state
   const [activities, setActivities] = useState<Activity[]>([])
   const [loadingActivities, setLoadingActivities] = useState(false)
@@ -77,7 +96,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
   useEffect(() => {
     if (linkedIds.length === 0 || activities.length > 0) return
     let cancelled = false
-    apiFetch<ActivityListResponse>(`/api/activities?start=${date}&end=${date}&page_size=50`)
+    apiFetch<ActivityListResponse>(`/api/activities?start=${windowStart}&end=${windowEnd}&page_size=50`)
       .then((data) => { if (!cancelled) setActivities(data.items ?? []) })
       .catch(() => { /* names fall back to ids */ })
     return () => { cancelled = true }
@@ -164,7 +183,7 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
     setLoadingActivities(true)
     try {
       const data = await apiFetch<ActivityListResponse>(
-        `/api/activities?start=${date}&end=${date}&page_size=50`
+        `/api/activities?start=${windowStart}&end=${windowEnd}&page_size=50`
       )
       setActivities(data.items ?? [])
     } catch {
@@ -246,11 +265,19 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
 
   const activityLabel = (id: string): string => {
     const a = activities.find((x) => x.id === id)
-    return a ? (a.name || a.sport_type) : id.slice(0, 8)
+    if (!a) return id.slice(0, 8)
+    return `${a.name || a.sport_type} · ${format(parseISO(activityDate(a)), 'EEE d MMM yyyy')}`
   }
 
-  // Activities on the day that are not already linked to this workout.
-  const linkableActivities = activities.filter((a) => !linkedIds.includes(a.id))
+  // Candidate activities in the window, not already linked to this workout, ordered
+  // by proximity to the planned day (same-day first) so the common case stays on top.
+  const linkableActivities = activities
+    .filter((a) => !linkedIds.includes(a.id))
+    .sort(
+      (a, b) =>
+        Math.abs(differenceInCalendarDays(parseISO(activityDate(a)), parseISO(date))) -
+        Math.abs(differenceInCalendarDays(parseISO(activityDate(b)), parseISO(date))),
+    )
 
   const linkPickerNode = (
     <div className="space-y-2">
@@ -267,7 +294,8 @@ export function WorkoutActionsPanel({ workout, date, onWorkoutUpdated, onWorkout
           <SelectContent>
             {linkableActivities.map((a) => (
               <SelectItem key={a.id} value={a.id} className="text-xs">
-                {a.name || a.sport_type}
+                {format(parseISO(activityDate(a)), 'EEE d MMM yyyy')}
+                {` · ${a.name || a.sport_type}`}
                 {a.duration_s ? ` · ${formatDuration(a.duration_s)}` : ''}
                 {a.load != null ? ` · ${Math.round(a.load)} Load` : ''}
               </SelectItem>

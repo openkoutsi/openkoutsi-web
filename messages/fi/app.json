@@ -127,7 +127,7 @@
     "linkAnother": "Linkitä toinen harjoitus…",
     "selectActivity": "Valitse harjoitus, jolla suoritit tämän:",
     "loadingActivities": "Ladataan harjoituksia…",
-    "noActivitiesOnDay": "Ei harjoituksia tälle päivälle.",
+    "noActivitiesOnDay": "Ei harjoituksia kahden päivän sisällä tästä harjoituksesta.",
     "chooseActivity": "Valitse harjoitus",
     "confirmLink": "Linkitä",
     "linking": "Linkitetään…",

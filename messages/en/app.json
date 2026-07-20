@@ -127,7 +127,7 @@
     "linkAnother": "Link another activity…",
     "selectActivity": "Choose an activity that completed this workout:",
     "loadingActivities": "Loading activities…",
-    "noActivitiesOnDay": "No activities recorded on this day.",
+    "noActivitiesOnDay": "No activities recorded within 2 days of this workout.",
     "chooseActivity": "Select an activity",
     "confirmLink": "Link",
     "linking": "Linking…",
