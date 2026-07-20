@@ -25,6 +25,7 @@ import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { CustomFunctionDialog } from '@/components/activities/CustomFunctionDialog'
 import { getCustomFunctions, CustomFunction } from '@/lib/customFunctions'
 import { showAdherenceScores } from '@/lib/adherence'
+import { showWeeklyLoad } from '@/lib/weeklyLoad'
 import { useTranslations as useActivityTranslations } from 'next-intl'
 
 // ── Default zone templates ────────────────────────────────────────────────
@@ -285,6 +286,25 @@ export default function ProfilePage() {
     } catch (err) {
       toast({
         title: t('settings.adherence.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleShowWeeklyLoadToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), show_weekly_load: checked },
+        }),
+      })
+      mutateProfile()
+      refreshAthlete()
+    } catch (err) {
+      toast({
+        title: t('settings.weeklyLoad.saveFailed'),
         description: err instanceof Error ? err.message : tCommon('unknownError'),
         variant: 'destructive',
       })
@@ -796,6 +816,28 @@ export default function ProfilePage() {
             <Switch
               checked={showAdherenceScores(profile?.app_settings)}
               onCheckedChange={handleShowAdherenceToggle}
+              disabled={!profile}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Weekly load */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('settings.weeklyLoad.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.weeklyLoad.show')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.weeklyLoad.showDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={showWeeklyLoad(profile?.app_settings)}
+              onCheckedChange={handleShowWeeklyLoadToggle}
               disabled={!profile}
             />
           </div>

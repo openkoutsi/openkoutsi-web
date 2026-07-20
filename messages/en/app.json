@@ -440,6 +440,12 @@
       "showScores": "Show adherence scores",
       "showScoresDesc": "Display the plan adherence percentage, per-workout match scores, and the calendar colour bands. The scores are always calculated; this only controls whether they are shown.",
       "saveFailed": "Could not save the setting"
+    },
+    "weeklyLoad": {
+      "title": "Weekly load",
+      "show": "Show weekly load chart",
+      "showDesc": "Display the weekly training-load chart on your dashboard. The load is always calculated; this only controls whether the chart is shown.",
+      "saveFailed": "Could not save the setting"
     }
   }
 }
