@@ -5,8 +5,7 @@ import useSWR from 'swr'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/navigation'
 import { fetcher, apiFetch, apiDownload, LlmSubscriptionRequiredError } from '@/lib/api'
-import type { ActivityDetail, AthleteProfile, FitnessCurrent, PowerBestEntry } from '@/lib/types'
-import { getLlmConfig, streamAnalysis, type FatigueContext, type PrBadges } from '@/lib/llm'
+import type { ActivityDetail, AthleteProfile, PowerBestEntry } from '@/lib/types'
 import { scheduleReanalyze } from '@/lib/reanalyze'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -79,7 +78,6 @@ export default function ActivityDetailPage({ params }: Props) {
     { shouldRetryOnError: false },
   )
   const { data: athlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
-  const { data: fitnessCurrent } = useSWR<FitnessCurrent>('/api/metrics/fitness/current', fetcher, { shouldRetryOnError: false })
 
   const [reprocessing, setReprocessing] = useState(false)
   const [overlayStreams, setOverlayStreams] = useState<OverlayStream[]>([])
@@ -162,12 +160,7 @@ export default function ActivityDetailPage({ params }: Props) {
     }
   }
 
-  // Frontend LLM streaming state
-  const [streamingText, setStreamingText] = useState<string | null>(null)
   const [showLlmUpsell, setShowLlmUpsell] = useState(false)
-  const abortRef = useRef<AbortController | null>(null)
-
-  const llmConfig = getLlmConfig(athlete?.app_settings)
 
   function startEditingTitle() {
     setTitleDraft(activity?.name ?? '')
@@ -231,72 +224,26 @@ export default function ActivityDetailPage({ params }: Props) {
   }
 
   async function handleAnalyze() {
-    const fatigue: FatigueContext | undefined = fitnessCurrent
-      ? { fitness: fitnessCurrent.fitness, fatigue: fitnessCurrent.fatigue, form: fitnessCurrent.form, form_label: fitnessCurrent.form_label }
-      : undefined
-
     setShowLlmUpsell(false)
-    if (llmConfig && activity && athlete) {
-      // User-configured LLM path: proxied through the backend (/api/llm/chat).
-      // The API key is decrypted server-side — it never touches the browser.
-      abortRef.current = new AbortController()
-      setStreamingText('')
-      try {
-        const prBadges: PrBadges = {
-          power: activity.power_pr_badges ?? {},
-          distance: activity.distance_pr_badges ?? {},
-        }
-        const full = await streamAnalysis(
-          activity,
-          athlete,
-          (chunk) => setStreamingText((t) => (t ?? '') + chunk),
-          abortRef.current.signal,
-          locale,
-          fatigue,
-          prBadges,
-        )
-        // Persist result to backend
-        await apiFetch(`/api/activities/${id}/analysis`, {
-          method: 'PATCH',
-          body: JSON.stringify({ analysis: full }),
-        })
-        setStreamingText(null)
-        mutate()
-      } catch (err) {
-        if ((err as Error).name === 'AbortError') {
-          setStreamingText(null)
-          return
-        }
-        setStreamingText(null)
-        if (err instanceof LlmSubscriptionRequiredError) {
-          setShowLlmUpsell(true)
-          return
-        }
-        toast({
-          title: t('detail.analysis.analysisFailed'),
-          description: err instanceof Error ? err.message : tCommon('unknownError'),
-          variant: 'destructive',
-        })
+    // Every user (BYO or instance) goes through the server analyze endpoint,
+    // which builds the prompt and resolves the caller's LLM server-side. The
+    // detail page polls while analysis_status is "pending".
+    try {
+      await apiFetch(`/api/activities/${id}/analyze`, {
+        method: 'POST',
+        body: JSON.stringify({ locale }),
+      })
+      mutate()
+    } catch (err) {
+      if (err instanceof LlmSubscriptionRequiredError) {
+        setShowLlmUpsell(true)
+        return
       }
-    } else {
-      // Server-side LLM path (server has its own LLM configured)
-      try {
-        await apiFetch(`/api/activities/${id}/analyze`, {
-          method: 'POST',
-          body: JSON.stringify({ locale }),
-        })
-        mutate()
-      } catch (err) {
-        if (err instanceof LlmSubscriptionRequiredError) {
-          setShowLlmUpsell(true)
-          return
-        }
-        toast({
-          title: t('detail.analysis.analysisFailedToStart'),
-          description: err instanceof Error ? err.message : tCommon('unknownError'),
-          variant: 'destructive',
-        })
-      }
+      toast({
+        title: t('detail.analysis.analysisFailedToStart'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
     }
   }
 
@@ -308,8 +255,7 @@ export default function ActivityDetailPage({ params }: Props) {
     return <p className="text-muted-foreground">{t('detail.notFound')}</p>
   }
 
-  const isStreaming = streamingText !== null
-  const isAnalysisPending = activity.analysis_status === 'pending' && !isStreaming
+  const isAnalysisPending = activity.analysis_status === 'pending'
 
   const powerCurveEntries: PowerBestEntry[] = Object.entries(activity.power_bests ?? {})
     .map(([d, w]) => ({
@@ -668,69 +614,26 @@ export default function ActivityDetailPage({ params }: Props) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">{t('detail.analysis.title')}</CardTitle>
-          {!isStreaming && !activity.analysis_status && (
+          {!isAnalysisPending && !activity.analysis_status && (
             <Button size="sm" variant="outline" onClick={handleAnalyze}>
               {t('detail.analysis.analyse')}
             </Button>
           )}
-          {!isStreaming && activity.analysis_status === 'error' && (
+          {!isAnalysisPending && activity.analysis_status === 'error' && (
             <Button size="sm" variant="outline" onClick={handleAnalyze}>
               {t('detail.analysis.retry')}
             </Button>
           )}
-          {!isStreaming && activity.analysis_status === 'done' && (
+          {!isAnalysisPending && activity.analysis_status === 'done' && (
             <Button size="sm" variant="outline" onClick={handleAnalyze}>
               {t('detail.analysis.reanalyse')}
-            </Button>
-          )}
-          {isStreaming && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => abortRef.current?.abort()}
-            >
-              {t('detail.analysis.stop')}
             </Button>
           )}
         </CardHeader>
         <CardContent>
           {showLlmUpsell && <LlmUpsell className="mb-4" />}
-          {/* Streaming: build chat bubbles from accumulated text */}
-          {isStreaming && (() => {
-            const { mood, paragraphs } = parseMoodAndParagraphs(streamingText ?? '')
-            const completedParagraphs = paragraphs.slice(0, -1)
-            const partial = paragraphs[paragraphs.length - 1] ?? ''
-            const showWaiting = paragraphs.length === 0
-            return (
-              <div className="flex flex-col gap-3">
-                {showWaiting && (
-                  <div className="flex items-start gap-3">
-                    <KoutsiAvatar mood="neutral" />
-                    <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
-                    </div>
-                  </div>
-                )}
-                {completedParagraphs.map((para, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <KoutsiAvatar mood={mood} />
-                    <KoutsiBubble text={para} />
-                  </div>
-                ))}
-                {partial && (
-                  <div className="flex items-start gap-3">
-                    <KoutsiAvatar mood={mood} />
-                    <KoutsiBubble text={partial} isPartial />
-                  </div>
-                )}
-              </div>
-            )
-          })()}
-
           {/* Server-side pending (polling) */}
-          {!isStreaming && isAnalysisPending && (
+          {isAnalysisPending && (
             <div className="flex items-start gap-3">
               <KoutsiAvatar mood="neutral" />
               <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
@@ -742,7 +645,7 @@ export default function ActivityDetailPage({ params }: Props) {
           )}
 
           {/* Completed analysis: render as chat bubbles */}
-          {!isStreaming && activity.analysis && (() => {
+          {!isAnalysisPending && activity.analysis && (() => {
             const { mood, paragraphs } = parseMoodAndParagraphs(activity.analysis)
             return (
               <div className="flex flex-col gap-3">
@@ -756,10 +659,10 @@ export default function ActivityDetailPage({ params }: Props) {
             )
           })()}
 
-          {!isStreaming && activity.analysis_status === 'error' && !activity.analysis && (
+          {!isAnalysisPending && activity.analysis_status === 'error' && !activity.analysis && (
             <p className="text-sm text-destructive">{t('detail.analysis.failed')}</p>
           )}
-          {!isStreaming && !activity.analysis_status && (
+          {!isAnalysisPending && !activity.analysis_status && (
             <p className="text-sm text-muted-foreground">
               {t('detail.analysis.noAnalysis')}
             </p>

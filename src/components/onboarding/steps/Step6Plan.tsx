@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
-import { getLlmConfig, generatePlanWeeks } from '@/lib/llm'
+import { getLlmConfig } from '@/lib/llm'
 import { WizardShell } from '@/components/onboarding/WizardShell'
 import { useCompleteOnboarding } from '@/components/onboarding/useCompleteOnboarding'
 import { Input } from '@/components/ui/input'
@@ -84,18 +84,11 @@ export function Step6Plan({ onNext, onBack, onSkip }: Props) {
       }
       const numWeeks = parseInt(weeks)
 
-      if (useLlm && llmConfig && athlete) {
-        const llmWeeks = await generatePlanWeeks(config, numWeeks, goal || null, athlete)
-        await apiFetch('/api/plans', {
-          method: 'POST',
-          body: JSON.stringify({ name, start_date: startDate, weeks: numWeeks, goal: goal || null, config, llm_weeks: llmWeeks }),
-        })
-      } else {
-        await apiFetch('/api/plans', {
-          method: 'POST',
-          body: JSON.stringify({ name, start_date: startDate, weeks: numWeeks, goal: goal || null, config, use_llm: useLlm }),
-        })
-      }
+      // Plan generation runs server-side for everyone (BYO or instance).
+      await apiFetch('/api/plans', {
+        method: 'POST',
+        body: JSON.stringify({ name, start_date: startDate, weeks: numWeeks, goal: goal || null, config, use_llm: useLlm }),
+      })
       setPlanCreated(true)
       toast({ title: tApp('plan.generate.success') })
       onNext()
