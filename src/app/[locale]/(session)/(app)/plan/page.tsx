@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { AthleteProfile, TrainingPlan, Page } from '@/lib/types'
-import { getLlmConfig, generatePlanWeeks } from '@/lib/llm'
+import { getLlmConfig } from '@/lib/llm'
 import { adherenceBadgeClass, formatAdherence, showAdherenceScores } from '@/lib/adherence'
 import { cn } from '@/lib/utils'
 import { LlmUpsell } from '@/components/LlmUpsell'
@@ -133,37 +133,19 @@ function GeneratePlanDialog({
 
       const numWeeks = parseInt(weeks)
 
-      if (useLlm && llmConfig && athlete) {
-        const llmWeeks = await generatePlanWeeks(
+      // Plan generation runs server-side for everyone (BYO or instance); the
+      // server builds the prompt and resolves the caller's LLM.
+      await apiFetch('/api/plans', {
+        method: 'POST',
+        body: JSON.stringify({
+          name,
+          start_date: startDate,
+          weeks: numWeeks,
+          goal: goal || null,
           config,
-          numWeeks,
-          goal || null,
-          athlete,
-        )
-        await apiFetch('/api/plans', {
-          method: 'POST',
-          body: JSON.stringify({
-            name,
-            start_date: startDate,
-            weeks: numWeeks,
-            goal: goal || null,
-            config,
-            llm_weeks: llmWeeks,
-          }),
-        })
-      } else {
-        await apiFetch('/api/plans', {
-          method: 'POST',
-          body: JSON.stringify({
-            name,
-            start_date: startDate,
-            weeks: numWeeks,
-            goal: goal || null,
-            config,
-            use_llm: useLlm,
-          }),
-        })
-      }
+          use_llm: useLlm,
+        }),
+      })
 
       toast({ title: t('plan.generate.success') })
       setOpen(false)
@@ -510,20 +492,11 @@ function RegeneratePlanDialog({
         intensity_preference: intensityPref,
         long_description: useLlm && longDescription ? longDescription : undefined,
       }
-      const numWeeks = plan.weeks ?? 8
-
-      if (useLlm && llmConfig && athlete) {
-        const llmWeeks = await generatePlanWeeks(config, numWeeks, plan.goal ?? null, athlete)
-        await apiFetch(`/api/plans/${plan.id}/regenerate`, {
-          method: 'POST',
-          body: JSON.stringify({ config, llm_weeks: llmWeeks }),
-        })
-      } else {
-        await apiFetch(`/api/plans/${plan.id}/regenerate`, {
-          method: 'POST',
-          body: JSON.stringify({ config, use_llm: useLlm }),
-        })
-      }
+      // Regeneration runs server-side for everyone (BYO or instance).
+      await apiFetch(`/api/plans/${plan.id}/regenerate`, {
+        method: 'POST',
+        body: JSON.stringify({ config, use_llm: useLlm }),
+      })
 
       toast({ title: t('plan.regenerate.success') })
       setOpen(false)
