@@ -7,6 +7,7 @@ import { useRouter } from '@/navigation'
 import { fetcher, apiFetch, apiDownload, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { ActivityDetail, AthleteProfile, FitnessCurrent, PowerBestEntry } from '@/lib/types'
 import { getLlmConfig, streamAnalysis, type FatigueContext, type PrBadges } from '@/lib/llm'
+import { scheduleReanalyze } from '@/lib/reanalyze'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -139,6 +140,7 @@ export default function ActivityDetailPage({ params }: Props) {
         body: JSON.stringify({ notes }),
       })
       await mutate()
+      scheduleReanalyze(id, { enabled: Boolean(athlete?.app_settings?.auto_analyze), locale })
     } catch {
       toast({ title: t('detail.notes.saveFailed'), variant: 'destructive' })
     } finally {
@@ -154,6 +156,7 @@ export default function ActivityDetailPage({ params }: Props) {
         body: JSON.stringify({ rpe: value }),
       })
       await mutate()
+      scheduleReanalyze(id, { enabled: Boolean(athlete?.app_settings?.auto_analyze), locale })
     } catch {
       toast({ title: t('detail.rpe.saveFailed'), variant: 'destructive' })
     }

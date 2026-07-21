@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { apiFetch } from '@/lib/api'
+import { scheduleReanalyze } from '@/lib/reanalyze'
 import { useAuth } from '@/lib/auth'
 import type { Activity } from '@/lib/types'
 import {
@@ -37,6 +38,7 @@ const RPE_VALUES = Array.from({ length: 10 }, (_, i) => i + 1)
  */
 export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
   const t = useTranslations('activities')
+  const locale = useLocale()
   const { athlete } = useAuth()
   const enabled = athlete ? athlete.app_settings?.ask_for_rpe !== false : false
 
@@ -114,6 +116,12 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
       await apiFetch(`/api/activities/${current.id}`, {
         method: 'PATCH',
         body: JSON.stringify(body),
+      })
+      // Issue #32: re-run analysis (if enabled) now that the athlete has rated
+      // this ride from the dashboard feedback prompt.
+      scheduleReanalyze(current.id, {
+        enabled: Boolean(athlete?.app_settings?.auto_analyze),
+        locale,
       })
       await advanceHead(current)
       advance()
