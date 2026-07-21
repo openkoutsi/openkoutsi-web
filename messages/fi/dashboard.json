@@ -105,6 +105,7 @@
     "completed": "{count} tehty",
     "notMarked": "{count} merkitsemättä",
     "skipped": "{count} ohitettu",
+    "remaining": "{count} jäljellä",
     "noTrend": "Trendin piirtämiseen ei ole vielä riittävästi tietoa."
   }
 }

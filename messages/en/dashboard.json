@@ -105,6 +105,7 @@
     "completed": "{count} completed",
     "notMarked": "{count} not marked",
     "skipped": "{count} skipped",
+    "remaining": "{count} remaining",
     "noTrend": "Not enough data yet to chart the trend."
   }
 }
