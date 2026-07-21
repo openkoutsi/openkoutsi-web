@@ -32,9 +32,31 @@ export function BackendStatusProvider({ children }: { children: React.ReactNode 
   }, [])
 
   useEffect(() => {
-    check()
-    const interval = setInterval(check, 30_000)
-    return () => clearInterval(interval)
+    let interval: ReturnType<typeof setInterval> | undefined
+
+    const start = () => {
+      if (interval) return
+      check()
+      interval = setInterval(check, 60_000)
+    }
+    const stop = () => {
+      if (interval) {
+        clearInterval(interval)
+        interval = undefined
+      }
+    }
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') start()
+      else stop()
+    }
+
+    // Only poll while the tab is visible; check immediately on becoming visible.
+    handleVisibility()
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [check])
 
   return React.createElement(

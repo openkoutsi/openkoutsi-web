@@ -40,6 +40,10 @@ const PERIOD_OPTIONS = [
 
 const GLOSSARY_KEYS = ['fitness', 'fatigue', 'form', 'ftp', 'load'] as const
 
+// Auto-refresh dashboard data while the page is open. SWR's refreshWhenHidden
+// defaults to false, so polling pauses automatically in a background tab.
+const REFRESH_INTERVAL_MS = 60_000
+
 function MetricsGlossaryDialog() {
   const t = useTranslations('dashboard')
   return (
@@ -190,20 +194,29 @@ export default function DashboardPage() {
   const { athlete } = useAuth()
   const [days, setDays] = useState(90)
   const [zoneKind, setZoneKind] = useState<'power' | 'hr'>('power')
-  const { data: current, mutate: mutateCurrent } = useSWR<FitnessCurrent>('/api/metrics/fitness/current', fetcher)
+  const { data: current, mutate: mutateCurrent } = useSWR<FitnessCurrent>(
+    '/api/metrics/fitness/current',
+    fetcher,
+    { refreshInterval: REFRESH_INTERVAL_MS },
+  )
   const { data: history, mutate: mutateHistory } = useSWR<FitnessPoint[]>(
     `/api/metrics/fitness?days=${days}`,
     fetcher,
+    { refreshInterval: REFRESH_INTERVAL_MS },
   )
   const { data: summary } = useSWR<ActivitySummary>(
     `/api/metrics/activity-summary?days=${days}`,
     fetcher,
+    { refreshInterval: REFRESH_INTERVAL_MS },
   )
   const { data: weeklyZones } = useSWR<WeeklyZoneBucket[]>(
     `/api/metrics/zones/weekly?days=${days}`,
     fetcher,
+    { refreshInterval: REFRESH_INTERVAL_MS },
   )
-  const { data: plansPage } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher)
+  const { data: plansPage } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher, {
+    refreshInterval: REFRESH_INTERVAL_MS,
+  })
   const plans = plansPage?.items
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
   const _rawPlanned = plans ? aggregatePlannedLoadByWeek(plans) : undefined
