@@ -375,6 +375,9 @@ export interface PlanAdherenceSummary {
   missed: number
   skipped: number
   pending: number
+  // Sessions still to do from today onward: future workouts + today's un-acted
+  // workout. Optional so older cached payloads still type-check.
+  remaining?: number
 }
 
 export interface PlanAdherencePoint {

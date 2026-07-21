@@ -46,6 +46,7 @@ export function PlanAdherenceCard({ plan }: Props) {
             <span>{t('adherence.completed', { count: summary.completed })}</span>
             <span>{t('adherence.notMarked', { count: summary.missed })}</span>
             <span>{t('adherence.skipped', { count: summary.skipped })}</span>
+            <span>{t('adherence.remaining', { count: summary.remaining ?? 0 })}</span>
           </div>
         )}
         {hasTrend ? (
