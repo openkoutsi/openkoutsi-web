@@ -113,6 +113,15 @@ function GeneratePlanDialog({
     setLongDescription('')
   }
 
+  // Re-seed the structure fields from experience level + saved hours when the
+  // dialog opens. The hook's useState initializers run once (often before the
+  // SWR athlete has loaded), so without this a cold load would lock in the
+  // intermediate fallback and blank hours until the dialog was closed once.
+  useEffect(() => {
+    if (open) structure.resetToDefaults()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
   async function handleSubmit() {
     setGenerating(true)
     setShowLlmUpsell(false)
@@ -477,6 +486,10 @@ function RegeneratePlanDialog({
         Object.fromEntries(cfg.day_configs.map((d) => [d.day_of_week, d.workout_type])),
       )
     }
+    // Seed from experience defaults first, then overlay the stored config, so a
+    // plan whose config predates the structure keys still falls back to the
+    // athlete's experience defaults rather than the cold-load seed.
+    structure.resetToDefaults()
     structure.applyConfig(cfg)
     if (typeof cfg.long_description === 'string') setLongDescription(cfg.long_description)
     // eslint-disable-next-line react-hooks/exhaustive-deps

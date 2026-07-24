@@ -113,7 +113,7 @@
     "deleteDesc": "“{name}” will be permanently deleted.",
     "current": "(current)",
     "weekLabel": "Week {week} — {date}",
-    "loadUnit": "TSS",
+    "loadUnit": "Load",
     "weekType": {
       "build": "Build",
       "recovery": "Recovery",
@@ -200,6 +200,7 @@
       },
       "weeklyHours": "Weekly hours available",
       "weeklyHoursHelp": "Weekly ride time is kept within this range (leave blank for no limit).",
+      "hoursRangeHint": "Minimum is above maximum — the values will be swapped.",
       "hoursMinPlaceholder": "min",
       "hoursMaxPlaceholder": "max",
       "hoursMinLabel": "Minimum weekly hours",

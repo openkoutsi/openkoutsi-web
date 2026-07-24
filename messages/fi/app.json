@@ -113,7 +113,7 @@
     "deleteDesc": "“{name}” poistetaan pysyvästi.",
     "current": "(nykyinen)",
     "weekLabel": "Viikko {week} — {date}",
-    "loadUnit": "TSS",
+    "loadUnit": "kuormaa",
     "weekType": {
       "build": "Rakennus",
       "recovery": "Palautus",
@@ -200,6 +200,7 @@
       },
       "weeklyHours": "Viikoittaiset tunnit käytettävissä",
       "weeklyHoursHelp": "Viikoittainen ajoaika pidetään tällä välillä (jätä tyhjäksi, jos ei rajaa).",
+      "hoursRangeHint": "Vähimmäisarvo on suurempi kuin enimmäisarvo — arvot vaihdetaan keskenään.",
       "hoursMinPlaceholder": "min",
       "hoursMaxPlaceholder": "max",
       "hoursMinLabel": "Vähimmäistunnit viikossa",

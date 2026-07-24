@@ -226,6 +226,11 @@ export function PlanStructureFields({
             />
           </div>
           <p className="text-xs text-muted-foreground">{t('plan.generate.weeklyHoursHelp')}</p>
+          {hoursMin && hoursMax && parseFloat(hoursMin) > parseFloat(hoursMax) && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              {t('plan.generate.hoursRangeHint')}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="plan-base-load">{t('plan.generate.baseLoad')}</Label>

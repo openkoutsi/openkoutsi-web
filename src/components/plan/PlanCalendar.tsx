@@ -30,6 +30,8 @@ interface Props {
   showGenerateAction?: boolean
 }
 
+const KNOWN_WEEK_TYPES = new Set(['build', 'recovery', 'taper'])
+
 /** Colour for the build / recovery / taper week badge. */
 function weekTypeBadgeClass(weekType: string): string {
   switch (weekType) {
@@ -174,7 +176,9 @@ export function PlanCalendar({ plan, currentWeek = 1, onWorkoutUpdated, onChange
                     )}
                     title={meta.focus ?? undefined}
                   >
-                    {t(`plan.weekType.${meta.week_type}` as never)}
+                    {KNOWN_WEEK_TYPES.has(meta.week_type)
+                      ? t(`plan.weekType.${meta.week_type}` as never)
+                      : meta.week_type}
                     {meta.target_hours != null && ` · ${meta.target_hours}h`}
                     {meta.target_load != null && ` · ${meta.target_load} ${t('plan.loadUnit')}`}
                   </span>
