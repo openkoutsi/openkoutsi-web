@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { apiFetch } from '@/lib/api'
 import { workoutFormToPayload, type WorkoutFormValues } from '@/lib/planUtils'
 import { toast } from '@/components/ui/use-toast'
+import { cn } from '@/lib/utils'
 import { addDays, format } from 'date-fns'
 import {
   Dialog,
@@ -27,6 +28,18 @@ interface Props {
   onChanged?: () => void
   /** Show the "Generate workouts" action (only meaningful for the active plan). */
   showGenerateAction?: boolean
+}
+
+/** Colour for the build / recovery / taper week badge. */
+function weekTypeBadgeClass(weekType: string): string {
+  switch (weekType) {
+    case 'recovery':
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+    case 'taper':
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+    default: // build
+      return 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'
+  }
 }
 
 interface SelectedDay {
@@ -142,15 +155,34 @@ export function PlanCalendar({ plan, currentWeek = 1, onWorkoutUpdated, onChange
 
           const planStart = new Date(plan.start_date)
           const weekStart = addDays(planStart, (wn - 1) * 7)
+          const meta = plan.week_meta?.find((m) => m.week_number === wn)
 
           return (
             <div key={wn}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                {t('plan.weekLabel', { week: wn, date: format(weekStart, 'MMM d') })}
-                {wn === currentWeek && (
-                  <span className="ml-2 text-primary">{t('plan.current')}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {t('plan.weekLabel', { week: wn, date: format(weekStart, 'MMM d') })}
+                  {wn === currentWeek && (
+                    <span className="ml-2 text-primary">{t('plan.current')}</span>
+                  )}
+                </p>
+                {meta && (
+                  <span
+                    className={cn(
+                      'text-[10px] rounded-full px-2 py-0.5 font-medium',
+                      weekTypeBadgeClass(meta.week_type),
+                    )}
+                    title={meta.focus ?? undefined}
+                  >
+                    {t(`plan.weekType.${meta.week_type}` as never)}
+                    {meta.target_hours != null && ` · ${meta.target_hours}h`}
+                    {meta.target_load != null && ` · ${meta.target_load} ${t('plan.loadUnit')}`}
+                  </span>
                 )}
-              </p>
+              </div>
+              {meta?.focus && (
+                <p className="text-xs text-muted-foreground mb-2 -mt-1">{meta.focus}</p>
+              )}
               <div className="grid grid-cols-7 gap-1">
                 {dayLabels.map((label, idx) => {
                   const dayNum = idx + 1 // 1=Mon

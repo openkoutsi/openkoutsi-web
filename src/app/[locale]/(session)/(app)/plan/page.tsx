@@ -26,6 +26,7 @@ import {
   PlanStructureFields,
   DEFAULT_DAY_TYPES,
 } from '@/components/plan/PlanStructureFields'
+import { usePlanStructureState } from '@/components/plan/usePlanStructureState'
 import { toast } from '@/components/ui/use-toast'
 import {
   AlertDialog,
@@ -94,8 +95,7 @@ function GeneratePlanDialog({
     new Set([2, 4, 6, 7]),
   )
   const [dayTypes, setDayTypes] = useState<Record<number, string>>(DEFAULT_DAY_TYPES)
-  const [periodization, setPeriodization] = useState('base_building')
-  const [intensityPref, setIntensityPref] = useState('moderate')
+  const structure = usePlanStructureState(athlete?.app_settings)
   const [longDescription, setLongDescription] = useState('')
   const [generating, setGenerating] = useState(false)
   const [showLlmUpsell, setShowLlmUpsell] = useState(false)
@@ -109,8 +109,7 @@ function GeneratePlanDialog({
     setUseLlm(false)
     setSelectedDays(new Set([2, 4, 6, 7]))
     setDayTypes(DEFAULT_DAY_TYPES)
-    setPeriodization('base_building')
-    setIntensityPref('moderate')
+    structure.resetToDefaults()
     setLongDescription('')
   }
 
@@ -126,8 +125,7 @@ function GeneratePlanDialog({
       const config = {
         days_per_week: selectedDays.size,
         day_configs: dayConfigs,
-        periodization,
-        intensity_preference: intensityPref,
+        ...structure.toConfigParams(),
         long_description: useLlm && longDescription ? longDescription : undefined,
       }
 
@@ -280,10 +278,20 @@ function GeneratePlanDialog({
               onToggleDay={(d) => toggleDayIn(d, setSelectedDays, dayTypes, setDayTypes)}
               dayTypes={dayTypes}
               onDayTypeChange={(d, v) => setDayTypes((t) => ({ ...t, [d]: v }))}
-              periodization={periodization}
-              onPeriodizationChange={setPeriodization}
-              intensityPref={intensityPref}
-              onIntensityChange={setIntensityPref}
+              periodization={structure.periodization}
+              onPeriodizationChange={structure.setPeriodization}
+              intensityPref={structure.intensityPref}
+              onIntensityChange={structure.setIntensityPref}
+              progressionPct={structure.progressionPct}
+              onProgressionPctChange={structure.setProgressionPct}
+              buildWeeks={structure.buildWeeks}
+              onBuildWeeksChange={structure.setBuildWeeks}
+              baseLoad={structure.baseLoad}
+              onBaseLoadChange={structure.setBaseLoad}
+              hoursMin={structure.hoursMin}
+              onHoursMinChange={structure.setHoursMin}
+              hoursMax={structure.hoursMax}
+              onHoursMaxChange={structure.setHoursMax}
               useLlm={useLlm}
               longDescription={longDescription}
               onLongDescriptionChange={setLongDescription}
@@ -448,8 +456,7 @@ function RegeneratePlanDialog({
   const [useLlm, setUseLlm] = useState(plan.generation_method === 'llm')
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set([2, 4, 6, 7]))
   const [dayTypes, setDayTypes] = useState<Record<number, string>>(DEFAULT_DAY_TYPES)
-  const [periodization, setPeriodization] = useState('base_building')
-  const [intensityPref, setIntensityPref] = useState('moderate')
+  const structure = usePlanStructureState(athlete?.app_settings)
   const [longDescription, setLongDescription] = useState('')
   const [generating, setGenerating] = useState(false)
   const [showLlmUpsell, setShowLlmUpsell] = useState(false)
@@ -458,12 +465,10 @@ function RegeneratePlanDialog({
   useEffect(() => {
     if (!open) return
     const cfg = plan.config as
-      | {
+      | (Record<string, unknown> & {
           day_configs?: Array<{ day_of_week: number; workout_type: string }>
-          periodization?: string
-          intensity_preference?: string
           long_description?: string
-        }
+        })
       | null
     if (!cfg) return
     if (Array.isArray(cfg.day_configs) && cfg.day_configs.length > 0) {
@@ -472,9 +477,9 @@ function RegeneratePlanDialog({
         Object.fromEntries(cfg.day_configs.map((d) => [d.day_of_week, d.workout_type])),
       )
     }
-    if (cfg.periodization) setPeriodization(cfg.periodization)
-    if (cfg.intensity_preference) setIntensityPref(cfg.intensity_preference)
-    if (cfg.long_description) setLongDescription(cfg.long_description)
+    structure.applyConfig(cfg)
+    if (typeof cfg.long_description === 'string') setLongDescription(cfg.long_description)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, plan.config])
 
   async function handleRegenerate() {
@@ -488,8 +493,7 @@ function RegeneratePlanDialog({
       const config = {
         days_per_week: selectedDays.size,
         day_configs: dayConfigs,
-        periodization,
-        intensity_preference: intensityPref,
+        ...structure.toConfigParams(),
         long_description: useLlm && longDescription ? longDescription : undefined,
       }
       // Regeneration runs server-side for everyone (BYO or instance).
@@ -565,10 +569,20 @@ function RegeneratePlanDialog({
             onToggleDay={(d) => toggleDayIn(d, setSelectedDays, dayTypes, setDayTypes)}
             dayTypes={dayTypes}
             onDayTypeChange={(d, v) => setDayTypes((t) => ({ ...t, [d]: v }))}
-            periodization={periodization}
-            onPeriodizationChange={setPeriodization}
-            intensityPref={intensityPref}
-            onIntensityChange={setIntensityPref}
+            periodization={structure.periodization}
+            onPeriodizationChange={structure.setPeriodization}
+            intensityPref={structure.intensityPref}
+            onIntensityChange={structure.setIntensityPref}
+            progressionPct={structure.progressionPct}
+            onProgressionPctChange={structure.setProgressionPct}
+            buildWeeks={structure.buildWeeks}
+            onBuildWeeksChange={structure.setBuildWeeks}
+            baseLoad={structure.baseLoad}
+            onBaseLoadChange={structure.setBaseLoad}
+            hoursMin={structure.hoursMin}
+            onHoursMinChange={structure.setHoursMin}
+            hoursMax={structure.hoursMax}
+            onHoursMaxChange={structure.setHoursMax}
             useLlm={useLlm}
             longDescription={longDescription}
             onLongDescriptionChange={setLongDescription}

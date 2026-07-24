@@ -91,6 +91,14 @@ export default function ProfilePage() {
   const [experienceLevel, setExperienceLevel] = useState<string>(
     ((athlete?.app_settings as Record<string, unknown>)?.experience_level as string) ?? '',
   )
+  const [weeklyHoursMin, setWeeklyHoursMin] = useState<string>(() => {
+    const v = (athlete?.app_settings as Record<string, unknown>)?.weekly_hours_min
+    return typeof v === 'number' ? String(v) : ''
+  })
+  const [weeklyHoursMax, setWeeklyHoursMax] = useState<string>(() => {
+    const v = (athlete?.app_settings as Record<string, unknown>)?.weekly_hours_max
+    return typeof v === 'number' ? String(v) : ''
+  })
   const [saving, setSaving] = useState(false)
   const [syncingProvider, setSyncingProvider] = useState<string | null>(null)
   const [syncingZones, setSyncingZones] = useState<string | null>(null)
@@ -165,7 +173,11 @@ export default function ProfilePage() {
           ftp: ftp ? parseInt(ftp) : null,
           max_hr: maxHr ? parseInt(maxHr) : null,
           resting_hr: restingHr ? parseInt(restingHr) : null,
-          app_settings: { experience_level: experienceLevel || null },
+          app_settings: {
+            experience_level: experienceLevel || null,
+            weekly_hours_min: weeklyHoursMin ? parseFloat(weeklyHoursMin) : null,
+            weekly_hours_max: weeklyHoursMax ? parseFloat(weeklyHoursMax) : null,
+          },
         }),
       })
       await refreshAthlete()
@@ -591,6 +603,33 @@ export default function ProfilePage() {
                     <SelectItem value="elite">{t('profile.experienceLevelElite')}</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label>{t('profile.weeklyHours')}</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="40"
+                    step="0.5"
+                    value={weeklyHoursMin}
+                    onChange={(e) => setWeeklyHoursMin(e.target.value)}
+                    placeholder={t('profile.weeklyHoursMin')}
+                    aria-label={t('profile.weeklyHoursMin')}
+                  />
+                  <span className="text-muted-foreground text-sm">–</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="40"
+                    step="0.5"
+                    value={weeklyHoursMax}
+                    onChange={(e) => setWeeklyHoursMax(e.target.value)}
+                    placeholder={t('profile.weeklyHoursMax')}
+                    aria-label={t('profile.weeklyHoursMax')}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">{t('profile.weeklyHoursHelp')}</p>
               </div>
             </div>
             <Button type="submit" disabled={saving}>

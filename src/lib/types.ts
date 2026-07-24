@@ -364,10 +364,22 @@ export interface TrainingPlan {
   workouts: PlannedWorkout[]
   config: Record<string, unknown> | null
   generation_method: string | null
+  // Per-week metadata (build vs recovery week, focus note, target weekly
+  // Load/hours). Optional so older cached payloads still type-check.
+  week_meta?: PlanWeekMeta[] | null
   // Current "so far" adherence score (0–100) and breakdown (issue #26); null
   // when the plan has nothing contributing yet.
   adherence_score?: number | null
   adherence_summary?: PlanAdherenceSummary | null
+}
+
+export interface PlanWeekMeta {
+  week_number: number
+  week_type: string // "build" | "recovery" | "taper"
+  focus?: string | null
+  target_load?: number | null
+  target_hours?: number | null
+  base_load?: number | null
 }
 
 export interface PlanAdherenceSummary {

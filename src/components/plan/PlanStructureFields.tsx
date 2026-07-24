@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -32,6 +33,17 @@ interface Props {
   onPeriodizationChange: (value: string) => void
   intensityPref: string
   onIntensityChange: (value: string) => void
+  // Structure/progression parameters (issue #29).
+  progressionPct: string
+  onProgressionPctChange: (value: string) => void
+  buildWeeks: string
+  onBuildWeeksChange: (value: string) => void
+  baseLoad: string
+  onBaseLoadChange: (value: string) => void
+  hoursMin: string
+  onHoursMinChange: (value: string) => void
+  hoursMax: string
+  onHoursMaxChange: (value: string) => void
   /** When true, shows the AI free-text description field. */
   useLlm?: boolean
   longDescription?: string
@@ -51,6 +63,16 @@ export function PlanStructureFields({
   onPeriodizationChange,
   intensityPref,
   onIntensityChange,
+  progressionPct,
+  onProgressionPctChange,
+  buildWeeks,
+  onBuildWeeksChange,
+  baseLoad,
+  onBaseLoadChange,
+  hoursMin,
+  onHoursMinChange,
+  hoursMax,
+  onHoursMaxChange,
   useLlm = false,
   longDescription = '',
   onLongDescriptionChange,
@@ -139,6 +161,85 @@ export function PlanStructureFields({
               <SelectItem value="high">{t('plan.generate.intensityOptions.high')}</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      {/* Progression & recovery cadence */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="plan-progression">{t('plan.generate.progressionPct')}</Label>
+          <Input
+            id="plan-progression"
+            type="number"
+            min="3"
+            max="12"
+            step="0.5"
+            value={progressionPct}
+            onChange={(e) => onProgressionPctChange(e.target.value)}
+            className="text-sm"
+          />
+          <p className="text-xs text-muted-foreground">{t('plan.generate.progressionPctHelp')}</p>
+        </div>
+        <div className="space-y-2">
+          <Label>{t('plan.generate.buildWeeks')}</Label>
+          <Select value={buildWeeks} onValueChange={onBuildWeeksChange}>
+            <SelectTrigger className="text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">{t('plan.generate.buildWeeksOptions.two')}</SelectItem>
+              <SelectItem value="3">{t('plan.generate.buildWeeksOptions.three')}</SelectItem>
+              <SelectItem value="4">{t('plan.generate.buildWeeksOptions.four')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">{t('plan.generate.buildWeeksHelp')}</p>
+        </div>
+      </div>
+
+      {/* Weekly hours band & base load */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label>{t('plan.generate.weeklyHours')}</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="0"
+              max="40"
+              step="0.5"
+              value={hoursMin}
+              onChange={(e) => onHoursMinChange(e.target.value)}
+              placeholder={t('plan.generate.hoursMinPlaceholder')}
+              className="text-sm"
+              aria-label={t('plan.generate.hoursMinLabel')}
+            />
+            <span className="text-muted-foreground text-sm">–</span>
+            <Input
+              type="number"
+              min="0"
+              max="40"
+              step="0.5"
+              value={hoursMax}
+              onChange={(e) => onHoursMaxChange(e.target.value)}
+              placeholder={t('plan.generate.hoursMaxPlaceholder')}
+              className="text-sm"
+              aria-label={t('plan.generate.hoursMaxLabel')}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">{t('plan.generate.weeklyHoursHelp')}</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="plan-base-load">{t('plan.generate.baseLoad')}</Label>
+          <Input
+            id="plan-base-load"
+            type="number"
+            min="0"
+            step="5"
+            value={baseLoad}
+            onChange={(e) => onBaseLoadChange(e.target.value)}
+            placeholder="0"
+            className="text-sm"
+          />
+          <p className="text-xs text-muted-foreground">{t('plan.generate.baseLoadHelp')}</p>
         </div>
       </div>
 
