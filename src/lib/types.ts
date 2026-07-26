@@ -521,6 +521,15 @@ export interface AchievementDefinition {
   unit: string
   /** Data dependency ("distance", "elevation", "load", "plan"); null when always reachable. */
   requires: string | null
+  /**
+   * For streaks: what makes one period qualify — 5 `hours` a week, 100 `km` a
+   * week — as distinct from `tiers`, which counts qualifying periods. Comes from
+   * the backend's own constants, so the rule shown always matches the rule
+   * enforced; never hardcode these numbers in copy. Null for non-streaks and
+   * for the streaks that need only a single activity.
+   */
+  threshold: number | null
+  threshold_unit: string | null
 }
 
 export interface AchievementUnlock {

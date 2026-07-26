@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import en from '../../messages/en/app.json'
+import fi from '../../messages/fi/app.json'
+
 import {
   byMostRecent,
   formatTier,
@@ -28,6 +31,59 @@ function unlock(id: string, tier: number, achievedOn = '2026-01-01'): Achievemen
     context: null,
   }
 }
+
+describe('streak rule copy', () => {
+  const streakIds = Object.keys(en.achievements.items).filter((id) =>
+    id.startsWith('streak_'),
+  )
+
+  it('covers every streak achievement in both locales', () => {
+    // The streak card renders `rules.<id>`; a streak shipped without one would
+    // show a raw i18n key. This is what breaks when the second catalogue wave
+    // adds streak_plan_weeks and streak_logged_weeks.
+    expect(streakIds.length).toBeGreaterThan(0)
+    for (const id of streakIds) {
+      expect(en.achievements.rules, `en is missing ${id}`).toHaveProperty(id)
+      expect(fi.achievements.rules, `fi is missing ${id}`).toHaveProperty(id)
+    }
+  })
+
+  it('has no rule for an achievement that is not a streak', () => {
+    expect(Object.keys(en.achievements.rules).sort()).toEqual(streakIds.sort())
+    expect(Object.keys(fi.achievements.rules).sort()).toEqual(streakIds.sort())
+  })
+
+  it('states a maintenance rule rather than a badge target', () => {
+    // `items.*.description` is written for the badge and interpolates {tier} —
+    // how many periods it takes. A rule describes keeping the streak alive, so
+    // it must never mention a tier.
+    for (const id of streakIds) {
+      const rule = (en.achievements.rules as Record<string, string>)[id]
+      expect(rule).not.toContain('{tier}')
+      expect(rule.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('never hardcodes a qualifying threshold', () => {
+    // The threshold comes from the API, which reads it from the backend's own
+    // constants. A number written into the copy would silently disagree with
+    // the engine the day that constant changes — the exact drift this
+    // interpolation exists to prevent.
+    const suspicious = /\b(5|100|1000|2)\b/
+    for (const locale of [en, fi]) {
+      for (const id of streakIds) {
+        const rule = (locale.achievements.rules as Record<string, string>)[id]
+        const description = (
+          locale.achievements.items as Record<string, { description: string }>
+        )[id].description
+        expect(rule, `${id} rule hardcodes a number`).not.toMatch(suspicious)
+        expect(description, `${id} description hardcodes a number`).not.toMatch(
+          suspicious,
+        )
+      }
+    }
+  })
+})
 
 describe('gamificationEnabled', () => {
   it('defaults to on when unset', () => {

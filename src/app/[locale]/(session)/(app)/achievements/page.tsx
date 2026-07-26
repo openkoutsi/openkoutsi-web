@@ -44,7 +44,13 @@ function formatProgress(value: number): string {
   return value.toFixed(1)
 }
 
-function StreakCard({ streak }: { streak: Streak }) {
+function StreakCard({
+  streak,
+  definition,
+}: {
+  streak: Streak
+  definition: AchievementDefinition | undefined
+}) {
   const t = useTranslations('app.achievements')
   const unit = streak.id.endsWith('months') ? 'months' : 'weeks'
   const live = streak.current > 0
@@ -60,6 +66,20 @@ function StreakCard({ streak }: { streak: Streak }) {
           {t(`items.${streak.id}.name` as never)}
         </p>
       </div>
+      {/* What keeps this streak alive, above the count rather than below it:
+          the names ("Steady volume", "Mixing it up") don't give it away, and
+          burying the rule under Longest and the hints defeats the point.
+          Separate from `items.*.description`, which is phrased as a badge
+          target ("…for {tier} weeks running") rather than a rule to maintain. */}
+      {/* Skipped rather than guessed if the definition is missing: the rule
+          text interpolates the threshold, and a missing value would throw.
+          The API filters streaks and catalogue by the same availability, so
+          this shouldn't happen — but the card shouldn't be what proves it. */}
+      {definition && (
+        <p className="text-xs text-muted-foreground mb-2">
+          {t(`rules.${streak.id}` as never, { threshold: definition.threshold } as never)}
+        </p>
+      )}
       <p className="text-2xl font-semibold tabular-nums">
         {t(unit as 'weeks' | 'months', { count: streak.current })}
       </p>
@@ -125,6 +145,10 @@ function AchievementCard({
       <p className="text-xs text-muted-foreground">
         {t(`items.${definition.id}.description` as never, {
           tier: formatTier(target ?? definition.tiers[definition.tiers.length - 1], definition.unit),
+          // Streak descriptions state the qualifying threshold too; it comes
+          // from the backend's constants rather than being written into the
+          // copy, so the rule shown can't drift from the rule enforced.
+          threshold: definition.threshold,
         } as never)}
       </p>
 
@@ -217,7 +241,11 @@ export default function AchievementsPage() {
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {streaks.map((streak) => (
-                <StreakCard key={streak.id} streak={streak} />
+                <StreakCard
+                  key={streak.id}
+                  streak={streak}
+                  definition={catalogue.find((d) => d.id === streak.id)}
+                />
               ))}
             </div>
           </CardContent>
