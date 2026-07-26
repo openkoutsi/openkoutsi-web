@@ -119,6 +119,10 @@
       "recovery": "Palautus",
       "taper": "Kevennys"
     },
+    "rampWarning": {
+      "title": "Ohjelma nousee suunniteltua jyrkemmin",
+      "detail": "Ennustettu kunto nousee jopa {rise}% viikossa {weeks, plural, one {# viikon} other {# viikon}} aikana, kun ohjelma rakennettiin {configured}% nousulle. Harkitse rakennusviikkojen keventämistä tai palautusviikon lisäämistä."
+    },
     "rest": "Lepo",
     "done": "Tehty",
     "unlink": "Poista linkitys",

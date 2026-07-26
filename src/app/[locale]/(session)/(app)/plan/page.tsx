@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
-import type { AthleteProfile, TrainingPlan, Page } from '@/lib/types'
+import type { AthleteProfile, FitnessPoint, TrainingPlan, Page } from '@/lib/types'
+import { checkProjectedRamp } from '@/lib/planUtils'
 import { getLlmConfig } from '@/lib/llm'
 import { adherenceBadgeClass, formatAdherence, showAdherenceScores } from '@/lib/adherence'
 import { cn } from '@/lib/utils'
@@ -39,7 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Plus, ChevronDown, ChevronUp, Trash2, ArchiveRestore } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp, Trash2, ArchiveRestore, AlertTriangle } from 'lucide-react'
 import { differenceInWeeks } from 'date-fns'
 
 interface PlanStructureState {
@@ -630,11 +631,50 @@ function RegeneratePlanDialog({
   )
 }
 
+/** Warns when the plan's projected Fitness ramps faster than it was configured to.
+ *
+ *  The configured percentage governs the week-over-week *Load* ramp while the
+ *  forecast reports the resulting *Fitness* ramp, so `checkProjectedRamp`
+ *  compares against a tolerance rather than the exact figure — this is a "the
+ *  plan looks aggressive" hint, not a claim that the plan is malformed. */
+function RampWarning({
+  plan,
+  forecast,
+}: {
+  plan: TrainingPlan
+  forecast: FitnessPoint[] | undefined
+}) {
+  const t = useTranslations('app')
+  const ramp = checkProjectedRamp(plan, forecast)
+  if (ramp.weeks.length === 0) return null
+
+  const steepest = ramp.weeks.reduce((a, b) => (b.risePct > a.risePct ? b : a))
+  return (
+    <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
+      <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+      <div>
+        <p className="font-medium">{t('plan.rampWarning.title')}</p>
+        <p className="text-xs mt-0.5">
+          {t('plan.rampWarning.detail', {
+            weeks: ramp.weeks.length,
+            rise: steepest.risePct.toFixed(0),
+            configured: ramp.configuredPct.toFixed(0),
+          })}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function PlanPage() {
   const t = useTranslations('app')
   const tCommon = useTranslations('common')
   const { data: plansPage, mutate } = useSWR<Page<TrainingPlan>>('/api/plans', fetcher)
   const plans = plansPage?.items
+  const { data: forecast } = useSWR<FitnessPoint[]>(
+    '/api/metrics/fitness/forecast?days=90',
+    fetcher,
+  )
   const { data: athlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
@@ -759,6 +799,7 @@ export default function PlanPage() {
             </div>
           </CardHeader>
           <CardContent>
+            <RampWarning plan={activePlan} forecast={forecast} />
             <PlanCalendar
               key={`${activePlan.id}:${activePlan.workouts.map((w) => w.id).join(',')}`}
               plan={activePlan}

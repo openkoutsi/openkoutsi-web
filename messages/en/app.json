@@ -119,6 +119,10 @@
       "recovery": "Recovery",
       "taper": "Taper"
     },
+    "rampWarning": {
+      "title": "This plan ramps up faster than configured",
+      "detail": "Projected fitness rises up to {rise}% week over week in {weeks, plural, one {# week} other {# weeks}}, against the {configured}% progression this plan was built with. Consider easing the build weeks or adding a recovery week."
+    },
     "rest": "Rest",
     "done": "Done",
     "unlink": "Unlink",

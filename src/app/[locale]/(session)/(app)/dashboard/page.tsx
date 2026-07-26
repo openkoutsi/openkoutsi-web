@@ -5,8 +5,8 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { fetcher, apiFetch } from '@/lib/api'
-import type { FitnessPoint, FitnessCurrent, TrainingPlan, TrainingStatus, ActivitySummary, WeeklyZoneBucket, Page } from '@/lib/types'
-import { formatHoursMinutes, formatDistance } from '@/lib/utils'
+import type { FitnessPoint, FitnessCurrent, Goal, TrainingPlan, TrainingStatus, ActivitySummary, WeeklyZoneBucket, Page } from '@/lib/types'
+import { formatDate, formatHoursMinutes, formatDistance } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
@@ -45,6 +45,10 @@ const GLOSSARY_KEYS = ['fitness', 'fatigue', 'form', 'ftp', 'load'] as const
 // Auto-refresh dashboard data while the page is open. SWR's refreshWhenHidden
 // defaults to false, so polling pauses automatically in a background tab.
 const REFRESH_INTERVAL_MS = 60_000
+
+// Forecast horizon. Fixed rather than derived from the active plan, so the
+// projected part of the chart keeps the same length as a plan is consumed.
+const FORECAST_DAYS = 90
 
 function MetricsGlossaryDialog() {
   const t = useTranslations('dashboard')
@@ -191,6 +195,49 @@ function FormBadge({ form }: { form: FitnessCurrent['form_label'] }) {
   )
 }
 
+/** Projected Form on the target date of each goal that falls inside the horizon.
+ *
+ *  Only goals whose target date the forecast actually covers are shown — a goal
+ *  further out than the horizon has no projected day to report. */
+function GoalFormOutlook({
+  goals,
+  forecast,
+}: {
+  goals: Goal[] | undefined
+  forecast: FitnessPoint[] | undefined
+}) {
+  const t = useTranslations('dashboard')
+  if (!goals || !forecast || forecast.length === 0) return null
+
+  const byDate = new Map(forecast.map((point) => [point.date, point]))
+  const rows = goals
+    .filter((goal) => goal.status === 'active' && goal.target_date)
+    .map((goal) => ({ goal, point: byDate.get(goal.target_date!) }))
+    .filter((row): row is { goal: Goal; point: FitnessPoint } => row.point != null)
+
+  if (rows.length === 0) return null
+
+  return (
+    <div className="mt-4 space-y-2">
+      {rows.map(({ goal, point }) => (
+        <div
+          key={goal.id}
+          className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm"
+        >
+          <span className="font-medium truncate">{goal.title}</span>
+          <span className="text-muted-foreground">
+            {t('forecast.goalOutlook', {
+              date: formatDate(goal.target_date!),
+              form: point.form.toFixed(0),
+            })}
+          </span>
+          {point.form_label && <FormBadge form={point.form_label} />}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const t = useTranslations('dashboard')
   const { athlete } = useAuth()
@@ -206,11 +253,19 @@ export default function DashboardPage() {
     fetcher,
     { refreshInterval: REFRESH_INTERVAL_MS },
   )
+  const { data: forecast } = useSWR<FitnessPoint[]>(
+    `/api/metrics/fitness/forecast?days=${FORECAST_DAYS}`,
+    fetcher,
+    { refreshInterval: REFRESH_INTERVAL_MS },
+  )
   const { data: summary } = useSWR<ActivitySummary>(
     `/api/metrics/activity-summary?days=${days}`,
     fetcher,
     { refreshInterval: REFRESH_INTERVAL_MS },
   )
+  const { data: goalsPage } = useSWR<Page<Goal>>('/api/goals', fetcher, {
+    refreshInterval: REFRESH_INTERVAL_MS,
+  })
   const { data: weeklyZones } = useSWR<WeeklyZoneBucket[]>(
     `/api/metrics/zones/weekly?days=${days}`,
     fetcher,
@@ -290,7 +345,19 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           {history && history.length > 0 ? (
-            <FitnessChart data={history} />
+            <>
+              <FitnessChart
+                data={history}
+                forecast={forecast}
+                todayLabel={t('forecast.today')}
+              />
+              {forecast && forecast.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t('forecast.caption', { days: FORECAST_DAYS })}
+                </p>
+              )}
+              <GoalFormOutlook goals={goalsPage?.items} forecast={forecast} />
+            </>
           ) : (
             <p className="text-sm text-muted-foreground py-12 text-center">
               {t('noHistory')}

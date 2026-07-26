@@ -223,12 +223,18 @@ export interface ActivityDetail extends Activity {
   analysis?: string | null
 }
 
+export type FormLabel = 'peak' | 'fresh' | 'neutral' | 'tired' | 'overreached'
+
 export interface FitnessPoint {
   date: string
   fitness: number
   fatigue: number
   form: number
   daily_load: number
+  // Present only on rows from /api/metrics/fitness/forecast: a modeled day
+  // projected from the plan's prescribed Load, not a measured one.
+  projected?: boolean
+  form_label?: FormLabel
 }
 
 export interface FitnessCurrent {
@@ -236,7 +242,7 @@ export interface FitnessCurrent {
   fitness: number
   fatigue: number
   form: number
-  form_label: 'peak' | 'fresh' | 'neutral' | 'tired' | 'overreached'
+  form_label: FormLabel
 }
 
 export interface ActivitySummary {
