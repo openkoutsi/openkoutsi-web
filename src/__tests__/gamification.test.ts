@@ -54,12 +54,33 @@ describe('streak rule copy', () => {
   })
 
   it('states a maintenance rule rather than a badge target', () => {
-    // `items.*.description` is written for the badge and interpolates {tier};
-    // the card's rule takes no placeholder and must not carry one.
+    // `items.*.description` is written for the badge and interpolates {tier} —
+    // how many periods it takes. A rule describes keeping the streak alive, so
+    // it must never mention a tier.
     for (const id of streakIds) {
       const rule = (en.achievements.rules as Record<string, string>)[id]
-      expect(rule).not.toContain('{')
+      expect(rule).not.toContain('{tier}')
       expect(rule.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('never hardcodes a qualifying threshold', () => {
+    // The threshold comes from the API, which reads it from the backend's own
+    // constants. A number written into the copy would silently disagree with
+    // the engine the day that constant changes — the exact drift this
+    // interpolation exists to prevent.
+    const suspicious = /\b(5|100|1000|2)\b/
+    for (const locale of [en, fi]) {
+      for (const id of streakIds) {
+        const rule = (locale.achievements.rules as Record<string, string>)[id]
+        const description = (
+          locale.achievements.items as Record<string, { description: string }>
+        )[id].description
+        expect(rule, `${id} rule hardcodes a number`).not.toMatch(suspicious)
+        expect(description, `${id} description hardcodes a number`).not.toMatch(
+          suspicious,
+        )
+      }
     }
   })
 })

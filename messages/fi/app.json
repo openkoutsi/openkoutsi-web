@@ -507,10 +507,10 @@
     },
     "rules": {
       "streak_active_weeks": "Tee vähintään yksi suoritus joka viikko.",
-      "streak_volume_weeks": "Harjoittele vähintään 5 tuntia joka viikko.",
-      "streak_multisport_weeks": "Harrasta vähintään kahta eri lajia joka viikko.",
-      "streak_distance_weeks": "Taita vähintään 100 km joka viikko.",
-      "streak_climbing_weeks": "Nouse vähintään 1000 m joka viikko.",
+      "streak_volume_weeks": "Harjoittele vähintään {threshold} tuntia joka viikko.",
+      "streak_multisport_weeks": "Harrasta vähintään {threshold} eri lajia joka viikko.",
+      "streak_distance_weeks": "Taita vähintään {threshold} km joka viikko.",
+      "streak_climbing_weeks": "Nouse vähintään {threshold} m joka viikko.",
       "streak_active_months": "Tee vähintään yksi suoritus joka kuukausi."
     },
     "items": {
@@ -596,19 +596,19 @@
       },
       "streak_volume_weeks": {
         "name": "Tasainen määrä",
-        "description": "Harjoittele vähintään 5 tuntia {tier} viikkoa putkeen."
+        "description": "Harjoittele vähintään {threshold} tuntia {tier} viikkoa putkeen."
       },
       "streak_multisport_weeks": {
         "name": "Vaihtelua",
-        "description": "Harrasta vähintään kahta lajia {tier} viikkoa putkeen."
+        "description": "Harrasta vähintään {threshold} lajia {tier} viikkoa putkeen."
       },
       "streak_distance_weeks": {
         "name": "Kilometrit kertyvät",
-        "description": "Taita vähintään 100 km {tier} viikkoa putkeen."
+        "description": "Taita vähintään {threshold} km {tier} viikkoa putkeen."
       },
       "streak_climbing_weeks": {
         "name": "Aina ylöspäin",
-        "description": "Nouse vähintään 1000 m {tier} viikkoa putkeen."
+        "description": "Nouse vähintään {threshold} m {tier} viikkoa putkeen."
       },
       "streak_active_months": {
         "name": "Pitkäjänteinen",
