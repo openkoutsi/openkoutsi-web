@@ -72,7 +72,9 @@
     "weeklyLoadToggle": "Show weekly load",
     "weeklyLoadToggleDesc": "Display the weekly training-load chart on your dashboard.",
     "adherenceToggle": "Show plan adherence",
-    "adherenceToggleDesc": "Display how closely you follow your training plan (adherence scores)."
+    "adherenceToggleDesc": "Display how closely you follow your training plan (adherence scores).",
+    "gamificationToggle": "Show achievements and streaks",
+    "gamificationToggleDesc": "Earn badges for milestones and track weekly streaks. Turn this off if you would rather train without them."
   },
   "step5": {
     "title": "Set a goal",

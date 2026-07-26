@@ -15,6 +15,8 @@ import { WeeklyZones } from '@/components/charts/WeeklyZones'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
 import { showWeeklyLoad } from '@/lib/weeklyLoad'
+import { gamificationEnabled } from '@/lib/gamification'
+import { AchievementsCard } from '@/components/AchievementsCard'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { RpePrompt } from '@/components/activities/RpePrompt'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
@@ -373,6 +375,9 @@ export default function DashboardPage() {
         activePlans
           .filter((p) => p.adherence_score != null)
           .map((p) => <PlanAdherenceCard key={p.id} plan={p} />)}
+
+      {/* Achievements & streaks (deterministic; display is opt-out) */}
+      {gamificationEnabled(athlete?.app_settings) && <AchievementsCard />}
 
       {/* Activity calendar */}
       <ActivityCalendar activePlans={activePlans} />

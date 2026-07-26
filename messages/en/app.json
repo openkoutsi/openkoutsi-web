@@ -452,6 +452,8 @@
       "autoTrainingStatusDesc": "Automatically generate a daily training status overview on the dashboard after uploads and syncs. Requires an LLM configured by your team administrator.",
       "askForRpe": "Ask me to rate effort after uploads",
       "askForRpeDesc": "After a significant cycling ride is uploaded or synced, prompt me on the dashboard to rate how hard it felt (RPE, 1–10).",
+      "gamification": "Show achievements and streaks",
+      "gamificationDesc": "Earn badges for milestones and track weekly streaks. Turn this off if you would rather train without them.",
       "saveFailed": "Failed to save setting",
       "coachingStyle": "Coaching style",
       "coachingStyleDesc": "Adjust Koutsi's feedback tone.",
@@ -474,6 +476,136 @@
       "show": "Show weekly load chart",
       "showDesc": "Display the weekly training-load chart on your dashboard. The load is always calculated; this only controls whether the chart is shown.",
       "saveFailed": "Could not save the setting"
+    }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Badges you have earned, and what you are working toward next.",
+    "loading": "Loading…",
+    "empty": "No achievements yet. Log an activity to get started.",
+    "earned": "Earned {date}",
+    "locked": "Locked",
+    "progress": "{current} / {target}",
+    "streaks": "Streaks",
+    "currentStreak": "Current",
+    "longestStreak": "Longest",
+    "weeks": "{count, plural, one {# week} other {# weeks}}",
+    "months": "{count, plural, one {# month} other {# months}}",
+    "inProgressHint": "This week is still going — your streak is safe until it ends.",
+    "noStreak": "No active streak. One activity this week starts a new one.",
+    "recentlyEarned": "Recently earned",
+    "viewAll": "View all achievements",
+    "tierOf": "Tier {current} of {total}",
+    "categories": {
+      "volume": "Volume",
+      "climbing": "Climbing",
+      "variety": "Variety",
+      "engagement": "Engagement",
+      "plan": "Plans",
+      "goal": "Goals",
+      "streak": "Streaks"
+    },
+    "items": {
+      "activity_count": {
+        "name": "Getting started",
+        "description": "Record {tier} activities."
+      },
+      "long_activity": {
+        "name": "Long hauler",
+        "description": "Ride for {tier} hours in a single session."
+      },
+      "total_hours": {
+        "name": "Time in the saddle",
+        "description": "Accumulate {tier} hours of training."
+      },
+      "single_ride_distance": {
+        "name": "Distance rider",
+        "description": "Cover {tier} km in one ride."
+      },
+      "total_distance": {
+        "name": "The long way round",
+        "description": "Cover {tier} km in total."
+      },
+      "total_load": {
+        "name": "Load bearer",
+        "description": "Accumulate {tier} Load over your training."
+      },
+      "single_ride_elevation": {
+        "name": "Climber",
+        "description": "Climb {tier} m in a single ride."
+      },
+      "total_elevation": {
+        "name": "Mountain goat",
+        "description": "Climb {tier} m in total."
+      },
+      "everesting": {
+        "name": "Everesting",
+        "description": "Climb the height of Everest — 8848 m — in one single ride."
+      },
+      "multisport": {
+        "name": "All-rounder",
+        "description": "Record activities in {tier} different sports."
+      },
+      "race_day": {
+        "name": "Race day",
+        "description": "Tag {tier} activities as a race."
+      },
+      "commuter": {
+        "name": "Commuter",
+        "description": "Tag {tier} activities as a commute."
+      },
+      "comeback": {
+        "name": "Welcome back",
+        "description": "Return to training after a month or more away. Everyone needs a break."
+      },
+      "rpe_recorded": {
+        "name": "In tune",
+        "description": "Rate perceived effort on {tier} activities."
+      },
+      "notes_written": {
+        "name": "Training diary",
+        "description": "Write notes on {tier} activities."
+      },
+      "plans_completed": {
+        "name": "Plan finisher",
+        "description": "Complete {tier} training plans."
+      },
+      "plan_flawless": {
+        "name": "Perfect plan",
+        "description": "Finish a training plan without missing or skipping a single session."
+      },
+      "plan_adherence": {
+        "name": "On the programme",
+        "description": "Finish a training plan with {tier}% adherence."
+      },
+      "goals_reached": {
+        "name": "Goal getter",
+        "description": "Reach {tier} of your goals."
+      },
+      "streak_active_weeks": {
+        "name": "Consistency",
+        "description": "Train at least once a week for {tier} weeks running."
+      },
+      "streak_volume_weeks": {
+        "name": "Steady volume",
+        "description": "Train 5 hours or more for {tier} weeks running."
+      },
+      "streak_multisport_weeks": {
+        "name": "Mixing it up",
+        "description": "Touch two or more sports for {tier} weeks running."
+      },
+      "streak_distance_weeks": {
+        "name": "Rolling on",
+        "description": "Cover 100 km or more for {tier} weeks running."
+      },
+      "streak_climbing_weeks": {
+        "name": "Always climbing",
+        "description": "Climb 1000 m or more for {tier} weeks running."
+      },
+      "streak_active_months": {
+        "name": "In it for the long run",
+        "description": "Train at least once a month for {tier} months running."
+      }
     }
   }
 }

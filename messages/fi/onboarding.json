@@ -72,7 +72,9 @@
     "weeklyLoadToggle": "Näytä viikkokuormitus",
     "weeklyLoadToggleDesc": "Näytä viikoittaisen harjoituskuormituksen kaavio koontinäytölläsi.",
     "adherenceToggle": "Näytä suunnitelman toteutuma",
-    "adherenceToggleDesc": "Näytä kuinka tarkasti noudatat harjoitussuunnitelmaasi (toteutumapisteet)."
+    "adherenceToggleDesc": "Näytä kuinka tarkasti noudatat harjoitussuunnitelmaasi (toteutumapisteet).",
+    "gamificationToggle": "Näytä saavutukset ja putket",
+    "gamificationToggleDesc": "Ansaitse merkkejä virstanpylväistä ja seuraa viikkoputkia. Ota pois päältä, jos haluat harjoitella ilman niitä."
   },
   "step5": {
     "title": "Aseta tavoite",

@@ -5,6 +5,7 @@ export const KNOWN_MESSAGE_TYPES = [
   'team_request',
   'invite_used',
   'join_request',
+  'achievement_unlocked',
 ] as const
 
 export type KnownMessageType = (typeof KNOWN_MESSAGE_TYPES)[number]
@@ -21,11 +22,15 @@ export function messageTypeKey(type: string): KnownMessageType | 'unknown' {
  * next-intl. The backend may send `null` for optional fields (e.g. a join
  * request's `display_name`/`message`); passing those straight into `t(...)`
  * would render "null" or break formatting, so null/undefined become "".
+ *
+ * Numbers are passed through as numbers: `achievement_unlocked` carries a
+ * `count` that an ICU plural selects on, and stringifying it first would break
+ * the plural rule.
  */
 export function messageValues(
-  data: Record<string, string | null> | null | undefined,
-): Record<string, string> {
-  const out: Record<string, string> = {}
+  data: Record<string, string | number | null> | null | undefined,
+): Record<string, string | number> {
+  const out: Record<string, string | number> = {}
   for (const [k, v] of Object.entries(data ?? {})) {
     out[k] = v ?? ''
   }

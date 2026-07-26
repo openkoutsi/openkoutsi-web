@@ -26,6 +26,7 @@ import { CustomFunctionDialog } from '@/components/activities/CustomFunctionDial
 import { getCustomFunctions, CustomFunction } from '@/lib/customFunctions'
 import { showAdherenceScores } from '@/lib/adherence'
 import { showWeeklyLoad } from '@/lib/weeklyLoad'
+import { gamificationEnabled } from '@/lib/gamification'
 import { useTranslations as useActivityTranslations } from 'next-intl'
 
 // ── Default zone templates ────────────────────────────────────────────────
@@ -255,6 +256,24 @@ export default function ProfilePage() {
         method: 'PATCH',
         body: JSON.stringify({
           app_settings: { ...(profile?.app_settings ?? {}), ask_for_rpe: checked },
+        }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleGamificationToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), gamification: checked },
         }),
       })
       mutateProfile()
@@ -924,6 +943,19 @@ export default function ProfilePage() {
             <Switch
               checked={profile?.app_settings?.ask_for_rpe !== false}
               onCheckedChange={handleAskForRpeToggle}
+              disabled={!profile}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 mt-4 pt-4 border-t">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.analysis.gamification')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.analysis.gamificationDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={gamificationEnabled(profile?.app_settings)}
+              onCheckedChange={handleGamificationToggle}
               disabled={!profile}
             />
           </div>

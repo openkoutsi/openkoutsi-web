@@ -495,11 +495,60 @@ export interface GoalGuidance {
 export interface Message {
   id: string
   type: string
-  data: Record<string, string | null>
+  // Numbers appear alongside strings — `achievement_unlocked` carries a numeric
+  // `count` that an ICU plural selects on.
+  data: Record<string, string | number | null>
   read_at: string | null
   created_at: string
 }
 
 export interface UnreadCount {
   count: number
+}
+
+// ── Achievements & streaks (issue #33) ─────────────────────────────────────
+
+/**
+ * A catalogue entry. Carries ids and tiers only — the display name and
+ * description are i18n strings under `app.achievements.<id>`, so the same
+ * payload serves every locale.
+ */
+export interface AchievementDefinition {
+  id: string
+  category: string
+  tiers: number[]
+  /** What the tier numbers mean: count, hours, km, metres, load, percent, weeks, months. */
+  unit: string
+  /** Data dependency ("distance", "elevation", "load", "plan"); null when always reachable. */
+  requires: string | null
+}
+
+export interface AchievementUnlock {
+  achievement_id: string
+  tier: number
+  /** The day the criterion was actually met, derived from the athlete's history. */
+  achieved_on: string
+  created_at: string | null
+  seen: boolean
+  context: Record<string, string> | null
+}
+
+export interface Streak {
+  id: string
+  current: number
+  longest: number
+  /**
+   * The current week hasn't qualified yet but the streak is still alive — the
+   * week simply isn't over. Never render this as broken.
+   */
+  in_progress: boolean
+}
+
+export interface Achievements {
+  catalogue: AchievementDefinition[]
+  unlocked: AchievementUnlock[]
+  progress: Record<string, number>
+  streaks: Streak[]
+  /** True when the athlete has opted out; the UI hides the feature entirely. */
+  disabled: boolean
 }
