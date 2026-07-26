@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth'
 import { fetcher, apiFetch } from '@/lib/api'
 import type { AchievementDefinition, Achievements, Streak } from '@/lib/types'
 import {
+  descriptionValues,
   formatTier,
   gamificationEnabled,
   highestTier,
@@ -142,14 +143,14 @@ function AchievementCard({
         </div>
       </div>
 
+      {/* The tier goes in bare, without its unit: the copy names the unit in
+          its own words ("Cover {tier} km", "Aja {tier} tuntia"), so a
+          formatted tier doubles it — "160 km km", "500 h tuntia". */}
       <p className="text-xs text-muted-foreground">
-        {t(`items.${definition.id}.description` as never, {
-          tier: formatTier(target ?? definition.tiers[definition.tiers.length - 1], definition.unit),
-          // Streak descriptions state the qualifying threshold too; it comes
-          // from the backend's constants rather than being written into the
-          // copy, so the rule shown can't drift from the rule enforced.
-          threshold: definition.threshold,
-        } as never)}
+        {t(
+          `items.${definition.id}.description` as never,
+          descriptionValues(definition, target) as never,
+        )}
       </p>
 
       {/* Locked tiers show how far along the athlete is, so the badge reads as

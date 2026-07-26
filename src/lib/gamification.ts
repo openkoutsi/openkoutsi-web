@@ -53,11 +53,25 @@ export function tierProgress(current: number, target: number | null): number {
 }
 
 /**
- * Format a tier for display in the achievement's own unit. Values are rendered
- * without trailing noise — 8848 metres, not 8848.0.
+ * Format a tier as a bare number, without its unit. Values are rendered
+ * without trailing noise — 8848, not 8848.0.
+ *
+ * This is what belongs in the `items.*.description` copy: those sentences
+ * spell the unit out in their own words ("Cover {tier} km in one ride.",
+ * "Aja {tier} tuntia yhdellä lenkillä."), so interpolating a formatted tier
+ * doubles it — "160 km km", "500 h tuntia".
+ */
+export function formatTierValue(tier: number): string {
+  return Number.isInteger(tier) ? tier.toString() : tier.toFixed(1)
+}
+
+/**
+ * Format a tier for display in the achievement's own unit, for the places that
+ * show a value on its own — the tier label, the progress readout — rather than
+ * inside a sentence that already names the unit.
  */
 export function formatTier(tier: number, unit: string): string {
-  const n = Number.isInteger(tier) ? tier.toString() : tier.toFixed(1)
+  const n = formatTierValue(tier)
   switch (unit) {
     case 'hours':
       return `${n} h`
@@ -71,6 +85,22 @@ export function formatTier(tier: number, unit: string): string {
       // count, load, weeks, months — the label carries the noun.
       return n
   }
+}
+
+/**
+ * Interpolation values for an achievement's `items.<id>.description`.
+ *
+ * `tier` is the tier the athlete is working toward, or the top one once every
+ * tier is earned — as a bare number, because the copy names the unit itself.
+ * `threshold` is what makes a streak period qualify; it comes from the API so
+ * the rule shown can't drift from the rule enforced.
+ */
+export function descriptionValues(
+  definition: AchievementDefinition,
+  target: number | null,
+): { tier: string; threshold: number | null } {
+  const tier = target ?? definition.tiers[definition.tiers.length - 1]
+  return { tier: formatTierValue(tier), threshold: definition.threshold }
 }
 
 /**
