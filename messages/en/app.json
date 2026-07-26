@@ -505,6 +505,14 @@
       "goal": "Goals",
       "streak": "Streaks"
     },
+    "rules": {
+      "streak_active_weeks": "Do at least one activity each week.",
+      "streak_volume_weeks": "Train 5 hours or more each week.",
+      "streak_multisport_weeks": "Do two or more different sports each week.",
+      "streak_distance_weeks": "Cover 100 km or more each week.",
+      "streak_climbing_weeks": "Climb 1000 m or more each week.",
+      "streak_active_months": "Do at least one activity each month."
+    },
     "items": {
       "activity_count": {
         "name": "Getting started",

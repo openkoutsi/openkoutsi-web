@@ -60,6 +60,14 @@ function StreakCard({ streak }: { streak: Streak }) {
           {t(`items.${streak.id}.name` as never)}
         </p>
       </div>
+      {/* What keeps this streak alive, above the count rather than below it:
+          the names ("Steady volume", "Mixing it up") don't give it away, and
+          burying the rule under Longest and the hints defeats the point.
+          Separate from `items.*.description`, which is phrased as a badge
+          target ("…for {tier} weeks running") rather than a rule to maintain. */}
+      <p className="text-xs text-muted-foreground mb-2">
+        {t(`rules.${streak.id}` as never)}
+      </p>
       <p className="text-2xl font-semibold tabular-nums">
         {t(unit as 'weeks' | 'months', { count: streak.current })}
       </p>

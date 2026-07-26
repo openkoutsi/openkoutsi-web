@@ -505,6 +505,14 @@
       "goal": "Tavoitteet",
       "streak": "Putket"
     },
+    "rules": {
+      "streak_active_weeks": "Tee vähintään yksi suoritus joka viikko.",
+      "streak_volume_weeks": "Harjoittele vähintään 5 tuntia joka viikko.",
+      "streak_multisport_weeks": "Harrasta vähintään kahta eri lajia joka viikko.",
+      "streak_distance_weeks": "Taita vähintään 100 km joka viikko.",
+      "streak_climbing_weeks": "Nouse vähintään 1000 m joka viikko.",
+      "streak_active_months": "Tee vähintään yksi suoritus joka kuukausi."
+    },
     "items": {
       "activity_count": {
         "name": "Alkuun päästy",
