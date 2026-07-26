@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
 import { showAdherenceScores } from '@/lib/adherence'
 import { showWeeklyLoad } from '@/lib/weeklyLoad'
+import { gamificationEnabled } from '@/lib/gamification'
 import { WizardShell } from '@/components/onboarding/WizardShell'
 import { useCompleteOnboarding } from '@/components/onboarding/useCompleteOnboarding'
 import { Switch } from '@/components/ui/switch'
@@ -27,6 +28,7 @@ export function Step4Analysis({ onNext, onBack, onSkip }: Props) {
   const [autoAnalyze, setAutoAnalyze] = useState(Boolean(settings.auto_analyze))
   const [adherence, setAdherence] = useState(showAdherenceScores(settings))
   const [weeklyLoad, setWeeklyLoad] = useState(showWeeklyLoad(settings))
+  const [gamification, setGamification] = useState(gamificationEnabled(settings))
   const [saving, setSaving] = useState(false)
 
   /** PATCH a single app_settings flag, optimistically updating local state. */
@@ -107,6 +109,23 @@ export function Step4Analysis({ onNext, onBack, onSkip }: Props) {
               {t('step4.adherenceToggle')}
             </Label>
             <p className="text-xs text-muted-foreground mt-0.5">{t('step4.adherenceToggleDesc')}</p>
+          </div>
+        </div>
+
+        {/* Asked up front (issue #33): someone who finds badges off-putting
+            should be able to decline before the first one ever appears. */}
+        <div className="flex items-center gap-3 rounded-md border p-4">
+          <Switch
+            id="ob-gamification"
+            checked={gamification}
+            onCheckedChange={(checked) => saveFlag('gamification', checked, setGamification)}
+            disabled={saving}
+          />
+          <div>
+            <Label htmlFor="ob-gamification" className="text-sm font-medium cursor-pointer">
+              {t('step4.gamificationToggle')}
+            </Label>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('step4.gamificationToggleDesc')}</p>
           </div>
         </div>
       </div>

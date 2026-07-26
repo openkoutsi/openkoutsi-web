@@ -19,6 +19,10 @@
       "title": "Join request",
       "body": "{username} requested to join {team_name}. Review it under Admin → Join requests."
     },
+    "achievement_unlocked": {
+      "title": "Achievement unlocked",
+      "body": "You earned {count, plural, one {a new achievement} other {# new achievements}}."
+    },
     "unknown": {
       "title": "Notification",
       "body": "You have a new notification."

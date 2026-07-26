@@ -452,6 +452,8 @@
       "autoTrainingStatusDesc": "Luo automaattisesti päivittäisen harjoittelun tilannekatsauksen kojelaudalle latausten ja synkronointien jälkeen. Vaatii tiimin ylläpitäjän määrittämän LLM:n.",
       "askForRpe": "Pyydä arvioimaan rasitus latausten jälkeen",
       "askForRpeDesc": "Kun merkittävä pyöräilylenkki on ladattu tai synkronoitu, pyydä minua kojelaudalla arvioimaan, miltä se tuntui (RPE, 1–10).",
+      "gamification": "Näytä saavutukset ja putket",
+      "gamificationDesc": "Ansaitse merkkejä virstanpylväistä ja seuraa viikkoputkia. Ota pois päältä, jos haluat harjoitella ilman niitä.",
       "saveFailed": "Asetuksen tallennus epäonnistui",
       "coachingStyle": "Valmennustyyli",
       "coachingStyleDesc": "Säädä Koutsin palautteen sävyä.",
@@ -474,6 +476,136 @@
       "show": "Näytä viikkokuormituksen kaavio",
       "showDesc": "Näytä viikoittaisen harjoituskuormituksen kaavio koontinäytölläsi. Kuormitus lasketaan aina; tämä säätää vain kaavion näyttämistä.",
       "saveFailed": "Asetuksen tallennus epäonnistui"
+    }
+  },
+  "achievements": {
+    "title": "Saavutukset",
+    "subtitle": "Ansaitsemasi merkit ja se, mitä kohti olet menossa.",
+    "loading": "Ladataan…",
+    "empty": "Ei vielä saavutuksia. Kirjaa suoritus päästäksesi alkuun.",
+    "earned": "Ansaittu {date}",
+    "locked": "Lukittu",
+    "progress": "{current} / {target}",
+    "streaks": "Putket",
+    "currentStreak": "Nykyinen",
+    "longestStreak": "Pisin",
+    "weeks": "{count, plural, one {# viikko} other {# viikkoa}}",
+    "months": "{count, plural, one {# kuukausi} other {# kuukautta}}",
+    "inProgressHint": "Tämä viikko on vielä kesken — putkesi on turvassa viikon loppuun asti.",
+    "noStreak": "Ei aktiivista putkea. Yksi suoritus tällä viikolla aloittaa uuden.",
+    "recentlyEarned": "Viimeksi ansaitut",
+    "viewAll": "Näytä kaikki saavutukset",
+    "tierOf": "Taso {current} / {total}",
+    "categories": {
+      "volume": "Määrä",
+      "climbing": "Nousut",
+      "variety": "Monipuolisuus",
+      "engagement": "Sitoutuminen",
+      "plan": "Ohjelmat",
+      "goal": "Tavoitteet",
+      "streak": "Putket"
+    },
+    "items": {
+      "activity_count": {
+        "name": "Alkuun päästy",
+        "description": "Kirjaa {tier} suoritusta."
+      },
+      "long_activity": {
+        "name": "Pitkän matkan taittaja",
+        "description": "Aja {tier} tuntia yhdellä lenkillä."
+      },
+      "total_hours": {
+        "name": "Tunteja satulassa",
+        "description": "Kerää {tier} tuntia harjoittelua."
+      },
+      "single_ride_distance": {
+        "name": "Matkantekijä",
+        "description": "Taita {tier} km yhdellä lenkillä."
+      },
+      "total_distance": {
+        "name": "Pitkä kiertotie",
+        "description": "Taita {tier} km yhteensä."
+      },
+      "total_load": {
+        "name": "Kuormankantaja",
+        "description": "Kerää {tier} kuormaa harjoittelustasi."
+      },
+      "single_ride_elevation": {
+        "name": "Kiipeilijä",
+        "description": "Nouse {tier} m yhdellä lenkillä."
+      },
+      "total_elevation": {
+        "name": "Vuorikauris",
+        "description": "Nouse {tier} m yhteensä."
+      },
+      "everesting": {
+        "name": "Everesting",
+        "description": "Nouse Mount Everestin korkeus — 8848 m — yhdellä lenkillä."
+      },
+      "multisport": {
+        "name": "Monipuolinen",
+        "description": "Kirjaa suorituksia {tier} eri lajissa."
+      },
+      "race_day": {
+        "name": "Kilpailupäivä",
+        "description": "Merkitse {tier} suoritusta kilpailuksi."
+      },
+      "commuter": {
+        "name": "Työmatkalainen",
+        "description": "Merkitse {tier} suoritusta työmatkaksi."
+      },
+      "comeback": {
+        "name": "Tervetuloa takaisin",
+        "description": "Palaa harjoittelun pariin kuukauden tai pidemmän tauon jälkeen. Tauko kuuluu asiaan."
+      },
+      "rpe_recorded": {
+        "name": "Kehon kuuntelija",
+        "description": "Arvioi koettu rasitus {tier} suorituksessa."
+      },
+      "notes_written": {
+        "name": "Harjoituspäiväkirja",
+        "description": "Kirjoita muistiinpanot {tier} suoritukseen."
+      },
+      "plans_completed": {
+        "name": "Ohjelman päättäjä",
+        "description": "Suorita {tier} harjoitusohjelmaa loppuun."
+      },
+      "plan_flawless": {
+        "name": "Täydellinen ohjelma",
+        "description": "Vie harjoitusohjelma loppuun ilman yhtään väliin jäänyttä tai ohitettua harjoitusta."
+      },
+      "plan_adherence": {
+        "name": "Ohjelmassa pysyjä",
+        "description": "Vie harjoitusohjelma loppuun {tier} %:n toteumalla."
+      },
+      "goals_reached": {
+        "name": "Tavoitteiden saavuttaja",
+        "description": "Saavuta {tier} tavoitetta."
+      },
+      "streak_active_weeks": {
+        "name": "Säännöllisyys",
+        "description": "Harjoittele vähintään kerran viikossa {tier} viikkoa putkeen."
+      },
+      "streak_volume_weeks": {
+        "name": "Tasainen määrä",
+        "description": "Harjoittele vähintään 5 tuntia {tier} viikkoa putkeen."
+      },
+      "streak_multisport_weeks": {
+        "name": "Vaihtelua",
+        "description": "Harrasta vähintään kahta lajia {tier} viikkoa putkeen."
+      },
+      "streak_distance_weeks": {
+        "name": "Kilometrit kertyvät",
+        "description": "Taita vähintään 100 km {tier} viikkoa putkeen."
+      },
+      "streak_climbing_weeks": {
+        "name": "Aina ylöspäin",
+        "description": "Nouse vähintään 1000 m {tier} viikkoa putkeen."
+      },
+      "streak_active_months": {
+        "name": "Pitkäjänteinen",
+        "description": "Harjoittele vähintään kerran kuussa {tier} kuukautta putkeen."
+      }
     }
   }
 }

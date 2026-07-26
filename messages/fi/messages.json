@@ -19,6 +19,10 @@
       "title": "Liittymispyyntö",
       "body": "{username} pyysi liittyä tiimiin {team_name}. Käsittele se kohdassa Ylläpito → Liittymispyynnöt."
     },
+    "achievement_unlocked": {
+      "title": "Saavutus avattu",
+      "body": "Ansaitsit {count, plural, one {uuden saavutuksen} other {# uutta saavutusta}}."
+    },
     "unknown": {
       "title": "Ilmoitus",
       "body": "Sinulla on uusi ilmoitus."
