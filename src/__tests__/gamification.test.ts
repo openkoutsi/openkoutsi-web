@@ -5,7 +5,9 @@ import fi from '../../messages/fi/app.json'
 
 import {
   byMostRecent,
+  descriptionValues,
   formatTier,
+  formatTierValue,
   gamificationEnabled,
   highestTier,
   nextTier,
@@ -155,6 +157,87 @@ describe('formatTier', () => {
   it('does not add trailing noise to whole numbers', () => {
     expect(formatTier(4, 'km')).toBe('4 km')
     expect(formatTier(3.5, 'km')).toBe('3.5 km')
+  })
+})
+
+describe('formatTierValue', () => {
+  it('renders a bare number, whatever the unit means', () => {
+    expect(formatTierValue(500)).toBe('500')
+    expect(formatTierValue(8848)).toBe('8848')
+    expect(formatTierValue(80)).toBe('80')
+  })
+
+  it('does not add trailing noise to whole numbers', () => {
+    expect(formatTierValue(4)).toBe('4')
+    expect(formatTierValue(3.5)).toBe('3.5')
+  })
+})
+
+describe('descriptionValues', () => {
+  /** What the backend's catalogue says each badge's tiers mean. */
+  const UNITS: Record<string, string> = {
+    long_activity: 'hours',
+    total_hours: 'hours',
+    single_ride_distance: 'km',
+    total_distance: 'km',
+    single_ride_elevation: 'metres',
+    total_elevation: 'metres',
+    everesting: 'metres',
+    total_load: 'load',
+    plan_adherence: 'percent',
+  }
+
+  /** A tier big enough that its digits can't be confused with the copy. */
+  const TIER = 160
+
+  function define(id: string): AchievementDefinition {
+    return {
+      id,
+      category: 'volume',
+      tiers: [TIER],
+      unit: UNITS[id] ?? 'count',
+      requires: null,
+      // Streak copy interpolates this; the value itself is the API's.
+      threshold: 5,
+      threshold_unit: 'hours',
+    }
+  }
+
+  function render(template: string, id: string): string {
+    const values = descriptionValues(define(id), TIER)
+    return template
+      .replaceAll('{tier}', values.tier)
+      .replaceAll('{threshold}', String(values.threshold))
+  }
+
+  it('interpolates the tier as a bare number', () => {
+    expect(descriptionValues(define('single_ride_distance'), TIER).tier).toBe('160')
+    expect(descriptionValues(define('plan_adherence'), TIER).tier).toBe('160')
+  })
+
+  it('falls back to the top tier once every tier is earned', () => {
+    const definition = { ...define('total_hours'), tiers: [10, 100, 500] }
+    expect(descriptionValues(definition, null).tier).toBe('500')
+  })
+
+  it('passes the threshold through untouched', () => {
+    expect(descriptionValues(define('streak_volume_weeks'), TIER).threshold).toBe(5)
+  })
+
+  it('never doubles a unit the copy already names', () => {
+    // The descriptions spell the unit out in their own words — "Cover {tier}
+    // km", "Aja {tier} tuntia" — so a formatted tier read "160 km km",
+    // "500 h tuntia", "80 % %:n" on the achievements page.
+    const doubled = [/\bkm\s+km\b/, /\bh\s+(h|hours|tuntia)\b/, /\bm\s+m\b/, /%\s*%/]
+    for (const locale of [en, fi]) {
+      const items = locale.achievements.items as Record<string, { description: string }>
+      for (const [id, item] of Object.entries(items)) {
+        const text = render(item.description, id)
+        for (const pattern of doubled) {
+          expect(text, `${id}: "${text}"`).not.toMatch(pattern)
+        }
+      }
+    }
   })
 })
 
