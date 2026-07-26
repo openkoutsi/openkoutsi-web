@@ -15,6 +15,11 @@
   },
   "ftpValue": "{value} W",
   "fitnessHistory": "Kuntohistoria",
+  "forecast": {
+    "today": "Tänään",
+    "caption": "Katkoviiva ennustaa seuraavat {days} päivää aktiivisten ohjelmiesi perusteella olettaen, että teet jokaisen suunnitellun harjoituksen. Päivät ilman suunniteltua harjoitusta lasketaan lepopäiviksi.",
+    "goalOutlook": "ennustettu kunto {date}: {form}"
+  },
   "activitySummary": {
     "numActivities": "Suoritukset",
     "activeTime": "Aktiivinen aika",

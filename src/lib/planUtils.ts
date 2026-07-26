@@ -1,5 +1,5 @@
 import { addDays, startOfWeek, format } from 'date-fns'
-import type { PlannedWorkout, TrainingPlan } from './types'
+import type { FitnessPoint, PlannedWorkout, TrainingPlan } from './types'
 
 /** Computes the calendar Date of a planned workout.
  *  day_of_week: 1=Monday … 7=Sunday (matches backend schema) */
@@ -79,6 +79,81 @@ export function workoutFormToPayload(values: WorkoutFormValues): {
     duration_min: toInt(values.duration_min),
     target_load: toInt(values.target_load),
   }
+}
+
+/** Default week-over-week ramp when a plan's config doesn't carry one.
+ *  Mirrors the backend's PlanConfig.weekly_progression_pct default. */
+const DEFAULT_PROGRESSION_PCT = 7
+
+/** How far above the configured band the projected ramp must sit before it is
+ *  worth flagging. The configured percentage governs the week-over-week *Load*
+ *  ramp, whereas the forecast reports the resulting *Fitness* ramp — related,
+ *  but not the same number — so an exact comparison would cry wolf. The margin
+ *  makes this a "this looks aggressive" hint rather than a spec violation. */
+const RAMP_TOLERANCE_PCT = 3
+
+export interface RampWeek {
+  /** Monday of the projected week (yyyy-MM-dd). */
+  weekStart: string
+  /** Week-over-week rise in projected Fitness, as a percentage. */
+  risePct: number
+}
+
+export interface RampCheck {
+  /** The plan's configured week-over-week progression, in percent. */
+  configuredPct: number
+  /** The threshold actually applied (configured + tolerance). */
+  thresholdPct: number
+  /** Projected weeks whose Fitness rise exceeds the threshold. */
+  weeks: RampWeek[]
+}
+
+/** Read the configured week-over-week progression from a plan's config. */
+export function progressionPctOf(plan: TrainingPlan): number {
+  const pct = plan.config?.weekly_progression_pct
+  return typeof pct === 'number' && pct > 0 ? pct : DEFAULT_PROGRESSION_PCT
+}
+
+/**
+ * Flags projected weeks where Fitness ramps faster than the plan intends.
+ *
+ * Buckets the forecast into Monday-based weeks that fall inside the plan's date
+ * range, takes each week's last projected Fitness value, and compares the
+ * week-over-week rise against the plan's configured `weekly_progression_pct`
+ * plus a tolerance (see `RAMP_TOLERANCE_PCT` for why the comparison is not
+ * exact). Weeks starting from a near-zero base are skipped — a percentage rise
+ * off ~0 Fitness is arbitrarily large and says nothing useful about the plan.
+ */
+export function checkProjectedRamp(
+  plan: TrainingPlan,
+  forecast: FitnessPoint[] | undefined,
+): RampCheck {
+  const configuredPct = progressionPctOf(plan)
+  const thresholdPct = configuredPct + RAMP_TOLERANCE_PCT
+  const result: RampCheck = { configuredPct, thresholdPct, weeks: [] }
+  if (!forecast || forecast.length === 0 || plan.status !== 'active') return result
+
+  const planStart = new Date(plan.start_date)
+  const planEnd = plan.end_date ? new Date(plan.end_date) : null
+
+  // Last projected Fitness of each week inside the plan window, in week order.
+  const lastOfWeek = new Map<string, number>()
+  for (const point of forecast) {
+    const day = new Date(point.date)
+    if (day < planStart) continue
+    if (planEnd && day > planEnd) continue
+    lastOfWeek.set(weekKey(day), point.fitness)
+  }
+
+  const weeks = [...lastOfWeek.entries()].sort(([a], [b]) => a.localeCompare(b))
+  for (let i = 1; i < weeks.length; i++) {
+    const [, previous] = weeks[i - 1]
+    const [weekStart, current] = weeks[i]
+    if (previous < 1) continue
+    const risePct = ((current - previous) / previous) * 100
+    if (risePct > thresholdPct) result.weeks.push({ weekStart, risePct })
+  }
+  return result
 }
 
 /** Groups workouts of the active plan by date key (yyyy-MM-dd). */

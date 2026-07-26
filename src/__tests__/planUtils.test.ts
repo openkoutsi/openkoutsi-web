@@ -3,11 +3,13 @@ import {
   workoutDate,
   weekKey,
   aggregatePlannedLoadByWeek,
+  checkProjectedRamp,
   groupPlannedWorkoutsByDate,
   plannedWorkoutStatus,
+  progressionPctOf,
   workoutFormToPayload,
 } from '@/lib/planUtils'
-import type { PlannedWorkout, TrainingPlan } from '@/lib/types'
+import type { FitnessPoint, PlannedWorkout, TrainingPlan } from '@/lib/types'
 
 describe('workoutFormToPayload', () => {
   it('coerces filled numeric fields to integers', () => {
@@ -275,5 +277,87 @@ describe('plannedWorkoutStatus', () => {
   it('treats completion as taking precedence over a skip reason', () => {
     const w = makeWorkout({ completed_activity_id: 'act-1', skip_reason: 'illness' })
     expect(plannedWorkoutStatus(w)).toBe('completed')
+  })
+})
+
+/** Forecast points for `weeks` consecutive Mondays-to-Sundays from `start`,
+ *  where each week's Fitness grows by `growthPct` over the previous one. */
+function makeForecast(start: string, weeks: number, base: number, growthPct: number): FitnessPoint[] {
+  const points: FitnessPoint[] = []
+  const from = new Date(start)
+  let fitness = base
+  for (let w = 0; w < weeks; w++) {
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(from)
+      day.setDate(from.getDate() + w * 7 + d)
+      points.push({
+        date: day.toISOString().slice(0, 10),
+        fitness,
+        fatigue: 0,
+        form: fitness,
+        daily_load: 0,
+        projected: true,
+      })
+    }
+    fitness = fitness * (1 + growthPct / 100)
+  }
+  return points
+}
+
+describe('progressionPctOf', () => {
+  it('reads the configured weekly progression', () => {
+    expect(progressionPctOf(makePlan({ config: { weekly_progression_pct: 9 } }))).toBe(9)
+  })
+
+  it('falls back to the backend default when config is absent or unusable', () => {
+    expect(progressionPctOf(makePlan({ config: null }))).toBe(7)
+    expect(progressionPctOf(makePlan({ config: { weekly_progression_pct: 'fast' } }))).toBe(7)
+    expect(progressionPctOf(makePlan({ config: { weekly_progression_pct: 0 } }))).toBe(7)
+  })
+})
+
+describe('checkProjectedRamp', () => {
+  const plan = makePlan({
+    start_date: '2025-01-06', // Monday
+    end_date: '2025-03-02',
+    config: { weekly_progression_pct: 7 },
+  })
+
+  it('flags weeks whose projected fitness rise exceeds the configured band', () => {
+    const ramp = checkProjectedRamp(plan, makeForecast('2025-01-06', 4, 40, 20))
+    expect(ramp.configuredPct).toBe(7)
+    expect(ramp.thresholdPct).toBe(10)
+    expect(ramp.weeks.length).toBe(3)
+    expect(ramp.weeks[0].risePct).toBeCloseTo(20, 5)
+  })
+
+  it('stays quiet when the ramp sits inside the configured band', () => {
+    expect(checkProjectedRamp(plan, makeForecast('2025-01-06', 4, 40, 5)).weeks).toEqual([])
+  })
+
+  it('stays quiet within the tolerance above the configured band', () => {
+    // 9% > the configured 7%, but inside the 3-point tolerance: Load ramp and
+    // Fitness ramp are related but not the same number.
+    expect(checkProjectedRamp(plan, makeForecast('2025-01-06', 4, 40, 9)).weeks).toEqual([])
+  })
+
+  it('ignores projected days outside the plan window', () => {
+    // The plan ends 2025-03-02; a steep ramp starting after it is not this
+    // plan's doing.
+    const ramp = checkProjectedRamp(plan, makeForecast('2025-03-03', 4, 40, 30))
+    expect(ramp.weeks).toEqual([])
+  })
+
+  it('skips weeks ramping off a near-zero base', () => {
+    // 0.2 → 0.4 is +100%, but says nothing useful about the plan.
+    const ramp = checkProjectedRamp(plan, makeForecast('2025-01-06', 3, 0.2, 100))
+    expect(ramp.weeks).toEqual([])
+  })
+
+  it('returns nothing without a forecast or for a non-active plan', () => {
+    expect(checkProjectedRamp(plan, undefined).weeks).toEqual([])
+    expect(checkProjectedRamp(plan, []).weeks).toEqual([])
+    const archived = makePlan({ ...plan, status: 'archived' })
+    expect(checkProjectedRamp(archived, makeForecast('2025-01-06', 4, 40, 30)).weeks).toEqual([])
   })
 })

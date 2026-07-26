@@ -15,6 +15,11 @@
   },
   "ftpValue": "{value} W",
   "fitnessHistory": "Fitness history",
+  "forecast": {
+    "today": "Today",
+    "caption": "The dashed section projects the next {days} days from your active plans, assuming every planned session gets done. Days with no planned workout count as rest.",
+    "goalOutlook": "projected form on {date}: {form}"
+  },
   "activitySummary": {
     "numActivities": "Activities",
     "activeTime": "Active time",
