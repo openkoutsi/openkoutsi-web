@@ -15,6 +15,7 @@ import { WeeklyZones } from '@/components/charts/WeeklyZones'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
 import { showWeeklyLoad } from '@/lib/weeklyLoad'
+import { MAX_FORECAST_DAYS, forecastHorizon } from '@/lib/fitnessForecast'
 import { gamificationEnabled } from '@/lib/gamification'
 import { AchievementsCard } from '@/components/AchievementsCard'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
@@ -45,10 +46,6 @@ const GLOSSARY_KEYS = ['fitness', 'fatigue', 'form', 'ftp', 'load'] as const
 // Auto-refresh dashboard data while the page is open. SWR's refreshWhenHidden
 // defaults to false, so polling pauses automatically in a background tab.
 const REFRESH_INTERVAL_MS = 60_000
-
-// Forecast horizon. Fixed rather than derived from the active plan, so the
-// projected part of the chart keeps the same length as a plan is consumed.
-const FORECAST_DAYS = 90
 
 function MetricsGlossaryDialog() {
   const t = useTranslations('dashboard')
@@ -253,8 +250,12 @@ export default function DashboardPage() {
     fetcher,
     { refreshInterval: REFRESH_INTERVAL_MS },
   )
+  // Always fetched at the full horizon: the projection is a day-by-day walk
+  // from tomorrow, so its first N days are what a shorter request would return.
+  // Slicing locally keeps the SWR key — and the backend catch-up it triggers —
+  // stable as the period buttons are tapped.
   const { data: forecast } = useSWR<FitnessPoint[]>(
-    `/api/metrics/fitness/forecast?days=${FORECAST_DAYS}`,
+    `/api/metrics/fitness/forecast?days=${MAX_FORECAST_DAYS}`,
     fetcher,
     { refreshInterval: REFRESH_INTERVAL_MS },
   )
@@ -276,6 +277,10 @@ export default function DashboardPage() {
   })
   const plans = plansPage?.items
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
+  // The dashed tail is trimmed to the selected period so it never dwarfs the
+  // measured data; the goal outlook below keeps using the full projection.
+  const forecastDays = forecastHorizon(days)
+  const chartForecast = forecast?.slice(0, forecastDays)
   const _rawPlanned = plans ? aggregatePlannedLoadByWeek(plans) : undefined
   const plannedByWeek = _rawPlanned?.size ? _rawPlanned : undefined
 
@@ -348,12 +353,12 @@ export default function DashboardPage() {
             <>
               <FitnessChart
                 data={history}
-                forecast={forecast}
+                forecast={chartForecast}
                 todayLabel={t('forecast.today')}
               />
-              {forecast && forecast.length > 0 && (
+              {chartForecast && chartForecast.length > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {t('forecast.caption', { days: FORECAST_DAYS })}
+                  {t('forecast.caption', { days: chartForecast.length })}
                 </p>
               )}
               <GoalFormOutlook goals={goalsPage?.items} forecast={forecast} />
