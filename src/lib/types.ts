@@ -149,7 +149,9 @@ export type DecouplingReason =
   | 'no_power'
   | 'no_hr'
   | 'degenerate_hr'
+  | 'stream_mismatch'
   | 'variable_effort'
+  | 'uneven_pacing'
 
 export interface Activity {
   id: string
@@ -241,6 +243,10 @@ export interface ActivityDetail extends Activity {
   // athlete's power bests weren't enough to fit a CP.
   cp_w: number | null
   w_prime_j: number | null
+  // How many duration bests the CP fit used. Low values mean a thin power
+  // profile at the time — typically an old ride imported early in a
+  // newest-first provider backlog.
+  cp_fit_points: number | null
   zone_breakdown?: ZoneBreakdown[]
   analysis_status?: string | null
   analysis?: string | null

@@ -117,6 +117,8 @@
         "no_hr": "Not measured: this ride has no heart-rate data.",
         "degenerate_hr": "Not measured: the heart-rate data from this ride is unusable.",
         "variable_effort": "Not measured: this was an interval or otherwise surging session, where the figure would describe the intervals rather than your aerobic durability.",
+        "stream_mismatch": "Not measured: the power and heart-rate recordings from this ride don't line up closely enough to compare them.",
+        "uneven_pacing": "Not measured: the two halves were ridden at markedly different intensities, so the figure would reflect your pacing rather than your aerobic durability.",
         "unknown": "Not measured for this ride."
       }
     },

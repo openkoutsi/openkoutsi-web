@@ -117,6 +117,8 @@
         "no_hr": "Ei mitattu: tässä lenkissä ei ole sykedataa.",
         "degenerate_hr": "Ei mitattu: tämän lenkin sykedata ei ole käyttökelpoista.",
         "variable_effort": "Ei mitattu: tämä oli intervalli- tai muuten sykähtelevä harjoitus, jolloin luku kuvaisi intervalleja eikä aerobista kestävyyttäsi.",
+        "stream_mismatch": "Ei mitattu: tämän lenkin teho- ja sykerekisteröinnit eivät osu riittävän tarkasti yhteen, jotta niitä voisi verrata.",
+        "uneven_pacing": "Ei mitattu: puoliskot ajettiin selvästi eri teholla, joten luku kuvaisi vetoasi eikä aerobista kestävyyttäsi.",
         "unknown": "Ei mitattu tälle lenkille."
       }
     },
