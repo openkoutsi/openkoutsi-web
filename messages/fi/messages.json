@@ -4,29 +4,12 @@
     "empty": "Ei viestejä.",
     "markAllRead": "Merkitse kaikki luetuiksi",
     "delete": "Poista",
-    "deleteFailed": "Viestin poisto epäonnistui"
-  },
-  "types": {
-    "team_request": {
-      "title": "Uusi tiimipyyntö",
-      "body": "{admin_username} pyysi uutta tiimiä \"{team_name}\" ({team_slug}). Hyväksyntä vaaditaan ennen kuin jäsenet voivat kirjautua."
-    },
-    "invite_used": {
-      "title": "Kutsu käytetty",
-      "body": "{username} liittyi tiimiin {team_name} kutsulinkin kautta."
-    },
-    "join_request": {
-      "title": "Liittymispyyntö",
-      "body": "{username} pyysi liittyä tiimiin {team_name}. Käsittele se kohdassa Ylläpito → Liittymispyynnöt."
-    },
-    "achievement_unlocked": {
-      "title": "Saavutus avattu",
-      "body": "Ansaitsit {count, plural, one {uuden saavutuksen} other {# uutta saavutusta}}."
-    },
-    "unknown": {
-      "title": "Ilmoitus",
-      "body": "Sinulla on uusi ilmoitus."
-    }
+    "deleteFailed": "Viestin poisto epäonnistui",
+    "open": "Avaa viesti: {title}",
+    "close": "Sulje",
+    "received": "Vastaanotettu {date}",
+    "viewAchievements": "Näytä saavutukset",
+    "legacy": "Aiempi ilmoitus"
   },
   "join": {
     "title": "Pyydä liittymistä",

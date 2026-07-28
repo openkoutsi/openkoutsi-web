@@ -4,29 +4,12 @@
     "empty": "No messages.",
     "markAllRead": "Mark all read",
     "delete": "Delete",
-    "deleteFailed": "Failed to delete message"
-  },
-  "types": {
-    "team_request": {
-      "title": "New team request",
-      "body": "{admin_username} requested a new team \"{team_name}\" ({team_slug}). Approval is required before its members can sign in."
-    },
-    "invite_used": {
-      "title": "Invite used",
-      "body": "{username} joined {team_name} via an invite link."
-    },
-    "join_request": {
-      "title": "Join request",
-      "body": "{username} requested to join {team_name}. Review it under Admin → Join requests."
-    },
-    "achievement_unlocked": {
-      "title": "Achievement unlocked",
-      "body": "You earned {count, plural, one {a new achievement} other {# new achievements}}."
-    },
-    "unknown": {
-      "title": "Notification",
-      "body": "You have a new notification."
-    }
+    "deleteFailed": "Failed to delete message",
+    "open": "Open message: {title}",
+    "close": "Close",
+    "received": "Received {date}",
+    "viewAchievements": "View achievements",
+    "legacy": "Earlier notification"
   },
   "join": {
     "title": "Request to join",

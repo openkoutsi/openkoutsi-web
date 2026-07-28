@@ -1,34 +1,23 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from '@/navigation'
 import useSWR, { mutate as globalMutate } from 'swr'
 import { Trash2 } from 'lucide-react'
-import { useAuth } from '@/lib/auth'
 import { apiFetch, fetcher } from '@/lib/api'
-import { messageTypeKey, messageValues } from '@/lib/messages'
 import type { Message, Page } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { MessageDialog } from '@/components/messages/MessageDialog'
 import { toast } from '@/components/ui/use-toast'
 
 const UNREAD_KEY = '/api/messages/unread-count'
 
 export default function InboxPage() {
   const t = useTranslations('messages')
-  const { isAdmin, loading } = useAuth()
-  const router = useRouter()
   const { data: messagesPage, mutate } = useSWR<Page<Message>>('/api/messages?page_size=100', fetcher)
   const messages = messagesPage?.items
-
-  useEffect(() => {
-    if (!loading && !isAdmin) {
-      router.replace(`/dashboard`)
-    }
-  }, [isAdmin, loading, router])
-
-  if (loading || !isAdmin) return null
+  const [selected, setSelected] = useState<Message | null>(null)
 
   async function markRead(id: string) {
     try {
@@ -38,6 +27,12 @@ export default function InboxPage() {
     } catch {
       // best-effort
     }
+  }
+
+  /** Opening a message is what reads it — unread ones flip on the way in. */
+  function open(message: Message) {
+    setSelected(message)
+    if (!message.read_at) markRead(message.id)
   }
 
   async function markAllRead() {
@@ -84,40 +79,39 @@ export default function InboxPage() {
       ) : (
         <div className="space-y-2">
           {messages.map((m) => {
-            const key = messageTypeKey(m.type)
-            const values = messageValues(m.data)
-            const interactive = !m.read_at
+            // Messages sent before they carried their own text have none to
+            // show. Rather than a blank card, name them for what they are.
+            const title = m.title || t('inbox.legacy')
             return (
               <Card
                 key={m.id}
-                className={`p-4 ${interactive ? 'cursor-pointer' : 'cursor-default opacity-70'}`}
-                role={interactive ? 'button' : undefined}
-                tabIndex={interactive ? 0 : undefined}
-                onClick={() => interactive && markRead(m.id)}
-                onKeyDown={
-                  interactive
-                    ? (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          markRead(m.id)
-                        }
-                      }
-                    : undefined
-                }
+                className={`p-4 cursor-pointer ${m.read_at ? 'opacity-70' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label={t('inbox.open', { title })}
+                onClick={() => open(m)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    open(m)
+                  }
+                }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
                       {!m.read_at && (
                         <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
                       )}
-                      <p className="text-sm font-medium">
-                        {t(`types.${key}.title` as never, values as never)}
-                      </p>
+                      <p className="text-sm font-medium">{title}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t(`types.${key}.body` as never, values as never)}
-                    </p>
+                    {m.body && (
+                      // Bodies can run to several lines (one per badge in an
+                      // achievement batch); the popup shows all of it.
+                      <p className="text-sm text-muted-foreground line-clamp-2 whitespace-pre-line">
+                        {m.body}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {new Date(m.created_at).toLocaleString()}
                     </p>
@@ -139,6 +133,8 @@ export default function InboxPage() {
           })}
         </div>
       )}
+
+      <MessageDialog message={selected} onOpenChange={(o) => !o && setSelected(null)} />
     </div>
   )
 }

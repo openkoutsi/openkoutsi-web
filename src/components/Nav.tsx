@@ -22,8 +22,10 @@ function NavInner({ onClose }: NavInnerProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { athlete, logout, isAdmin } = useAuth()
+  // Every athlete has a mailbox — achievement unlocks land there, not just the
+  // instance events that used to make this admin-only.
   const { data: unread } = useSWR<UnreadCount>(
-    isAdmin ? '/api/messages/unread-count' : null,
+    '/api/messages/unread-count',
     fetcher,
     { refreshInterval: 60000 },
   )
@@ -124,26 +126,24 @@ function NavInner({ onClose }: NavInnerProps) {
             {t('nav.admin')}
           </Link>
         )}
-        {isAdmin && (
-          <Link
-            href={`/inbox`}
-            onClick={onClose}
-            className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
-              pathname.startsWith('/inbox')
-                ? 'bg-accent text-accent-foreground font-medium'
-                : 'text-muted-foreground',
-            )}
-          >
-            <Inbox className="h-4 w-4 shrink-0" />
-            <span className="flex-1">{t('nav.inbox')}</span>
-            {unreadCount > 0 && (
-              <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </Link>
-        )}
+        <Link
+          href={`/inbox`}
+          onClick={onClose}
+          className={cn(
+            'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+            pathname.startsWith('/inbox')
+              ? 'bg-accent text-accent-foreground font-medium'
+              : 'text-muted-foreground',
+          )}
+        >
+          <Inbox className="h-4 w-4 shrink-0" />
+          <span className="flex-1">{t('nav.inbox')}</span>
+          {unreadCount > 0 && (
+            <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </Link>
       </div>
 
       <div className="flex items-center justify-between px-1 pt-1">

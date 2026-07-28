@@ -501,9 +501,18 @@ export interface GoalGuidance {
 export interface Message {
   id: string
   type: string
-  // Numbers appear alongside strings — `achievement_unlocked` carries a numeric
-  // `count` that an ICU plural selects on.
-  data: Record<string, string | number | null>
+  /**
+   * Machine-readable metadata — deep links, icon selection, the data export.
+   * Never the source of what the message says: the backend renders `title` and
+   * `body` when the message is sent, so a new message type is readable here
+   * without the web app shipping a template for it first.
+   */
+  data: Record<string, unknown>
+  /** Null on messages sent before messages carried their own text. */
+  title: string | null
+  body: string | null
+  /** Which language `title`/`body` were rendered in. */
+  locale: string | null
   read_at: string | null
   created_at: string
 }
