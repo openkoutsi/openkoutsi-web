@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import {
   cn,
   formatDate,
+  formatDecoupling,
   formatDistance,
   formatDuration,
+  formatEfficiencyFactor,
   formatHoursMinutes,
   formatHR,
   formatPower,
+  formatVariabilityIndex,
+  formatWPrime,
 } from '@/lib/utils'
 
 describe('cn', () => {
@@ -112,5 +116,57 @@ describe('formatHR', () => {
     expect(formatHR(148)).toBe('148 bpm')
     expect(formatHR(148.6)).toBe('149 bpm')
     expect(formatHR(0)).toBe('0 bpm')
+  })
+})
+
+// ── Aerobic response metrics (issue #37) ──────────────────────────────────────
+
+describe('formatEfficiencyFactor', () => {
+  it('returns dash when missing', () => {
+    expect(formatEfficiencyFactor(null)).toBe('—')
+    expect(formatEfficiencyFactor(undefined)).toBe('—')
+  })
+
+  it('shows two decimals with the unit', () => {
+    expect(formatEfficiencyFactor(1.5238)).toBe('1.52 W/bpm')
+    expect(formatEfficiencyFactor(2)).toBe('2.00 W/bpm')
+  })
+})
+
+describe('formatVariabilityIndex', () => {
+  it('returns dash when missing', () => {
+    expect(formatVariabilityIndex(null)).toBe('—')
+    expect(formatVariabilityIndex(undefined)).toBe('—')
+  })
+
+  it('shows two decimals and no unit', () => {
+    expect(formatVariabilityIndex(1.067)).toBe('1.07')
+    expect(formatVariabilityIndex(1)).toBe('1.00')
+  })
+})
+
+describe('formatDecoupling', () => {
+  it('returns dash when missing', () => {
+    // A gated-out decoupling is null; the card explains why alongside the dash.
+    expect(formatDecoupling(null)).toBe('—')
+    expect(formatDecoupling(undefined)).toBe('—')
+  })
+
+  it('always carries a sign, because the sign is the meaning', () => {
+    expect(formatDecoupling(3.42)).toBe('+3.4 %')
+    expect(formatDecoupling(-1.24)).toBe('−1.2 %')
+    expect(formatDecoupling(0)).toBe('+0.0 %')
+  })
+})
+
+describe('formatWPrime', () => {
+  it('returns dash when missing', () => {
+    expect(formatWPrime(null)).toBe('—')
+    expect(formatWPrime(undefined)).toBe('—')
+  })
+
+  it('converts joules to kilojoules', () => {
+    expect(formatWPrime(15000)).toBe('15.0 kJ')
+    expect(formatWPrime(23480)).toBe('23.5 kJ')
   })
 })

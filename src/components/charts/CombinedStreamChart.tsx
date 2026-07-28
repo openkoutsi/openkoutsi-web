@@ -20,9 +20,9 @@ import { formatChartTime, niceTickStepMinutes } from '@/lib/utils'
 import { downsample } from '@/lib/chartUtils'
 import { Interval } from '@/lib/types'
 
-type StreamKey = 'power' | 'heartrate' | 'speed' | 'altitude' | 'cadence' | 'torque'
+type StreamKey = 'power' | 'heartrate' | 'speed' | 'altitude' | 'cadence' | 'torque' | 'w_bal'
 
-const STREAM_KEYS: StreamKey[] = ['power', 'heartrate', 'speed', 'altitude', 'cadence', 'torque']
+const STREAM_KEYS: StreamKey[] = ['power', 'heartrate', 'speed', 'altitude', 'cadence', 'torque', 'w_bal']
 const DEFAULT_VISIBLE = new Set<StreamKey>(['power', 'speed', 'altitude', 'heartrate'])
 const MAX_POINTS = 1000
 
@@ -79,10 +79,20 @@ const STREAM_CONFIG: Record<StreamKey, StreamConfig> = {
     yAxisId: 'torque',
     domain: [0, 'auto'],
   },
+  // W' balance arrives from the API in joules; kJ is the readable unit and
+  // keeps the axis labels short.
+  w_bal: {
+    unit: 'kJ',
+    color: '#e11d48',
+    renderType: 'line',
+    yAxisId: 'wbal',
+    domain: [0, 'auto'],
+    transform: (v) => Math.round(v / 100) / 10,
+  },
 }
 
-const LEFT_PRIORITY: StreamKey[] = ['power', 'speed', 'heartrate', 'cadence', 'torque', 'altitude']
-const RIGHT_PRIORITY: StreamKey[] = ['altitude', 'heartrate', 'speed', 'cadence', 'torque', 'power']
+const LEFT_PRIORITY: StreamKey[] = ['power', 'speed', 'heartrate', 'cadence', 'torque', 'w_bal', 'altitude']
+const RIGHT_PRIORITY: StreamKey[] = ['altitude', 'w_bal', 'heartrate', 'speed', 'cadence', 'torque', 'power']
 
 function getAxisAssignments(
   visible: Set<StreamKey>,
@@ -132,6 +142,7 @@ export function CombinedStreamChart({
     altitude: t('detail.chart.streamLabels.altitude'),
     cadence: t('detail.chart.streamLabels.cadence'),
     torque: t('detail.chart.streamLabels.torque'),
+    w_bal: t('detail.chart.streamLabels.w_bal'),
   }
 
   // All heavy data computation is memoised — only re-runs when streams or overlays change

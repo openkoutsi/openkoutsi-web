@@ -143,6 +143,14 @@ export interface AthleteProfile {
   updated_at: string
 }
 
+/** Why `Activity.decoupling_pct` is absent — see the backend's decoupling gate. */
+export type DecouplingReason =
+  | 'too_short'
+  | 'no_power'
+  | 'no_hr'
+  | 'degenerate_hr'
+  | 'variable_effort'
+
 export interface Activity {
   id: string
   athlete_id: string
@@ -160,6 +168,16 @@ export interface Activity {
   avg_cadence: number | null
   load: number | null
   intensity: number | null
+  // Aerobic response metrics (issue #37). `efficiency_factor` (weighted power
+  // per heartbeat) and `variability_index` (weighted / average power) are
+  // derived server-side on read, so they are present on activities processed
+  // long before the feature existed. `decoupling_pct` is the power:HR drift
+  // over the ride; when it is null, `decoupling_reason` says why a figure would
+  // be misleading rather than leaving the athlete to guess.
+  efficiency_factor: number | null
+  variability_index: number | null
+  decoupling_pct: number | null
+  decoupling_reason: DecouplingReason | null
   workout_category: string | null
   labels: string[]
   notes: string | null
@@ -218,6 +236,11 @@ export interface ActivityDetail extends Activity {
   power_pr_badges: Record<number, Record<string, string>>
   distance_pr_badges: Record<number, Record<string, string>>
   intervals: Interval[]
+  // CP (watts) and W' (joules) the `w_bal` stream was integrated with, frozen at
+  // processing time. Both null — and no `w_bal` in `streams` — when the
+  // athlete's power bests weren't enough to fit a CP.
+  cp_w: number | null
+  w_prime_j: number | null
   zone_breakdown?: ZoneBreakdown[]
   analysis_status?: string | null
   analysis?: string | null
@@ -235,6 +258,21 @@ export interface FitnessPoint {
   // projected from the plan's prescribed Load, not a measured one.
   projected?: boolean
   form_label?: FormLabel
+}
+
+/**
+ * One steady endurance ride in the aerobic efficiency trend
+ * (`GET /api/metrics/efficiency`, issue #37).
+ *
+ * The backend has already filtered out interval and non-cycling rides, so every
+ * point here is directly comparable with the others.
+ */
+export interface EfficiencyPoint {
+  activity_id: string
+  date: string
+  duration_s: number | null
+  efficiency_factor: number
+  decoupling_pct: number | null
 }
 
 export interface FitnessCurrent {

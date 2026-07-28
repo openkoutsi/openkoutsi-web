@@ -44,6 +44,35 @@ export function formatHR(bpm: number | null | undefined): string {
   return `${Math.round(bpm)} bpm`
 }
 
+/** Efficiency factor (weighted power per heartbeat): 1.5238 → "1.52 W/bpm" */
+export function formatEfficiencyFactor(ef: number | null | undefined): string {
+  if (ef == null) return '—'
+  return `${ef.toFixed(2)} W/bpm`
+}
+
+/** Variability index (weighted ÷ average power), unitless: 1.067 → "1.07" */
+export function formatVariabilityIndex(vi: number | null | undefined): string {
+  if (vi == null) return '—'
+  return vi.toFixed(2)
+}
+
+/**
+ * Aerobic decoupling as a signed percentage: 3.42 → "+3.4 %", -1.2 → "−1.2 %".
+ * The sign carries the meaning — positive is heart-rate drift, negative means
+ * the second half was the more efficient one — so it is always shown.
+ */
+export function formatDecoupling(pct: number | null | undefined): string {
+  if (pct == null) return '—'
+  const sign = pct < 0 ? '−' : '+'
+  return `${sign}${Math.abs(pct).toFixed(1)} %`
+}
+
+/** W′ balance in joules shown as kilojoules: 15000 → "15.0 kJ" */
+export function formatWPrime(joules: number | null | undefined): string {
+  if (joules == null) return '—'
+  return `${(joules / 1000).toFixed(1)} kJ`
+}
+
 /** Format a distance in metres as a human-readable label: 1000 → "1 km", 10000 → "10 km" */
 export function formatDistanceLabel(metres: number): string {
   return `${metres / 1000} km`

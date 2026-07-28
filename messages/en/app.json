@@ -37,6 +37,13 @@
       "fit": "fit ±{rmse} W",
       "noData": "Not enough power data to fit models yet.",
       "note": "Estimates from your recorded efforts, not a dedicated test."
+    },
+    "efficiency": {
+      "title": "Aerobic efficiency",
+      "subtitle": "Weighted power per heartbeat on your steady endurance rides",
+      "chartLabel": "Efficiency factor",
+      "decouplingLabel": "Decoupling",
+      "noData": "Not enough steady endurance rides yet to chart a trend. Rides need power and heart rate, at least 20 minutes, and a steady effort."
     }
   },
   "records": {
