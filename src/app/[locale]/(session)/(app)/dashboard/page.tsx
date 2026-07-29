@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
 import { WeeklyLoadBar } from '@/components/charts/WeeklyLoadBar'
 import { WeeklyZones } from '@/components/charts/WeeklyZones'
+import { IntensityDistributionCard } from '@/components/charts/IntensityDistributionCard'
 import { PlanAdherenceCard } from '@/components/plan/PlanAdherenceCard'
 import { showAdherenceScores } from '@/lib/adherence'
 import { showWeeklyLoad } from '@/lib/weeklyLoad'
@@ -441,6 +442,10 @@ export default function DashboardPage() {
           </Card>
         )
       })()}
+
+      {/* Intensity distribution over the block (issue #38) — the shape the
+          weekly zone bars above can't show. */}
+      <IntensityDistributionCard title={t('intensity.title')} days={days} />
 
       {/* Plan adherence (deterministic, always computed; display is opt-out) */}
       {showAdherenceScores(athlete?.app_settings) &&

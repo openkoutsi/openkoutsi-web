@@ -298,6 +298,9 @@
     "adherence": {
       "soFar": "{score} so far",
       "tooltip": "How closely you've followed this plan so far"
+    },
+    "phaseDistribution": {
+      "title": "This phase's intensity distribution"
     }
   },
   "profile": {
@@ -400,15 +403,17 @@
       "name": "Name",
       "low": "Low ({unit})",
       "high": "High ({unit})",
-      "addZone": "Add zone",
       "errors": {
         "required": "Both bounds are required",
         "lowGteHigh": "Low must be below high",
         "lowBelowPrev": "Low can't be below the previous zone's high",
         "invalidTitle": "Invalid zones",
-        "invalid": "Fix the highlighted zones before saving"
-      }
-    }
+        "invalid": "Fix the highlighted zones before saving",
+        "wrongCount": "There must be exactly the standard number of zones"
+      },
+      "fixedCount": "openkoutsi uses a fixed set of {count} zones, so only the boundaries are yours to set."
+    },
+    "syncZonesSkipped": "Left unchanged: {kinds} — the provider returned a different number of zones than openkoutsi uses."
   },
   "settings": {
     "title": "Settings",

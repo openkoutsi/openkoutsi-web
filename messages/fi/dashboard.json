@@ -112,5 +112,32 @@
     "skipped": "{count} ohitettu",
     "remaining": "{count} jäljellä",
     "noTrend": "Trendin piirtämiseen ei ole vielä riittävästi tietoa."
+  },
+  "intensity": {
+    "title": "Intensiteettijakauma",
+    "loading": "Ladataan jakaumaa…",
+    "bandLow": "Kevyt (alle LT1)",
+    "bandModerate": "Vauhtikestävyys / kynnys",
+    "bandHigh": "Kova (yli LT2)",
+    "methodTime": "Ajan mukaan",
+    "methodSession": "Harjoitusten mukaan",
+    "unitTime": "ajasta",
+    "unitSessions": "harjoituksista",
+    "explainTime": "Laskee jokaisen sekunnin jokaiselta lenkiltä. Alkulämmittelyt, palautukset ja rullailut päätyvät kaikki kevyeen kaistaan, mikä vetää useimmat urheilijat pyramidimaiseen muotoon.",
+    "explainSession": "Laskee jokaisen lenkin kokonaisena sen tavoitteen mukaan. VO2max-harjoitus on yksi kova harjoitus riippumatta siitä, kuinka suuri osa siitä meni palautellen — näin tutkimuksissa yleensä lasketaan.",
+    "coverage": "Perustuu {used}/{total} lenkkiin — muilta puuttui käyttökelpoinen vyöhykedata.",
+    "zonesChanged": "Vyöhykkeesi tai FTP:si muuttui tämän jakson aikana, joten kaistoja ei mitattu koko ajan samoilla rajoilla. Käsittele jakaumaa suuntaa antavana.",
+    "shape": {
+      "polarized": "Polarisoitunut",
+      "pyramidal": "Pyramidimainen",
+      "threshold": "Kynnyspainotteinen",
+      "predominantly_low": "Lähes kokonaan kevyttä"
+    },
+    "shapeHint": {
+      "polarized": "pääosin kevyttä ajoa, kovat päivät aidosti kovia eikä juuri mitään siltä väliltä",
+      "pyramidal": "laaja kevyt perusta, vähemmän vauhtikestävyyttä ja kynnystä, vähiten kovaa ajoa",
+      "threshold": "suuri osuus keskiraskasta työtä — harmaa alue kevyen ja kovan välissä",
+      "predominantly_low": "hyvin vähän ensimmäisen kynnyksen yläpuolella"
+    }
   }
 }

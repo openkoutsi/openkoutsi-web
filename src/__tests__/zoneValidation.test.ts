@@ -61,3 +61,38 @@ describe('validateZones', () => {
     expect(zonesAreValid([])).toBe(true)
   })
 })
+
+describe('validateZones with a fixed zone count', () => {
+  const five = [
+    z('Z1', 0, 120),
+    z('Z2', 120, 140),
+    z('Z3', 140, 160),
+    z('Z4', 160, 172),
+    z('Z5', 172, 200),
+  ]
+
+  it('accepts a list of exactly the expected length', () => {
+    expect(zonesAreValid(five, 5)).toBe(true)
+  })
+
+  it('flags a list that is too short', () => {
+    const errors = validateZones(five.slice(0, 3), 5)
+    expect(errors.some((e) => e.code === 'wrongCount')).toBe(true)
+    expect(zonesAreValid(five.slice(0, 3), 5)).toBe(false)
+  })
+
+  it('flags a list that is too long', () => {
+    expect(zonesAreValid([...five, z('Z6', 200, 210)], 5)).toBe(false)
+  })
+
+  it('treats an empty list as not-configured rather than wrong', () => {
+    // A skipped onboarding step leaves no zones at all, which is allowed.
+    expect(zonesAreValid([], 5)).toBe(true)
+  })
+
+  it('still checks bounds when the count is right', () => {
+    const broken = [...five]
+    broken[1] = z('Z2', 100, 140) // overlaps Z1
+    expect(zonesAreValid(broken, 5)).toBe(false)
+  })
+})
