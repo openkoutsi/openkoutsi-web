@@ -7,11 +7,12 @@ import { useTranslations } from 'next-intl'
 import { fetcher, apiFetch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { toast } from '@/components/ui/use-toast'
-import type { AllTimePowerBests, FtpEstimate, PowerBestEntry, PowerModels, PowerModelFit } from '@/lib/types'
+import type { AllTimePowerBests, EfficiencyPoint, FtpEstimate, PowerBestEntry, PowerModels, PowerModelFit } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { EfficiencyChart } from '@/components/charts/EfficiencyChart'
 import { PowerCurveChart, formatDuration } from '@/components/charts/PowerCurveChart'
 import {
   MODEL_KEYS,
@@ -203,6 +204,50 @@ function modelParamsLine(m: PowerModelFit): string {
   if (m.pmax != null) parts.push(`Pmax ${Math.round(m.pmax)} W`)
   if (m.a != null && m.b != null) parts.push(`a ${m.a.toFixed(0)} · b ${m.b.toFixed(3)}`)
   return parts.join(' · ')
+}
+
+/**
+ * Aerobic efficiency trend (issue #37) — weighted power per heartbeat across
+ * steady endurance rides. Lives on the Power view next to the power curve and
+ * FTP estimate, since it answers the same question those do (is the engine
+ * getting bigger?) from the aerobic rather than the maximal side.
+ */
+function EfficiencyTrendCard({ rangeDays }: { rangeDays: number | null }) {
+  const t = useTranslations('app')
+
+  const suffix = rangeDays != null ? `?days=${rangeDays}` : ''
+  const { data, isLoading } = useSWR<EfficiencyPoint[]>(
+    `/api/metrics/efficiency${suffix}`, fetcher,
+  )
+
+  // A single point is a reading, not a trend, and this chart is about the trend.
+  const hasTrend = (data?.length ?? 0) > 1
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('power.efficiency.title')}</CardTitle>
+        <p className="text-xs text-muted-foreground">{t('power.efficiency.subtitle')}</p>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+            {t('power.loading')}
+          </div>
+        ) : hasTrend ? (
+          <EfficiencyChart
+            data={data!}
+            efficiencyLabel={t('power.efficiency.chartLabel')}
+            decouplingLabel={t('power.efficiency.decouplingLabel')}
+          />
+        ) : (
+          <div className="flex h-24 items-center justify-center px-6 text-center text-sm text-muted-foreground">
+            {t('power.efficiency.noData')}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 function PowerProfileCard({ rangeDays }: { rangeDays: number | null }) {
@@ -449,6 +494,9 @@ export default function PowerPage() {
 
       {/* Estimated potential (power profile) */}
       <PowerProfileCard rangeDays={rangeDays} />
+
+      {/* Aerobic efficiency trend */}
+      <EfficiencyTrendCard rangeDays={rangeDays} />
 
       {/* FTP estimate */}
       <FtpEstimateCard rangeDays={rangeDays} />

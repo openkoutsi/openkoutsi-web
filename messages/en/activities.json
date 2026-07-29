@@ -101,6 +101,27 @@
       "maxHr": "Max HR",
       "elevation": "Elevation"
     },
+    "aerobic": {
+      "title": "Aerobic response",
+      "efficiencyFactor": "Efficiency factor",
+      "efficiencyFactorHint": "Weighted power per heartbeat. Rising over time at the same training load means your aerobic engine is getting stronger.",
+      "variabilityIndex": "Variability index",
+      "variabilityIndexHint": "Weighted power divided by average power. 1.00 is perfectly steady; above 1.10 means surging or interval riding.",
+      "decoupling": "Aerobic decoupling",
+      "decouplingHint": "How far your power-to-heart-rate ratio drifted from the first half of the ride to the second. Under 5% is generally considered good durability.",
+      "decouplingCaveat": "Heart-rate drift is also pushed up by heat, dehydration and caffeine, so read a single ride's figure in context rather than as a pure fitness score.",
+      "wBalBasis": "W′ balance computed against CP {cp} W and W′ {wPrime}, fitted from your power bests as of this ride.",
+      "decouplingReasons": {
+        "too_short": "Not measured: the ride was too short. Decoupling needs about an hour of steady riding to mean anything.",
+        "no_power": "Not measured: this ride has no power data.",
+        "no_hr": "Not measured: this ride has no heart-rate data.",
+        "degenerate_hr": "Not measured: the heart-rate data from this ride is unusable.",
+        "variable_effort": "Not measured: this was an interval or otherwise surging session, where the figure would describe the intervals rather than your aerobic durability.",
+        "stream_mismatch": "Not measured: the power and heart-rate recordings from this ride don't line up closely enough to compare them.",
+        "uneven_pacing": "Not measured: the two halves were ridden at markedly different intensities, so the figure would reflect your pacing rather than your aerobic durability.",
+        "unknown": "Not measured for this ride."
+      }
+    },
     "zones": {
       "title": "Zone Distribution",
       "heartRate": "Heart Rate",
@@ -123,7 +144,8 @@
         "speed": "Speed",
         "altitude": "Elevation",
         "cadence": "Cadence",
-        "torque": "Torque"
+        "torque": "Torque",
+        "w_bal": "W′ balance"
       },
       "rollingAvg": "Rolling avg",
       "rollingAvgWindow": "Window (s)",

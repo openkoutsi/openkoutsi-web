@@ -101,6 +101,27 @@
       "maxHr": "Maks. sy",
       "elevation": "Nousu"
     },
+    "aerobic": {
+      "title": "Aerobinen vaste",
+      "efficiencyFactor": "Tehokkuuskerroin",
+      "efficiencyFactorHint": "Painotettu teho sydämenlyöntiä kohti. Nousu ajan myötä samalla harjoituskuormituksella tarkoittaa, että aerobinen moottorisi vahvistuu.",
+      "variabilityIndex": "Vaihtelukerroin",
+      "variabilityIndexHint": "Painotettu teho jaettuna keskiteholla. 1,00 on täysin tasaista; yli 1,10 tarkoittaa sykähtelevää tai intervalliajoa.",
+      "decoupling": "Aerobinen erkaantuma",
+      "decouplingHint": "Kuinka paljon teho–syke-suhteesi ajautui lenkin ensimmäisestä puoliskosta toiseen. Alle 5 %:a pidetään yleisesti hyvänä kestävyytenä.",
+      "decouplingCaveat": "Sykkeen nousua lisäävät myös kuumuus, nestehukka ja kofeiini, joten lue yksittäisen lenkin lukema asiayhteydessä eikä puhtaana kuntoarvosanana.",
+      "wBalBasis": "W′-tase laskettu arvoilla CP {cp} W ja W′ {wPrime}, jotka on sovitettu tehoennätyksistäsi tämän lenkin ajankohtana.",
+      "decouplingReasons": {
+        "too_short": "Ei mitattu: lenkki oli liian lyhyt. Erkaantuma vaatii noin tunnin tasaista ajoa ollakseen merkityksellinen.",
+        "no_power": "Ei mitattu: tässä lenkissä ei ole tehodataa.",
+        "no_hr": "Ei mitattu: tässä lenkissä ei ole sykedataa.",
+        "degenerate_hr": "Ei mitattu: tämän lenkin sykedata ei ole käyttökelpoista.",
+        "variable_effort": "Ei mitattu: tämä oli intervalli- tai muuten sykähtelevä harjoitus, jolloin luku kuvaisi intervalleja eikä aerobista kestävyyttäsi.",
+        "stream_mismatch": "Ei mitattu: tämän lenkin teho- ja sykerekisteröinnit eivät osu riittävän tarkasti yhteen, jotta niitä voisi verrata.",
+        "uneven_pacing": "Ei mitattu: puoliskot ajettiin selvästi eri teholla, joten luku kuvaisi vetoasi eikä aerobista kestävyyttäsi.",
+        "unknown": "Ei mitattu tälle lenkille."
+      }
+    },
     "zones": {
       "title": "Vyöhykejakauma",
       "heartRate": "Sykevyöhykkeet",
@@ -123,7 +144,8 @@
         "speed": "Nopeus",
         "altitude": "Korkeus",
         "cadence": "Kadenssi",
-        "torque": "Vääntömomentti"
+        "torque": "Vääntömomentti",
+        "w_bal": "W′-tase"
       },
       "rollingAvg": "Liukuva keskiarvo",
       "rollingAvgWindow": "Ikkuna (s)",

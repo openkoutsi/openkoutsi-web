@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CombinedStreamChart, OverlayStream } from '@/components/charts/CombinedStreamChart'
 import { FullscreenStreamDialog } from '@/components/charts/FullscreenStreamDialog'
+import { AerobicMetricsCard } from '@/components/activities/AerobicMetricsCard'
 import { SignalProcessingPanel } from '@/components/activities/SignalProcessingPanel'
 import { ZoneBar, toZoneEntries } from '@/components/charts/ZoneBar'
 import {
@@ -375,6 +376,9 @@ export default function ActivityDetailPage({ params }: Props) {
           </Card>
         ))}
       </div>
+
+      {/* Aerobic response metrics */}
+      <AerobicMetricsCard activity={activity} />
 
       {/* Labels & Notes */}
       <Card>

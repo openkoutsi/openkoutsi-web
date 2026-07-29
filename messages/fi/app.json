@@ -37,6 +37,13 @@
       "fit": "sovitus ±{rmse} W",
       "noData": "Ei vielä riittävästi tehodataa mallien sovittamiseen.",
       "note": "Arviot tallennetuista suorituksistasi, ei erillinen testi."
+    },
+    "efficiency": {
+      "title": "Aerobinen tehokkuus",
+      "subtitle": "Painotettu teho sydämenlyöntiä kohti tasaisilla kestävyyslenkeilläsi",
+      "chartLabel": "Tehokkuuskerroin",
+      "decouplingLabel": "Erkaantuma",
+      "noData": "Tasaisia kestävyyslenkkejä ei ole vielä tarpeeksi trendin piirtämiseen. Lenkeillä tulee olla teho ja syke, kestoa vähintään 20 minuuttia ja tasainen veto."
     }
   },
   "records": {
