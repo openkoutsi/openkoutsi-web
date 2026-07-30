@@ -281,6 +281,48 @@ export interface EfficiencyPoint {
   decoupling_pct: number | null
 }
 
+export type IntensityBasis = 'power' | 'hr'
+export type IntensityMethod = 'time' | 'session'
+export type IntensityShape = 'polarized' | 'pyramidal' | 'threshold' | 'predominantly_low'
+
+/**
+ * One of the three intensity bands: 1 below LT1, 2 between LT1 and LT2,
+ * 3 above LT2.
+ *
+ * `pct` is the band's share in whatever unit the method counts in — seconds for
+ * `method=time`, sessions for `method=session`. `sessions` is only populated
+ * for the session method.
+ */
+export interface IntensityBand {
+  band: number
+  seconds: number
+  pct: number
+  sessions: number | null
+}
+
+/**
+ * Intensity distribution over a training block
+ * (`GET /api/metrics/intensity-distribution`, issue #38).
+ *
+ * `basis` is null for the session method, which counts workout categories and
+ * so has no power/HR distinction. `classification` is null when the window has
+ * no usable data.
+ */
+export interface IntensityDistribution {
+  start: string | null
+  end: string | null
+  basis: IntensityBasis | null
+  method: IntensityMethod
+  bands: IntensityBand[]
+  classification: IntensityShape | null
+  coverage: {
+    activities_total: number
+    activities_used: number
+    seconds_total: number
+  }
+  zone_definitions_changed: boolean
+}
+
 export interface FitnessCurrent {
   date: string
   fitness: number

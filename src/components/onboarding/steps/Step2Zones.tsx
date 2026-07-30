@@ -4,7 +4,15 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
-import { defaultHrZones, defaultPowerZones } from '@/lib/zoneDefaults'
+import {
+  defaultHrZones,
+  defaultPowerZones,
+  padZones,
+  HR_ZONE_COUNT,
+  HR_ZONE_NAMES,
+  POWER_ZONE_COUNT,
+  POWER_ZONE_NAMES,
+} from '@/lib/zoneDefaults'
 import { zonesAreValid } from '@/lib/zoneValidation'
 import { ZoneEditor } from '@/components/profile/ZoneEditor'
 import { WizardShell } from '@/components/onboarding/WizardShell'
@@ -30,8 +38,14 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
 
   const [maxHr, setMaxHr] = useState(athlete?.max_hr?.toString() ?? '')
   const [ftp, setFtp] = useState(athlete?.ftp?.toString() ?? '')
-  const [hrZones, setHrZones] = useState<Zone[]>(athlete?.hr_zones ?? [])
-  const [powerZones, setPowerZones] = useState<Zone[]>(athlete?.power_zones ?? [])
+  // Pad a legacy list to the fixed model rather than showing rows the API
+  // will reject with no way to add more (issue #38).
+  const [hrZones, setHrZones] = useState<Zone[]>(
+    padZones(athlete?.hr_zones ?? [], HR_ZONE_COUNT, HR_ZONE_NAMES),
+  )
+  const [powerZones, setPowerZones] = useState<Zone[]>(
+    padZones(athlete?.power_zones ?? [], POWER_ZONE_COUNT, POWER_ZONE_NAMES),
+  )
   const [saving, setSaving] = useState(false)
 
   async function handleNext() {
@@ -39,7 +53,10 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
       onNext()
       return
     }
-    if (!zonesAreValid(hrZones) || !zonesAreValid(powerZones)) {
+    if (
+      !zonesAreValid(hrZones, HR_ZONE_COUNT) ||
+      !zonesAreValid(powerZones, POWER_ZONE_COUNT)
+    ) {
       toast({ title: tApp('profile.zoneEditor.errors.invalidTitle'), description: tApp('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
       return
     }
@@ -105,7 +122,13 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
             </Button>
           </div>
           {hrZones.length > 0 && (
-            <ZoneEditor zones={hrZones} unit="bpm" onChange={setHrZones} />
+            <ZoneEditor
+              zones={hrZones}
+              unit="bpm"
+              count={HR_ZONE_COUNT}
+              names={HR_ZONE_NAMES}
+              onChange={setHrZones}
+            />
           )}
         </div>
 
@@ -138,7 +161,13 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
             </Button>
           </div>
           {powerZones.length > 0 && (
-            <ZoneEditor zones={powerZones} unit="W" onChange={setPowerZones} />
+            <ZoneEditor
+              zones={powerZones}
+              unit="W"
+              count={POWER_ZONE_COUNT}
+              names={POWER_ZONE_NAMES}
+              onChange={setPowerZones}
+            />
           )}
         </div>
       </div>

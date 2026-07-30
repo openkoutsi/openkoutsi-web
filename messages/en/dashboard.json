@@ -112,5 +112,32 @@
     "skipped": "{count} skipped",
     "remaining": "{count} remaining",
     "noTrend": "Not enough data yet to chart the trend."
+  },
+  "intensity": {
+    "title": "Intensity distribution",
+    "loading": "Loading distribution…",
+    "bandLow": "Easy (below LT1)",
+    "bandModerate": "Tempo / threshold",
+    "bandHigh": "Hard (above LT2)",
+    "methodTime": "By time",
+    "methodSession": "By session",
+    "unitTime": "of time",
+    "unitSessions": "of sessions",
+    "explainTime": "Counts every second of every ride. Warm-ups, recoveries and coast-downs all land in the easy band, which pulls most athletes toward a pyramidal shape.",
+    "explainSession": "Counts each ride whole, by what it was for. A VO2max session counts as one hard session no matter how much of it was spent recovering — this is how the research usually counts.",
+    "coverage": "Based on {used} of {total} rides — the rest had no usable zone data.",
+    "zonesChanged": "Your zones or FTP changed during this period, so the bands weren't measured against the same boundaries throughout. Treat the split as approximate.",
+    "shape": {
+      "polarized": "Polarized",
+      "pyramidal": "Pyramidal",
+      "threshold": "Threshold-heavy",
+      "predominantly_low": "Almost all easy"
+    },
+    "shapeHint": {
+      "polarized": "mostly easy riding, with the hard days genuinely hard and little in between",
+      "pyramidal": "a broad easy base, less tempo and threshold, least hard riding",
+      "threshold": "a large share of moderate work — the grey zone between easy and hard",
+      "predominantly_low": "very little above your first threshold"
+    }
   }
 }

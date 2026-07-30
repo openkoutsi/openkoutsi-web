@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { PlanCalendar } from '@/components/plan/PlanCalendar'
+import { PlanPhaseDistributionCard } from '@/components/plan/PlanPhaseDistributionCard'
 import {
   PlanStructureFields,
   DEFAULT_DAY_TYPES,
@@ -807,6 +808,7 @@ export default function PlanPage() {
               showGenerateAction
               onChanged={() => mutate()}
             />
+            <PlanPhaseDistributionCard plan={activePlan} currentWeek={planWeek(activePlan)} />
           </CardContent>
         </Card>
       ))}

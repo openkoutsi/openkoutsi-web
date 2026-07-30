@@ -8,7 +8,15 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, apiDownload, fetcher } from '@/lib/api'
 import type { AthleteProfile, WeightLogEntry, Zone } from '@/lib/types'
-import { defaultHrZones, defaultPowerZones } from '@/lib/zoneDefaults'
+import {
+  defaultHrZones,
+  defaultPowerZones,
+  padZones,
+  HR_ZONE_COUNT,
+  HR_ZONE_NAMES,
+  POWER_ZONE_COUNT,
+  POWER_ZONE_NAMES,
+} from '@/lib/zoneDefaults'
 import { zonesAreValid } from '@/lib/zoneValidation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -126,8 +134,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      setHrZones(profile.hr_zones ?? [])
-      setPowerZones(profile.power_zones ?? [])
+      // Legacy lists can be any length; pad them to the fixed model so an
+      // athlete with 3 stored zones isn't left with 3 rows, a wrongCount
+      // error and no way to add more (issue #38).
+      setHrZones(padZones(profile.hr_zones ?? [], HR_ZONE_COUNT, HR_ZONE_NAMES))
+      setPowerZones(
+        padZones(profile.power_zones ?? [], POWER_ZONE_COUNT, POWER_ZONE_NAMES),
+      )
     }
   }, [profile])
 
@@ -195,7 +208,7 @@ export default function ProfilePage() {
   }
 
   async function handleSaveHrZones() {
-    if (!zonesAreValid(hrZones)) {
+    if (!zonesAreValid(hrZones, HR_ZONE_COUNT)) {
       toast({ title: t('profile.zoneEditor.errors.invalidTitle'), description: t('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
       return
     }
@@ -214,7 +227,7 @@ export default function ProfilePage() {
   }
 
   async function handleSavePowerZones() {
-    if (!zonesAreValid(powerZones)) {
+    if (!zonesAreValid(powerZones, POWER_ZONE_COUNT)) {
       toast({ title: t('profile.zoneEditor.errors.invalidTitle'), description: t('profile.zoneEditor.errors.invalid'), variant: 'destructive' })
       return
     }
@@ -458,6 +471,7 @@ export default function ProfilePage() {
     try {
       const res = await apiFetch<{
         updated: string[]
+        skipped: string[]
         ftp: number | null
         hr_zones: Zone[] | null
         power_zones: Zone[] | null
@@ -465,7 +479,22 @@ export default function ProfilePage() {
       if (res.ftp != null) setFtp(String(res.ftp))
       await mutateProfile()
       await refreshAthlete()
-      toast({ title: t('profile.syncZonesDone', { name: providerName }) })
+      // A provider can hand back a different number of zones than openkoutsi
+      // keeps (issue #38). Those are left alone, and saying so beats letting
+      // the athlete wonder why nothing changed.
+      const skipped = res.skipped ?? []
+      toast({
+        title: t('profile.syncZonesDone', { name: providerName }),
+        description: skipped.length
+          ? t('profile.syncZonesSkipped', {
+              kinds: skipped
+                .map((kind) =>
+                  kind === 'hr_zones' ? t('profile.hrZones') : t('profile.powerZones'),
+                )
+                .join(', '),
+            })
+          : undefined,
+      })
     } catch (err) {
       const msg = err instanceof Error ? err.message : tCommon('unknownError')
       const isScope = msg.includes('insufficient_scope')
@@ -703,7 +732,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">{t('profile.hrZones')}</CardTitle>
-          {hrZones.length === 0 && athlete?.max_hr && (
+          {athlete?.max_hr && (hrZones.length === 0 || !zonesAreValid(hrZones, HR_ZONE_COUNT)) && (
             <Button
               type="button"
               variant="outline"
@@ -720,7 +749,13 @@ export default function ProfilePage() {
               {t('profile.hrZonesHint')}
             </p>
           )}
-          <ZoneEditor zones={hrZones} unit="bpm" onChange={setHrZones} />
+          <ZoneEditor
+            zones={hrZones}
+            unit="bpm"
+            count={HR_ZONE_COUNT}
+            names={HR_ZONE_NAMES}
+            onChange={setHrZones}
+          />
           {hrZones.length > 0 && (
             <Button onClick={handleSaveHrZones} disabled={savingHr} size="sm">
               {savingHr ? t('profile.savingHrZones') : t('profile.saveHrZones')}
@@ -733,7 +768,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">{t('profile.powerZones')}</CardTitle>
-          {powerZones.length === 0 && athlete?.ftp && (
+          {athlete?.ftp && (powerZones.length === 0 || !zonesAreValid(powerZones, POWER_ZONE_COUNT)) && (
             <Button
               type="button"
               variant="outline"
@@ -750,7 +785,13 @@ export default function ProfilePage() {
               {t('profile.powerZonesHint')}
             </p>
           )}
-          <ZoneEditor zones={powerZones} unit="W" onChange={setPowerZones} />
+          <ZoneEditor
+            zones={powerZones}
+            unit="W"
+            count={POWER_ZONE_COUNT}
+            names={POWER_ZONE_NAMES}
+            onChange={setPowerZones}
+          />
           {powerZones.length > 0 && (
             <Button onClick={handleSavePowerZones} disabled={savingPower} size="sm">
               {savingPower ? t('profile.savingPowerZones') : t('profile.savePowerZones')}
