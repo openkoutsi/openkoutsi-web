@@ -409,7 +409,8 @@
         "lowBelowPrev": "Alaraja ei voi olla edellisen vyöhykkeen ylärajaa pienempi",
         "invalidTitle": "Virheelliset vyöhykkeet",
         "invalid": "Korjaa korostetut vyöhykkeet ennen tallennusta",
-        "wrongCount": "Vyöhykkeitä on oltava täsmälleen vakiomäärä"
+        "wrongCount": "Vyöhykkeitä on oltava täsmälleen vakiomäärä",
+        "gapAbovePrev": "Jättää aukon edellisen vyöhykkeen yläpuolelle — vyöhykkeiden on oltava yhtenäiset"
       },
       "fixedCount": "openkoutsi käyttää kiinteää {count} vyöhykkeen mallia, joten voit muuttaa vain rajoja."
     },

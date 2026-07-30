@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api'
 import {
   defaultHrZones,
   defaultPowerZones,
+  padZones,
   HR_ZONE_COUNT,
   HR_ZONE_NAMES,
   POWER_ZONE_COUNT,
@@ -37,8 +38,14 @@ export function Step2Zones({ onNext, onBack, onSkip }: Props) {
 
   const [maxHr, setMaxHr] = useState(athlete?.max_hr?.toString() ?? '')
   const [ftp, setFtp] = useState(athlete?.ftp?.toString() ?? '')
-  const [hrZones, setHrZones] = useState<Zone[]>(athlete?.hr_zones ?? [])
-  const [powerZones, setPowerZones] = useState<Zone[]>(athlete?.power_zones ?? [])
+  // Pad a legacy list to the fixed model rather than showing rows the API
+  // will reject with no way to add more (issue #38).
+  const [hrZones, setHrZones] = useState<Zone[]>(
+    padZones(athlete?.hr_zones ?? [], HR_ZONE_COUNT, HR_ZONE_NAMES),
+  )
+  const [powerZones, setPowerZones] = useState<Zone[]>(
+    padZones(athlete?.power_zones ?? [], POWER_ZONE_COUNT, POWER_ZONE_NAMES),
+  )
   const [saving, setSaving] = useState(false)
 
   async function handleNext() {

@@ -11,6 +11,7 @@ import type { AthleteProfile, WeightLogEntry, Zone } from '@/lib/types'
 import {
   defaultHrZones,
   defaultPowerZones,
+  padZones,
   HR_ZONE_COUNT,
   HR_ZONE_NAMES,
   POWER_ZONE_COUNT,
@@ -133,8 +134,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      setHrZones(profile.hr_zones ?? [])
-      setPowerZones(profile.power_zones ?? [])
+      // Legacy lists can be any length; pad them to the fixed model so an
+      // athlete with 3 stored zones isn't left with 3 rows, a wrongCount
+      // error and no way to add more (issue #38).
+      setHrZones(padZones(profile.hr_zones ?? [], HR_ZONE_COUNT, HR_ZONE_NAMES))
+      setPowerZones(
+        padZones(profile.power_zones ?? [], POWER_ZONE_COUNT, POWER_ZONE_NAMES),
+      )
     }
   }, [profile])
 
@@ -726,7 +732,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">{t('profile.hrZones')}</CardTitle>
-          {hrZones.length === 0 && athlete?.max_hr && (
+          {athlete?.max_hr && (hrZones.length === 0 || !zonesAreValid(hrZones, HR_ZONE_COUNT)) && (
             <Button
               type="button"
               variant="outline"
@@ -762,7 +768,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">{t('profile.powerZones')}</CardTitle>
-          {powerZones.length === 0 && athlete?.ftp && (
+          {athlete?.ftp && (powerZones.length === 0 || !zonesAreValid(powerZones, POWER_ZONE_COUNT)) && (
             <Button
               type="button"
               variant="outline"

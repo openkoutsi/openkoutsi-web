@@ -409,7 +409,8 @@
         "lowBelowPrev": "Low can't be below the previous zone's high",
         "invalidTitle": "Invalid zones",
         "invalid": "Fix the highlighted zones before saving",
-        "wrongCount": "There must be exactly the standard number of zones"
+        "wrongCount": "There must be exactly the standard number of zones",
+        "gapAbovePrev": "Leaves a gap above the previous zone — zones must be contiguous"
       },
       "fixedCount": "openkoutsi uses a fixed set of {count} zones, so only the boundaries are yours to set."
     },

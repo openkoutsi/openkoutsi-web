@@ -21,9 +21,12 @@ describe('validateZones', () => {
     expect(zonesAreValid(zones)).toBe(true)
   })
 
-  it('accepts a gap between zones (low above previous high)', () => {
+  it('rejects a gap between zones (low above previous high)', () => {
+    // Gaps used to be allowed. A value landing in one belongs to no zone, and
+    // was attributed to the *top* zone — a 10 W gap filed recovery-pace riding
+    // as neuromuscular (issue #38).
     const zones = [z('Z1', 100, 120), z('Z2', 130, 140)]
-    expect(zonesAreValid(zones)).toBe(true)
+    expect(zonesAreValid(zones)).toBe(false)
   })
 
   it('flags a blank low bound as required', () => {
@@ -94,5 +97,27 @@ describe('validateZones with a fixed zone count', () => {
     const broken = [...five]
     broken[1] = z('Z2', 100, 140) // overlaps Z1
     expect(zonesAreValid(broken, 5)).toBe(false)
+  })
+})
+
+describe('contiguity', () => {
+  it('accepts both contiguous conventions', () => {
+    // Inclusive-upper (`low === prev.high + 1`) and exclusive-upper
+    // (`low === prev.high`) are both in use.
+    expect(zonesAreValid([z('Z1', 0, 120), z('Z2', 120, 140)])).toBe(true)
+    expect(zonesAreValid([z('Z1', 0, 120), z('Z2', 121, 140)])).toBe(true)
+  })
+
+  it('flags a gap above the previous zone', () => {
+    // A value in the gap belongs to no zone, and used to be attributed to the
+    // top one — easy riding filed as maximal effort.
+    const errors = validateZones([z('Z1', 0, 120), z('Z2', 130, 140)])
+    expect(errors.some((e) => e.code === 'gapAbovePrev')).toBe(true)
+  })
+
+  it('still flags an overlap separately from a gap', () => {
+    const errors = validateZones([z('Z1', 0, 120), z('Z2', 100, 140)])
+    expect(errors.some((e) => e.code === 'lowBelowPrev')).toBe(true)
+    expect(errors.some((e) => e.code === 'gapAbovePrev')).toBe(false)
   })
 })
