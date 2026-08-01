@@ -11,7 +11,8 @@ import {
 } from 'recharts'
 import { parseISO, format } from 'date-fns'
 import type { WeeklyZoneBucket } from '@/lib/types'
-import { zoneColor } from './ZoneBar'
+import { zoneRow, zoneSeries } from '@/lib/zoneSeries'
+import { ZONE_COLORS, zoneColor } from './ZoneBar'
 
 function formatMinutes(s: number): string {
   const m = Math.round(s / 60)
@@ -30,22 +31,26 @@ interface Props {
 }
 
 // Weekly accumulated time-in-zone as stacked bars (one stack segment per zone,
-// cool → warm). Zone → colour is keyed off the numerically-sorted union of zone
-// names, so a zone keeps the same colour across every week even if some weeks
-// lack it.
+// cool → warm).
+//
+// Both generations of zone name are merged onto one series per zone first (see
+// `lib/zoneSeries`) — a week can hold snapshots keyed `Z1` and others keyed
+// `Z1 Recovery`, and drawing those separately split one zone across two legend
+// entries and two colours. Colour comes from the zone's own number rather than
+// its place in the series list, so a zone keeps its colour across every week
+// even when some weeks lack it, and the ramp still means intensity.
 export function WeeklyZones({ data, kind, title }: Props) {
-  const zoneNames = Array.from(
-    new Set(data.flatMap((b) => Object.keys(b[kind] ?? {}))),
-  ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  const zoneRows = data.map((b) => zoneRow(b[kind], kind))
+  const series = zoneSeries(zoneRows, kind)
 
-  if (!zoneNames.length) return null
+  if (!series.length) return null
 
-  const rows = data.map((b) => {
-    const times = b[kind] ?? {}
+  const rows = data.map((b, i) => {
+    const times = zoneRows[i]
     const row: Record<string, number | string> = {
       week: format(parseISO(b.week_start), 'MMM d'),
     }
-    for (const name of zoneNames) row[name] = times[name] ?? 0
+    for (const { key } of series) row[key] = times[key] ?? 0
     return row
   })
 
@@ -89,12 +94,15 @@ export function WeeklyZones({ data, kind, title }: Props) {
             formatter={(value: number, name: string) => [formatMinutes(value), name]}
           />
           <Legend wrapperStyle={{ fontSize: 11 }} />
-          {zoneNames.map((name, i) => (
+          {series.map(({ key, label, zone }) => (
             <Bar
-              key={name}
-              dataKey={name}
+              key={key}
+              dataKey={key}
+              name={label}
               stackId="zones"
-              fill={zoneColor(i)}
+              // An unplaceable name gets the top colour rather than a slot in
+              // the ramp, which it has no claim to.
+              fill={zoneColor(zone === null ? ZONE_COLORS.length : zone - 1)}
               maxBarSize={48}
             />
           ))}
