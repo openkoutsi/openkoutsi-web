@@ -6,6 +6,12 @@
   "recalcStarted": "Recalculation started",
   "recalcStartedDesc": "Fitness metrics will update in a moment",
   "recalcFailed": "Recalculation failed",
+  "freshness": {
+    "updatedJustNow": "Updated just now",
+    "updatedMinutesAgo": "Updated {minutes} min ago",
+    "updatedHoursAgo": "Updated {hours} h ago",
+    "refresh": "Refresh data"
+  },
   "currentFitness": "Current fitness",
   "metrics": {
     "fitness": "Fitness",

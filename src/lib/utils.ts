@@ -105,6 +105,26 @@ export function formatSpeedKmh(distance_m: number, time_s: number): string {
   return `${kmh.toFixed(1)} km/h`
 }
 
+/** How long ago something happened, at the coarsest unit that still says it. */
+export type RelativeAge =
+  | { unit: 'now' }
+  | { unit: 'minutes'; value: number }
+  | { unit: 'hours'; value: number }
+
+/**
+ * Bucket the age of a timestamp for display: under a minute reads as "now",
+ * under an hour in whole minutes, beyond that in whole hours.
+ *
+ * The unit is returned rather than a string so the caller can pick a
+ * translated message for it.
+ */
+export function relativeAge(timestampMs: number, nowMs: number = Date.now()): RelativeAge {
+  const elapsedMinutes = Math.floor(Math.max(0, nowMs - timestampMs) / 60_000)
+  if (elapsedMinutes < 1) return { unit: 'now' }
+  if (elapsedMinutes < 60) return { unit: 'minutes', value: elapsedMinutes }
+  return { unit: 'hours', value: Math.floor(elapsedMinutes / 60) }
+}
+
 /** Format a number of seconds as mm:ss or h:mm:ss */
 export function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600)
