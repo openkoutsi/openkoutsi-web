@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import useSWR from 'swr'
+import { useCallback, useEffect, useState } from 'react'
+import useSWR, { useSWRConfig } from 'swr'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/lib/auth'
 import { fetcher, apiFetch } from '@/lib/api'
+import { useAppResume } from '@/lib/appResume'
 import type { FitnessPoint, FitnessCurrent, Goal, TrainingPlan, TrainingStatus, ActivitySummary, WeeklyZoneBucket, Page } from '@/lib/types'
-import { formatDate, formatHoursMinutes, formatDistance } from '@/lib/utils'
+import { formatDate, formatHoursMinutes, formatDistance, relativeAge } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FitnessChart } from '@/components/charts/FitnessChart'
@@ -45,8 +46,16 @@ const PERIOD_OPTIONS = [
 const GLOSSARY_KEYS = ['fitness', 'fatigue', 'form', 'ftp', 'load'] as const
 
 // Auto-refresh dashboard data while the page is open. SWR's refreshWhenHidden
-// defaults to false, so polling pauses automatically in a background tab.
+// defaults to false, so polling pauses automatically in a background tab — and
+// on mobile the whole page is suspended, missed ticks are never replayed. What
+// brings the data back on return to the foreground is `ResumeRevalidator`
+// (mounted app-wide) plus the resume handler below; polling only covers the
+// case of the dashboard being left open and watched.
 const REFRESH_INTERVAL_MS = 60_000
+
+// How often the "updated N min ago" label re-renders. It only has to keep the
+// wording honest while the page is in front of the user.
+const FRESHNESS_TICK_MS = 30_000
 
 function MetricsGlossaryDialog() {
   const t = useTranslations('dashboard')
@@ -83,6 +92,66 @@ function MetricsGlossaryDialog() {
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+/**
+ * When the dashboard last got fresh numbers, plus a way to ask for new ones.
+ *
+ * Both halves exist for the same reason: a web app launched from an iOS Home
+ * Screen icon has no address bar and no reload button, so stale data is both
+ * invisible and unfixable by the user. The timestamp makes it visible; the
+ * button makes it fixable.
+ */
+function FreshnessBar({
+  lastUpdatedAt,
+  onRefresh,
+}: {
+  lastUpdatedAt: number | null
+  onRefresh: () => Promise<void>
+}) {
+  const t = useTranslations('dashboard')
+  const [refreshing, setRefreshing] = useState(false)
+  const [, setTick] = useState(0)
+
+  // The label is derived from the clock, so it needs a nudge to stay current
+  // even when no new data arrives.
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), FRESHNESS_TICK_MS)
+    return () => clearInterval(id)
+  }, [])
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    try {
+      await onRefresh()
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  let label: string | null = null
+  if (lastUpdatedAt != null) {
+    const age = relativeAge(lastUpdatedAt)
+    if (age.unit === 'now') label = t('freshness.updatedJustNow')
+    else if (age.unit === 'minutes') label = t('freshness.updatedMinutesAgo', { minutes: age.value })
+    else label = t('freshness.updatedHoursAgo', { hours: age.value })
+  }
+
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      {label && <span>{label}</span>}
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2"
+        onClick={handleRefresh}
+        disabled={refreshing}
+        aria-label={t('freshness.refresh')}
+      >
+        <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+      </Button>
+    </div>
   )
 }
 
@@ -239,14 +308,21 @@ function GoalFormOutlook({
 export default function DashboardPage() {
   const t = useTranslations('dashboard')
   const { athlete } = useAuth()
+  const { mutate: globalMutate } = useSWRConfig()
   const [days, setDays] = useState(90)
   const [zoneKind, setZoneKind] = useState<'power' | 'hr'>('power')
-  const { data: current, mutate: mutateCurrent } = useSWR<FitnessCurrent>(
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null)
+  const { data: current } = useSWR<FitnessCurrent>(
     '/api/metrics/fitness/current',
     fetcher,
-    { refreshInterval: REFRESH_INTERVAL_MS },
+    {
+      refreshInterval: REFRESH_INTERVAL_MS,
+      // The headline metrics stand in for the dashboard as a whole: every
+      // panel is revalidated together, on the same interval and on resume.
+      onSuccess: () => setLastUpdatedAt(Date.now()),
+    },
   )
-  const { data: history, mutate: mutateHistory } = useSWR<FitnessPoint[]>(
+  const { data: history } = useSWR<FitnessPoint[]>(
     `/api/metrics/fitness?days=${days}`,
     fetcher,
     { refreshInterval: REFRESH_INTERVAL_MS },
@@ -286,25 +362,47 @@ export default function DashboardPage() {
   const plannedByWeek = _rawPlanned?.size ? _rawPlanned : undefined
 
   // Automatically fill missing DailyMetric rows (e.g. after a new day begins)
-  useEffect(() => {
-    apiFetch<{ updated: boolean }>('/api/metrics/catch-up', { method: 'POST' })
-      .then(({ updated }) => {
-        if (updated) {
-          mutateCurrent()
-          mutateHistory()
-        }
+  const catchUp = useCallback(async () => {
+    try {
+      const { updated } = await apiFetch<{ updated: boolean }>('/api/metrics/catch-up', {
+        method: 'POST',
       })
-      .catch(() => {})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+      if (updated) {
+        // Matched by prefix rather than through the hooks' own mutators: the
+        // history and forecast keys carry the selected period, so depending on
+        // them would rebuild this callback — and re-run it — on every period
+        // button tap.
+        globalMutate(
+          (key) => typeof key === 'string' && key.startsWith('/api/metrics/fitness'),
+        ).catch(() => {})
+      }
+    } catch {
+      // A missed catch-up is not worth surfacing; the next one will do it.
+    }
+  }, [globalMutate])
+
+  useEffect(() => {
+    catchUp()
+  }, [catchUp])
+
+  // An app resumed from the background does not remount, so mounting alone
+  // would never fill in a day that began while it was suspended.
+  useAppResume(catchUp)
+
+  async function handleManualRefresh() {
+    await Promise.all([globalMutate(() => true).catch(() => {}), catchUp()])
+  }
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        {athlete?.name && (
-          <p className="text-muted-foreground">{t('welcomeBack', { name: athlete.name })}</p>
-        )}
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          {athlete?.name && (
+            <p className="text-muted-foreground">{t('welcomeBack', { name: athlete.name })}</p>
+          )}
+        </div>
+        <FreshnessBar lastUpdatedAt={lastUpdatedAt} onRefresh={handleManualRefresh} />
       </div>
 
       {/* Current metrics */}

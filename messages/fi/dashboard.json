@@ -6,6 +6,12 @@
   "recalcStarted": "Uudelleenlaskenta käynnistetty",
   "recalcStartedDesc": "Kuntomittarit päivittyvät hetken kuluttua",
   "recalcFailed": "Uudelleenlaskenta epäonnistui",
+  "freshness": {
+    "updatedJustNow": "Päivitetty juuri äsken",
+    "updatedMinutesAgo": "Päivitetty {minutes} min sitten",
+    "updatedHoursAgo": "Päivitetty {hours} h sitten",
+    "refresh": "Päivitä tiedot"
+  },
   "currentFitness": "Nykyinen kunto",
   "metrics": {
     "fitness": "Kunto",

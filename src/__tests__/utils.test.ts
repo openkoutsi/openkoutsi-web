@@ -11,6 +11,7 @@ import {
   formatPower,
   formatVariabilityIndex,
   formatWPrime,
+  relativeAge,
 } from '@/lib/utils'
 
 describe('cn', () => {
@@ -168,5 +169,30 @@ describe('formatWPrime', () => {
   it('converts joules to kilojoules', () => {
     expect(formatWPrime(15000)).toBe('15.0 kJ')
     expect(formatWPrime(23480)).toBe('23.5 kJ')
+  })
+})
+
+describe('relativeAge', () => {
+  const now = new Date('2026-07-31T12:00:00Z').getTime()
+  const minutesAgo = (m: number) => now - m * 60_000
+
+  it('reads as "now" under a minute', () => {
+    expect(relativeAge(now, now)).toEqual({ unit: 'now' })
+    expect(relativeAge(now - 59_000, now)).toEqual({ unit: 'now' })
+  })
+
+  it('counts whole minutes up to an hour', () => {
+    expect(relativeAge(minutesAgo(1), now)).toEqual({ unit: 'minutes', value: 1 })
+    expect(relativeAge(minutesAgo(59), now)).toEqual({ unit: 'minutes', value: 59 })
+  })
+
+  it('switches to whole hours at an hour', () => {
+    expect(relativeAge(minutesAgo(60), now)).toEqual({ unit: 'hours', value: 1 })
+    expect(relativeAge(minutesAgo(179), now)).toEqual({ unit: 'hours', value: 2 })
+  })
+
+  it('treats a timestamp from the future as now', () => {
+    // Clock skew between the device and the server should not read as negative.
+    expect(relativeAge(now + 60_000, now)).toEqual({ unit: 'now' })
   })
 })

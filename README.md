@@ -25,6 +25,24 @@ frontend talks to it purely over HTTP (`/api/*`) — the only coupling is config
 | i18n | next-intl (English + Finnish) |
 | Tests | Vitest · Testing Library |
 
+## Data freshness
+
+Screens that show live data poll with SWR's `refreshInterval`, but a timer alone
+cannot keep a mobile app current: iOS suspends JavaScript while the app is
+backgrounded — most aggressively when the site is launched from a Home Screen
+icon — and the ticks that were missed are never replayed. `ResumeRevalidator`
+(`src/components/ResumeRevalidator.tsx`, mounted once in the root providers)
+therefore refetches every mounted SWR key whenever the app returns to the
+foreground, using the resume signal from `src/lib/appResume.ts`
+(`visibilitychange` + `pageshow`/`pagehide`, de-duplicated so one resume means
+one pass).
+
+SWR's own `revalidateOnFocus` stays off: it fires on every window focus and does
+not see the `pageshow` that an iOS standalone app resumes with. The dashboard
+additionally re-runs the daily metrics catch-up on resume and shows when it last
+received data, next to a manual refresh button — a Home Screen web app has no
+address bar to reload from.
+
 ## Prerequisites
 
 - Node.js 22+
