@@ -312,6 +312,7 @@ export default function DashboardPage() {
   const [days, setDays] = useState(90)
   const [zoneKind, setZoneKind] = useState<'power' | 'hr'>('power')
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null)
+  const [rpeSignal, setRpeSignal] = useState(0)
   const { data: current } = useSWR<FitnessCurrent>(
     '/api/metrics/fitness/current',
     fetcher,
@@ -390,6 +391,10 @@ export default function DashboardPage() {
   useAppResume(catchUp)
 
   async function handleManualRefresh() {
+    // The RPE queue is refetched by the global mutate below like any other key,
+    // but the prompt only interrupts by itself for a ride it has not seen. An
+    // explicit refresh is a request to be shown whatever is pending.
+    setRpeSignal((n) => n + 1)
     await Promise.all([globalMutate(() => true).catch(() => {}), catchUp()])
   }
 
@@ -561,7 +566,7 @@ export default function DashboardPage() {
       <TrainingStatusCard />
 
       {/* Perceived-effort (RPE) prompt for recent significant cycling rides */}
-      <RpePrompt />
+      <RpePrompt reloadSignal={rpeSignal} />
     </div>
   )
 }
