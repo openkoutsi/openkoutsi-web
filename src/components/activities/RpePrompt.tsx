@@ -1,8 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import useSWR from 'swr'
 import { useTranslations, useLocale } from 'next-intl'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fetcher } from '@/lib/api'
+import { useAppResume } from '@/lib/appResume'
 import { scheduleReanalyze } from '@/lib/reanalyze'
 import { useAuth } from '@/lib/auth'
 import type { Activity } from '@/lib/types'
@@ -25,6 +27,11 @@ interface RpeQueueResponse {
 
 const RPE_VALUES = Array.from({ length: 10 }, (_, i) => i + 1)
 
+// How often the pending queue is re-checked while the page is open, matching the
+// interval the dashboard's own panels poll on. A ride that syncs while the app
+// sits in the foreground should not have to wait for a navigation to be noticed.
+const RPE_POLL_MS = 60_000
+
 /**
  * Prompts the athlete to rate the perceived effort (RPE) of recent significant
  * cycling rides (issue #28). Backed by the server-side `rpe-queue`, it works
@@ -33,8 +40,24 @@ const RPE_VALUES = Array.from({ length: 10 }, (_, i) => i + 1)
  * "Ask again later" leaves the cursor untouched so the same ride leads the
  * queue next visit.
  *
- * Enabled per-athlete via `app_settings.ask_for_rpe` (default on). Bumping
- * `reloadSignal` re-fetches the queue — used to re-prompt after a manual upload.
+ * The queue is an SWR key rather than a one-shot fetch so that it keeps up with
+ * rides that arrive after the page was rendered. Three things can open the
+ * prompt, and they differ only in how insistent they are:
+ *
+ * - The **poll** opens it only when a ride appears that was not in the queue
+ *   last time we looked, so a prompt dismissed with "Ask again later" is not
+ *   thrown straight back at the athlete a minute later.
+ * - A **resume** — the app coming back from the background — counts as a fresh
+ *   visit and opens whatever is pending, the same way navigating back to the
+ *   dashboard does. This is the case an interval cannot cover: iOS suspends the
+ *   page entirely, so nothing polls while the app is away and nothing remounts
+ *   when it returns (issue #66).
+ * - A bump of **`reloadSignal`** is likewise treated as a fresh visit; it marks
+ *   an upload, a manual entry, or a tap on the dashboard's refresh button.
+ *
+ * None of them disturb a prompt that is already open or a save in flight.
+ *
+ * Enabled per-athlete via `app_settings.ask_for_rpe` (default on).
  */
 export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
   const t = useTranslations('activities')
@@ -56,22 +79,78 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
     setCommute(false)
   }, [])
 
+  const { data, mutate } = useSWR<RpeQueueResponse>(
+    enabled ? '/api/activities/rpe-queue' : null,
+    fetcher,
+    { refreshInterval: RPE_POLL_MS },
+  )
+
+  // `open` and `saving` are read from callbacks that must not be rebuilt as the
+  // athlete fills the form in, so they are mirrored into refs.
+  const openRef = useRef(open)
+  const savingRef = useRef(saving)
   useEffect(() => {
-    if (!enabled) return
-    let cancelled = false
-    apiFetch<RpeQueueResponse>('/api/activities/rpe-queue')
-      .then((data) => {
-        if (cancelled || data.items.length === 0) return
-        setQueue(data.items)
-        setIndex(0)
-        resetForm()
-        setOpen(true)
+    openRef.current = open
+    savingRef.current = saving
+  })
+
+  // The rides in the queue as we last saw it. What makes a poll able to tell a
+  // genuinely new ride from the one that was just dismissed.
+  const seenIdsRef = useRef<Set<string>>(new Set())
+
+  /**
+   * Take a freshly fetched queue and decide whether to put it in front of the
+   * athlete. `force` marks the callers that count as a fresh visit; the poll
+   * passes `false` and so only interrupts for a ride it has not seen before.
+   */
+  const applyQueue = useCallback(
+    (items: Activity[], { force }: { force: boolean }) => {
+      // A prompt in use is never disturbed: resetting the queue under it would
+      // throw away a rating the athlete is in the middle of giving.
+      if (openRef.current || savingRef.current) return
+
+      const hasNew = items.some((a) => !seenIdsRef.current.has(a.id))
+      seenIdsRef.current = new Set(items.map((a) => a.id))
+
+      if (items.length === 0) return
+      if (!force && !hasNew) return
+
+      setQueue(items)
+      setIndex(0)
+      resetForm()
+      setOpen(true)
+    },
+    [resetForm],
+  )
+
+  // The poll, and the first load: on the first pass nothing has been seen yet,
+  // so everything counts as new. SWR keeps the previous object when a refetch
+  // is deeply equal, so an unchanged queue does not even re-run this.
+  useEffect(() => {
+    if (!data) return
+    applyQueue(data.items, { force: false })
+  }, [data, applyQueue])
+
+  /** Re-check the queue now and prompt for whatever is pending. */
+  const refreshNow = useCallback(() => {
+    // Awaiting the refetch rather than reacting to `data`: an unchanged queue
+    // leaves the cached object untouched, and that must still re-prompt here.
+    mutate()
+      .then((fresh) => {
+        if (fresh) applyQueue(fresh.items, { force: true })
       })
       .catch(() => {})
-    return () => {
-      cancelled = true
-    }
-  }, [enabled, reloadSignal, resetForm])
+  }, [mutate, applyQueue])
+
+  useAppResume(refreshNow)
+
+  // The initial value is not a bump — the first load above covers that.
+  const lastSignalRef = useRef(reloadSignal)
+  useEffect(() => {
+    if (reloadSignal === lastSignalRef.current) return
+    lastSignalRef.current = reloadSignal
+    refreshNow()
+  }, [reloadSignal, refreshNow])
 
   const current = queue[index]
   const remaining = queue.length - index - 1

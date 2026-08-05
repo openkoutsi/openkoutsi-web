@@ -43,6 +43,14 @@ additionally re-runs the daily metrics catch-up on resume and shows when it last
 received data, next to a manual refresh button — a Home Screen web app has no
 address bar to reload from.
 
+Because the mechanism keys on SWR, anything that fetches outside it is invisible
+to `ResumeRevalidator`. The RPE prompt (`src/components/activities/RpePrompt.tsx`)
+used to be exactly that, and so never asked about rides that synced while the app
+was backgrounded; it now holds the pending queue as an SWR key and additionally
+takes the resume signal itself, so a resume re-prompts even when the queue came
+back unchanged (a deep-equal refetch leaves the cached object — and therefore the
+effects watching it — untouched).
+
 ## Prerequisites
 
 - Node.js 22+
