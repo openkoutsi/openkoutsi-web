@@ -31,7 +31,25 @@
     "llmGranted": "Granted",
     "llmGrant": "Grant",
     "llmRevoke": "Revoke",
-    "llmEntitlementUpdated": "AI access updated"
+    "llmEntitlementUpdated": "AI access updated",
+    "tokens": "Access tokens",
+    "tokensTitle": "Access tokens for {username}",
+    "tokensDesc": "Metadata only — token names are never shown here, because they are free text the user wrote and can be revealing on their own. You can revoke a token, but never issue one on someone's behalf. Every revocation is recorded in the audit log and sent to the user's inbox.",
+    "tokensEmpty": "This user has no access tokens.",
+    "tokenStatus": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "tokenCreated": "created {date}",
+    "tokenExpires": "expires {date}",
+    "tokenLastUsed": "last used {date}",
+    "tokenNeverUsed": "never used",
+    "tokenRevoke": "Revoke",
+    "tokenRevoked": "Token revoked",
+    "tokenRevokeFailed": "Could not revoke the token",
+    "tokenRevokeConfirmTitle": "Revoke this token?",
+    "tokenRevokeConfirmDesc": "The token stops working immediately and the user is told in their inbox. This cannot be undone."
   },
   "invitations": {
     "pending": "Pending",
@@ -132,7 +150,10 @@
     "defaultBadge": "Default",
     "requiresSubscription": "Require subscription for instance LLM",
     "requiresSubscriptionDesc": "When on, only users with AI access (or their own AI model via BYOK) can use this instance’s AI features.",
-    "requiresSubscriptionWarning": "Users without AI access or their own AI model will be blocked from AI features until you grant them access."
+    "requiresSubscriptionWarning": "Users without AI access or their own AI model will be blocked from AI features until you grant them access.",
+    "allowTokens": "Allow personal access tokens",
+    "allowTokensDesc": "Let users issue long-lived, scoped credentials to their own tooling — backup scripts, cron jobs, phones, external AI clients. A token grants strictly less than the session its owner already holds: it is scoped, and never reaches the admin API, /api/auth, the inbox or AI features.",
+    "allowTokensWarning": "Turning this off refuses authentication, not just issuance: tokens issued earlier stop working immediately."
   },
   "usage": {
     "title": "LLM usage",

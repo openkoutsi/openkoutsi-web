@@ -93,6 +93,31 @@ BASE_URL=http://localhost:3000
 > var — it is an admin-managed instance setting served by the backend
 > (`GET /api/public/instance-info`) and editable in the admin settings UI.
 
+## Personal access tokens
+
+**Settings → Personal access tokens** lets a user issue long-lived, scoped
+credentials to their own tooling. The card follows the copy-once shape the
+invitation dialog established: the secret is returned exactly once, at creation,
+so the form is replaced by the value and a copy button and closing the dialog is
+the point of no return.
+
+Three details in `PersonalAccessTokensCard.tsx` are deliberate rather than
+incidental:
+
+- **The card hides itself** when `allow_personal_access_tokens` is off in
+  `GET /api/public/instance-info`, and does not even request the token list — a
+  self-hoster who forbade long-lived credentials should not see the feature.
+- **`athlete:export` is presented apart from the ordinary read scopes**, because
+  one call under it downloads the entire record. It is a box the user ticks on
+  purpose, not one they scroll past.
+- **Scopes and expiry are read-only on an existing token.** A token is immutable
+  server-side; widening one means revoking it and issuing a new one, so there is
+  no edit affordance to offer.
+
+The admin console gains the matching instance toggle beside `allow_self_signup`,
+and a per-user token dialog that lists and revokes — never issues, and never
+shows a token's name.
+
 ## Scripts
 
 ```bash

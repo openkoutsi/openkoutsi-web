@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LlmSettingsCard } from '@/components/settings/LlmSettingsCard'
+import { PersonalAccessTokensCard } from '@/components/settings/PersonalAccessTokensCard'
 import { fetcher } from '@/lib/api'
 import type { InstanceInfoResponse } from '@/lib/types'
 
@@ -17,6 +18,8 @@ export default function SettingsPage() {
       <h1 className="text-xl font-bold">{t('settings.title')}</h1>
 
       <LlmSettingsCard />
+
+      <PersonalAccessTokensCard />
 
       <Card>
         <CardHeader>

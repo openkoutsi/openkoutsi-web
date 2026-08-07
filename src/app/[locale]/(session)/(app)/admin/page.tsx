@@ -7,6 +7,7 @@ import useSWR from 'swr'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, fetcher } from '@/lib/api'
 import type {
+  AdminPersonalAccessTokenResponse,
   UserResponse,
   InvitationResponse,
   InstanceSettingsResponse,
@@ -54,6 +55,131 @@ function RoleBadge({ role }: { role: string }) {
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
       {role}
     </span>
+  )
+}
+
+// ── A user's personal access tokens (issue #46) ─────────────────────────────
+//
+// Narrow on purpose, and it follows from the audit log rather than being a
+// separate ambition: once rate limits and audit records are keyed by token id,
+// an admin investigating a runaway integration is staring at a token id with no
+// proportionate way to act on it. So: list and revoke, and nothing else.
+//
+// Metadata only — the API never returns a token's name, because names are
+// user-written free text and revealing on their own. Revocation needs the id.
+// There is no issue-on-behalf counterpart: an admin-minted token would be
+// indistinguishable from one the user created. Every revocation is audited and
+// lands in the user's inbox.
+
+function UserTokensDialog({ user }: { user: UserResponse }) {
+  const t = useTranslations('admin')
+  const [open, setOpen] = useState(false)
+  const { data: tokens, mutate } = useSWR<AdminPersonalAccessTokenResponse[]>(
+    open ? `/api/admin/users/${user.id}/tokens` : null,
+    fetcher,
+  )
+
+  async function revoke(tokenId: string) {
+    try {
+      await apiFetch(`/api/admin/users/${user.id}/tokens/${tokenId}`, { method: 'DELETE' })
+      toast({ title: t('users.tokenRevoked') })
+      mutate()
+    } catch (err) {
+      toast({
+        title: t('users.tokenRevokeFailed'),
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">{t('users.tokens')}</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {t('users.tokensTitle', { username: user.email ?? user.username ?? user.id })}
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-xs text-muted-foreground">{t('users.tokensDesc')}</p>
+        {!tokens ? (
+          <p className="text-sm text-muted-foreground py-2">…</p>
+        ) : tokens.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-2">{t('users.tokensEmpty')}</p>
+        ) : (
+          <div className="space-y-2">
+            {tokens.map((token) => (
+              <div
+                key={token.id}
+                className={`rounded-md border border-input p-3 space-y-2 ${
+                  token.status === 'active' ? '' : 'opacity-60'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <p className="font-mono text-xs truncate">{token.id}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(`users.tokenStatus.${token.status}`)}
+                      {' · '}
+                      {t('users.tokenCreated', {
+                        date: new Date(token.created_at).toLocaleDateString(),
+                      })}
+                      {' · '}
+                      {t('users.tokenExpires', {
+                        date: new Date(token.expires_at).toLocaleDateString(),
+                      })}
+                      {' · '}
+                      {token.last_used_at
+                        ? t('users.tokenLastUsed', {
+                            date: new Date(token.last_used_at).toLocaleDateString(),
+                          })
+                        : t('users.tokenNeverUsed')}
+                    </p>
+                  </div>
+                  {token.status === 'active' && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="destructive">{t('users.tokenRevoke')}</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{t('users.tokenRevokeConfirmTitle')}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t('users.tokenRevokeConfirmDesc')}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t('users.cancel')}</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => revoke(token.id)}
+                          >
+                            {t('users.tokenRevoke')}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {token.scopes.map((scope) => (
+                    <span
+                      key={scope}
+                      className="rounded-full bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground"
+                    >
+                      {scope}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -240,6 +366,7 @@ function UsersTab() {
                       >
                         {t('users.passwordReset')}
                       </Button>
+                      <UserTokensDialog user={u} />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button size="sm" variant="destructive">
@@ -699,6 +826,8 @@ function SettingsTab() {
   const [analysisContext, setAnalysisContext] = useState('')
   const [adminContact, setAdminContact] = useState('')
   const [allowSelfSignup, setAllowSelfSignup] = useState(false)
+  // Issue #46 — defaults on server-side; the real value arrives with `settings`.
+  const [allowTokens, setAllowTokens] = useState(true)
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -711,6 +840,7 @@ function SettingsTab() {
       setAnalysisContext(settings.llm_analysis_context ?? '')
       setAdminContact(settings.admin_contact ?? '')
       setAllowSelfSignup(Boolean(settings.allow_self_signup))
+      setAllowTokens(Boolean(settings.allow_personal_access_tokens))
       setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
@@ -751,6 +881,7 @@ function SettingsTab() {
         llm_analysis_context: analysisContext || null,
         admin_contact: adminContact || null,
         allow_self_signup: allowSelfSignup,
+        allow_personal_access_tokens: allowTokens,
         llm_models: models,
         llm_requires_subscription: requiresSubscription,
       }
@@ -820,6 +951,24 @@ function SettingsTab() {
               id="allow-self-signup"
               checked={allowSelfSignup}
               onCheckedChange={setAllowSelfSignup}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
+            <div className="space-y-1">
+              <Label htmlFor="allow-tokens">{t('settings.allowTokens')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.allowTokensDesc')}</p>
+              {!allowTokens && (
+                // Turning it off refuses authentication, not just issuance —
+                // say so, or the switch is a comforting untruth.
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  {t('settings.allowTokensWarning')}
+                </p>
+              )}
+            </div>
+            <Switch
+              id="allow-tokens"
+              checked={allowTokens}
+              onCheckedChange={setAllowTokens}
             />
           </div>
         </CardContent>

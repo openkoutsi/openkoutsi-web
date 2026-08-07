@@ -69,6 +69,10 @@ export interface InstanceSettingsResponse {
   llm_requires_subscription: boolean
   // Issue #15: allow self-serve email signup (also needs a configured provider).
   allow_self_signup: boolean
+  // Issue #46: allow users to issue personal access tokens. Defaults on —
+  // turning it off refuses authentication, so tokens issued beforehand stop
+  // working immediately rather than merely becoming un-issuable.
+  allow_personal_access_tokens: boolean
 }
 
 export interface InstanceSettingsPatch {
@@ -77,6 +81,7 @@ export interface InstanceSettingsPatch {
   llm_models?: LlmModelConfig[]
   llm_requires_subscription?: boolean
   allow_self_signup?: boolean
+  allow_personal_access_tokens?: boolean
 }
 
 // One aggregation row of the admin LLM-usage summary (issue #9).
@@ -103,6 +108,57 @@ export interface InstanceInfoResponse {
   // reset form) and whether self-serve signup is currently offered.
   email_enabled: boolean
   allow_self_signup: boolean
+  // Issue #46: whether the settings card offers personal access tokens at all.
+  allow_personal_access_tokens: boolean
+}
+
+// ── Personal access tokens (issue #46) ─────────────────────────────────────
+
+/** One entry of the scope vocabulary, as served by GET /api/tokens/scopes. */
+export interface TokenScope {
+  name: string
+  description: string
+  /** Presented apart from the ordinary read scopes — today only
+   *  `athlete:export`, which returns the entire record in one call. */
+  sensitive: boolean
+}
+
+export interface TokenScopesResponse {
+  scopes: TokenScope[]
+  allowed_lifetime_days: number[]
+  default_lifetime_days: number
+  max_lifetime_days: number
+}
+
+export type TokenStatus = 'active' | 'expired' | 'revoked'
+
+/** A token's metadata. Never carries the secret or its hash. */
+export interface PersonalAccessTokenResponse {
+  id: string
+  name: string
+  scopes: string[]
+  status: TokenStatus
+  expires_at: string
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
+}
+
+/** The create response — the only time the secret is ever returned. */
+export interface PersonalAccessTokenCreated extends PersonalAccessTokenResponse {
+  token: string
+}
+
+/** An admin's view of one user's token: metadata only, and deliberately no
+ *  name — names are user-written free text and revealing on their own. */
+export interface AdminPersonalAccessTokenResponse {
+  id: string
+  scopes: string[]
+  status: TokenStatus
+  expires_at: string
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
 }
 
 export interface User {
