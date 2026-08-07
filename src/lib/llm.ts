@@ -1,13 +1,15 @@
 /**
  * Frontend LLM config helpers.
  *
- * The browser never builds LLM prompts or calls the raw `/api/llm/chat` proxy.
+ * The browser never builds LLM prompts and never calls a model directly.
  * Activity analysis and plan generation go through the purpose-built server
  * endpoints (`POST /api/activities/{id}/analyze`, `POST /api/plans`,
  * `POST /api/plans/{id}/regenerate`), which construct prompts server-side and
- * resolve the caller's LLM (BYO or instance) via `resolve_llm_config`. This
- * module only exposes whether a BYO server is configured so the UI can label
- * the two cases.
+ * resolve the caller's LLM (BYO or instance) via `resolve_llm_config`. There is
+ * no general-purpose chat passthrough to call instead — it was removed
+ * deliberately, since a client-supplied `messages` array would let the browser
+ * override the server's system prompt. This module only exposes whether a BYO
+ * server is configured so the UI can label the two cases.
  */
 
 export interface LlmConfig {
