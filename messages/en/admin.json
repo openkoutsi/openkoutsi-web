@@ -153,7 +153,11 @@
     "requiresSubscriptionWarning": "Users without AI access or their own AI model will be blocked from AI features until you grant them access.",
     "allowTokens": "Allow personal access tokens",
     "allowTokensDesc": "Let users issue long-lived, scoped credentials to their own tooling — backup scripts, cron jobs, phones, external AI clients. A token grants strictly less than the session its owner already holds: it is scoped, and never reaches the admin API, /api/auth, the inbox or AI features.",
-    "allowTokensWarning": "Turning this off refuses authentication, not just issuance: tokens issued earlier stop working immediately."
+    "allowTokensWarning": "Turning this off refuses authentication, not just issuance: tokens issued earlier stop working immediately.",
+    "allowMcp": "Allow the MCP server",
+    "allowMcpDesc": "Publish the Model Context Protocol endpoint (POST /mcp), where an AI client — Claude Desktop, an IDE, a CLI — can call read-only coaching tools over the training data of whoever's credential it holds. Every tool declares the read scopes it needs, so a token reaches exactly what it was granted and nothing else.",
+    "allowMcpWarning": "The endpoint is refused outright, the handshake included, so a client is told the server is not there rather than connecting and then failing every call. This withdraws an interface, not an exposure: a token reaches the same data through the ordinary API either way — what limits a credential is its scopes.",
+    "allowMcpNeedsTokens": "Personal access tokens are off, so no external client has a credential to connect with. The endpoint is published but unreachable in practice."
   },
   "usage": {
     "title": "LLM usage",

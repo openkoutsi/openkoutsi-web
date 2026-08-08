@@ -828,6 +828,8 @@ function SettingsTab() {
   const [allowSelfSignup, setAllowSelfSignup] = useState(false)
   // Issue #46 — defaults on server-side; the real value arrives with `settings`.
   const [allowTokens, setAllowTokens] = useState(true)
+  // Issue #42 — on by default for the same reason, and read the same way.
+  const [allowMcp, setAllowMcp] = useState(true)
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -841,6 +843,7 @@ function SettingsTab() {
       setAdminContact(settings.admin_contact ?? '')
       setAllowSelfSignup(Boolean(settings.allow_self_signup))
       setAllowTokens(Boolean(settings.allow_personal_access_tokens))
+      setAllowMcp(Boolean(settings.allow_mcp_server))
       setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
@@ -882,6 +885,7 @@ function SettingsTab() {
         admin_contact: adminContact || null,
         allow_self_signup: allowSelfSignup,
         allow_personal_access_tokens: allowTokens,
+        allow_mcp_server: allowMcp,
         llm_models: models,
         llm_requires_subscription: requiresSubscription,
       }
@@ -969,6 +973,34 @@ function SettingsTab() {
               id="allow-tokens"
               checked={allowTokens}
               onCheckedChange={setAllowTokens}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
+            <div className="space-y-1">
+              <Label htmlFor="allow-mcp">{t('settings.allowMcp')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.allowMcpDesc')}</p>
+              {!allowMcp && (
+                // Off is a 404 on the handshake, not merely on the tool calls,
+                // and it withdraws an interface rather than an exposure — both
+                // worth saying where the decision is made.
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  {t('settings.allowMcpWarning')}
+                </p>
+              )}
+              {allowMcp && !allowTokens && (
+                // The endpoint also accepts a session token, but those last an
+                // hour; without personal access tokens there is no credential an
+                // external client can hold, so the switch above is on in name
+                // only.
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  {t('settings.allowMcpNeedsTokens')}
+                </p>
+              )}
+            </div>
+            <Switch
+              id="allow-mcp"
+              checked={allowMcp}
+              onCheckedChange={setAllowMcp}
             />
           </div>
         </CardContent>

@@ -118,6 +118,27 @@ The admin console gains the matching instance toggle beside `allow_self_signup`,
 and a per-user token dialog that lists and revokes — never issues, and never
 shows a token's name.
 
+## The MCP server switch
+
+**Admin → Settings → Allow the MCP server** drives `allow_mcp_server` on
+`PATCH /api/admin/settings`, the backend's instance switch for the Model Context
+Protocol endpoint (`POST /mcp`). It sits with the other instance switches and, like
+personal access tokens, is **on by default** — the copy has to earn the admin's
+trust rather than the default doing it.
+
+Two conditional lines carry the whole point of the switch:
+
+- **Off says what off means.** The endpoint is refused outright, the handshake
+  included, so a client is told the server is not there instead of connecting and
+  then failing every call. The same line says what turning it off does *not* do: it
+  withdraws an interface, not an exposure — a token reaches the same data through
+  the ordinary API either way, and what limits a credential is its scopes. An admin
+  who reads this switch as a privacy control has been misled by it.
+- **On, with tokens off, is on in name only.** The endpoint accepts a session token
+  too, but those last an hour; without personal access tokens no external client
+  has a credential to hold. The two switches interact, and the second one is where
+  the admin finds out.
+
 ## Scripts
 
 ```bash

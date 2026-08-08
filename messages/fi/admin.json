@@ -153,7 +153,11 @@
     "requiresSubscriptionWarning": "Käyttäjät joilla ei ole tekoälyn käyttöoikeutta tai omaa tekoälymallia estetään käyttämästä tekoälyominaisuuksia, kunnes myönnät heille käyttöoikeuden.",
     "allowTokens": "Salli henkilökohtaiset käyttöoikeustunnisteet",
     "allowTokensDesc": "Anna käyttäjien luoda pitkäikäisiä, rajattuja tunnisteita omille työkaluilleen — varmuuskopiointiskripteille, ajastetuille töille, puhelimille, ulkoisille tekoälysovelluksille. Tunniste antaa selvästi vähemmän oikeuksia kuin istunto, joka omistajalla jo on: se on rajattu eikä yllä koskaan ylläpito-ohjelmointirajapintaan, /api/auth-polkuun, postilaatikkoon tai tekoälytoimintoihin.",
-    "allowTokensWarning": "Asetuksen poistaminen estää tunnistautumisen, ei pelkästään uusien tunnisteiden luomista: aiemmin luodut tunnisteet lakkaavat toimimasta välittömästi."
+    "allowTokensWarning": "Asetuksen poistaminen estää tunnistautumisen, ei pelkästään uusien tunnisteiden luomista: aiemmin luodut tunnisteet lakkaavat toimimasta välittömästi.",
+    "allowMcp": "Salli MCP-palvelin",
+    "allowMcpDesc": "Julkaise Model Context Protocol -päätepiste (POST /mcp), jonka kautta tekoälysovellus — Claude Desktop, kehitysympäristö tai komentorivityökalu — voi kutsua vain lukevia valmennustyökaluja sen käyttäjän harjoitusdataan, jonka tunnistetta se käyttää. Jokainen työkalu ilmoittaa tarvitsemansa lukuoikeudet, joten tunniste yltää täsmälleen siihen mihin sille on myönnetty oikeus, ei muuhun.",
+    "allowMcpWarning": "Päätepiste kieltäytyy kokonaan, kättely mukaan lukien, joten asiakasohjelmalle kerrotaan ettei palvelinta ole — se ei yhdistä ensin ja epäonnistu sitten jokaisessa kutsussa. Tämä poistaa rajapinnan, ei pääsyä: tunniste yltää samaan dataan tavallisen ohjelmointirajapinnan kautta joka tapauksessa, ja tunnistetta rajaavat sille myönnetyt oikeudet.",
+    "allowMcpNeedsTokens": "Henkilökohtaiset käyttöoikeustunnisteet ovat pois päältä, joten ulkoisella asiakasohjelmalla ei ole tunnistetta jolla yhdistää. Päätepiste on julkaistu mutta käytännössä saavuttamaton."
   },
   "usage": {
     "title": "LLM-käyttö",
