@@ -281,6 +281,24 @@ export default function ProfilePage() {
     }
   }
 
+  async function handlePatExpiryEmailsToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), pat_expiry_emails: checked },
+        }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
   async function handleGamificationToggle(checked: boolean) {
     try {
       await apiFetch('/api/athlete', {
@@ -997,6 +1015,21 @@ export default function ProfilePage() {
             <Switch
               checked={gamificationEnabled(profile?.app_settings)}
               onCheckedChange={handleGamificationToggle}
+              disabled={!profile}
+            />
+          </div>
+          {/* Issue #46 — opt-*out*: the inbox message is unconditional, only the
+              email can be turned off. Absent means on. */}
+          <div className="flex items-start justify-between gap-4 mt-4 pt-4 border-t">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.analysis.patExpiryEmails')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.analysis.patExpiryEmailsDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={profile?.app_settings?.pat_expiry_emails !== false}
+              onCheckedChange={handlePatExpiryEmailsToggle}
               disabled={!profile}
             />
           </div>
