@@ -73,6 +73,11 @@ export interface InstanceSettingsResponse {
   // turning it off refuses authentication, so tokens issued beforehand stop
   // working immediately rather than merely becoming un-issuable.
   allow_personal_access_tokens: boolean
+  // Issue #42: publish the MCP endpoint (POST /mcp) on this instance. Defaults
+  // on — off refuses the endpoint outright, the handshake included, so a client
+  // is told the server is not there rather than connecting and then failing
+  // every useful call.
+  allow_mcp_server: boolean
 }
 
 export interface InstanceSettingsPatch {
@@ -82,6 +87,7 @@ export interface InstanceSettingsPatch {
   llm_requires_subscription?: boolean
   allow_self_signup?: boolean
   allow_personal_access_tokens?: boolean
+  allow_mcp_server?: boolean
 }
 
 // One aggregation row of the admin LLM-usage summary (issue #9).
