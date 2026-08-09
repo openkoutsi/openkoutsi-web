@@ -47,6 +47,10 @@
       "byok": "Käytät omaa tekoälypalvelintasi.",
       "none": "Tekoälyominaisuudet eivät ole käytettävissä — tilaa tai lisää oma tekoälypalvelin.",
       "inertHint": "Tämä käyttää palvelimen tekoälymallia, joka ei ole nyt käytettävissäsi. Asetus pysyy tallennettuna ja jatkuu, kun tilaat tai lisäät oman tekoälypalvelimen."
+    },
+    "aiGenerated": {
+      "label": "Tekoälyn tuottama",
+      "notice": "Tämän on kirjoittanut suuri kielimalli harjoitustietojesi pohjalta. Se voi olla virheellinen tai puutteellinen — käsittele sitä ehdotuksena, ei lääketieteellisenä tai ammatillisena neuvona."
     }
   }
 }

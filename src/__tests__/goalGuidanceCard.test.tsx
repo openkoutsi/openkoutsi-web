@@ -74,6 +74,23 @@ describe('GoalGuidanceCard', () => {
     expect(screen.getByText('Stay consistent and it comes.')).toBeInTheDocument()
   })
 
+  it('discloses that the guidance was written by a model (issue #41)', () => {
+    mocks.swr.data = {
+      status: 'done',
+      verdict: 'realistic',
+      guidance: 'That timeline holds up.',
+      updated_at: '2026-07-13T09:00:00Z',
+    }
+    render(h(GoalGuidanceCard, { goalId: 'g1' }))
+    expect(screen.getByRole('note')).toBeInTheDocument()
+  })
+
+  it('discloses the model while the guidance is still streaming in', () => {
+    mocks.swr.data = { status: 'pending', verdict: null, guidance: null, updated_at: null }
+    render(h(GoalGuidanceCard, { goalId: 'g1' }))
+    expect(screen.getByRole('note')).toBeInTheDocument()
+  })
+
   it('shows an error message when guidance failed', () => {
     mocks.swr.data = { status: 'error', verdict: null, guidance: null, updated_at: null }
     render(h(GoalGuidanceCard, { goalId: 'g1' }))

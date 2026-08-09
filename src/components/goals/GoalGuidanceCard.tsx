@@ -8,6 +8,7 @@ import { fetcher, apiFetch, LlmSubscriptionRequiredError } from '@/lib/api'
 import type { GoalGuidance } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
+import { AiDisclosure } from '@/components/AiDisclosure'
 import { LlmUpsell } from '@/components/LlmUpsell'
 import { Sparkles, RefreshCw } from 'lucide-react'
 
@@ -116,9 +117,12 @@ export function GoalGuidanceCard({ goalId }: { goalId: string }) {
           {verdict && !pending && <VerdictBadge verdict={verdict} />}
         </div>
         {pending && paragraphs.length === 0 ? (
-          <div className="flex items-start gap-3">
-            <KoutsiAvatar mood="knowing" />
-            <KoutsiBubble text={t('goals.guidance.thinking')} isPartial />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <KoutsiAvatar mood="knowing" />
+              <KoutsiBubble text={t('goals.guidance.thinking')} isPartial />
+            </div>
+            <AiDisclosure />
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -137,6 +141,8 @@ export function GoalGuidanceCard({ goalId }: { goalId: string }) {
                 <KoutsiBubble text="" isPartial />
               </div>
             )}
+            {/* Issue #41: the guidance above is model output — say so wherever it shows. */}
+            <AiDisclosure />
             {!pending && (
               <Button size="sm" variant="ghost" className="self-start h-7 px-2" onClick={handleGenerate}>
                 <RefreshCw className="h-3.5 w-3.5 mr-1" />

@@ -50,6 +50,7 @@ function PrBadgeRow({ badges }: { badges: Record<string, string> }) {
 }
 
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
+import { AiDisclosure } from '@/components/AiDisclosure'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
 
@@ -662,6 +663,9 @@ export default function ActivityDetailPage({ params }: Props) {
               </div>
             )
           })()}
+
+          {/* Issue #41: the analysis above is model output — say so wherever it shows. */}
+          {(isAnalysisPending || activity.analysis) && <AiDisclosure className="mt-3" />}
 
           {!isAnalysisPending && activity.analysis_status === 'error' && !activity.analysis && (
             <p className="text-sm text-destructive">{t('detail.analysis.failed')}</p>
