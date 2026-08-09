@@ -24,6 +24,7 @@ import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { RpePrompt } from '@/components/activities/RpePrompt'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
+import { AiDisclosure } from '@/components/AiDisclosure'
 import { HelpCircle, RefreshCw } from 'lucide-react'
 import {
   Dialog,
@@ -191,9 +192,12 @@ function TrainingStatusCard() {
 
     if (pending && paragraphs.length === 0) {
       content = (
-        <div className="flex items-start gap-3">
-          <KoutsiAvatar mood="knowing" />
-          <KoutsiBubble text={t('trainingStatus.thinking')} isPartial />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <KoutsiAvatar mood="knowing" />
+            <KoutsiBubble text={t('trainingStatus.thinking')} isPartial />
+          </div>
+          <AiDisclosure />
         </div>
       )
     } else {
@@ -214,6 +218,8 @@ function TrainingStatusCard() {
               <KoutsiBubble text="" isPartial />
             </div>
           )}
+          {/* Issue #41: the feedback above is model output — say so wherever it shows. */}
+          <AiDisclosure />
         </div>
       )
     }

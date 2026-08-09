@@ -47,6 +47,10 @@
       "byok": "Using your own AI server.",
       "none": "AI features are not available — subscribe or add your own AI server.",
       "inertHint": "This uses the server's AI model, which isn't available to you right now. The setting stays saved and resumes once you subscribe or add your own AI server."
+    },
+    "aiGenerated": {
+      "label": "AI-generated",
+      "notice": "Written by a large language model from your training data. It can be wrong or incomplete — treat it as a suggestion, not medical or professional advice."
     }
   }
 }
