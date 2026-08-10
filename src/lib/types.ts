@@ -312,6 +312,9 @@ export interface ActivityDetail extends Activity {
   zone_breakdown?: ZoneBreakdown[]
   analysis_status?: string | null
   analysis?: string | null
+  // Issue #43 — see `TrainingStatus.progress`. Only set while `analysis_status`
+  // is "pending" on the agentic path.
+  analysis_progress?: string | null
 }
 
 export type FormLabel = 'peak' | 'fresh' | 'neutral' | 'tired' | 'overreached'
@@ -637,6 +640,13 @@ export interface TrainingStatus {
   status: string | null
   feedback: string | null
   generated_date: string | null
+  // Issue #43. What the agentic coach is doing right now, while `status` is
+  // "pending" and no prose has arrived yet: a code from a fixed vocabulary
+  // (`thinking`, `tool.<tool_name>`), never a sentence. Null once the answer
+  // starts and null for the whole non-agentic path. Render it through
+  // `progressText`, which falls back to generic copy for a code this build
+  // doesn't know — the tool set grows without a frontend release.
+  progress?: string | null
 }
 
 export interface GoalGuidance {

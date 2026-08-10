@@ -49,7 +49,7 @@ function PrBadgeRow({ badges }: { badges: Record<string, string> }) {
   )
 }
 
-import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
+import { parseMoodAndParagraphs, progressText, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
 import { AiDisclosure } from '@/components/AiDisclosure'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
@@ -63,6 +63,7 @@ interface Props {
 export default function ActivityDetailPage({ params }: Props) {
   const t = useTranslations('activities')
   const tCommon = useTranslations('common')
+  const tLlm = useTranslations('common.llm')
   const locale = useLocale()
   const { id } = use(params)
   const router = useRouter()
@@ -637,15 +638,27 @@ export default function ActivityDetailPage({ params }: Props) {
         </CardHeader>
         <CardContent>
           {showLlmUpsell && <LlmUpsell className="mb-4" />}
-          {/* Server-side pending (polling) */}
+          {/* Server-side pending (polling). Issue #43: on the agentic path the
+              first rounds are tool calls that produce no prose, so the bouncing
+              dots would be the whole experience for the gathering phase. When
+              the API reports a progress code, say what Koutsi is actually
+              doing; the dots stay for the non-agentic path, which reaches the
+              prose quickly enough that a line would only flicker. */}
           {isAnalysisPending && (
             <div className="flex items-start gap-3">
               <KoutsiAvatar mood="neutral" />
-              <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
-              </div>
+              {activity.analysis_progress ? (
+                <KoutsiBubble
+                  text={progressText(tLlm, activity.analysis_progress, tLlm('progress.thinking'))}
+                  isPartial
+                />
+              ) : (
+                <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
+                </div>
+              )}
             </div>
           )}
 

@@ -23,7 +23,7 @@ import { AchievementsCard } from '@/components/AchievementsCard'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { RpePrompt } from '@/components/activities/RpePrompt'
 import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
-import { parseMoodAndParagraphs, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
+import { parseMoodAndParagraphs, progressText, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
 import { AiDisclosure } from '@/components/AiDisclosure'
 import { HelpCircle, RefreshCw } from 'lucide-react'
 import {
@@ -158,6 +158,7 @@ function FreshnessBar({
 
 function TrainingStatusCard() {
   const t = useTranslations('dashboard')
+  const tLlm = useTranslations('common.llm')
   const isPending = (status: string | null | undefined) => status === 'pending'
 
   const { data, mutate } = useSWR<TrainingStatus>(
@@ -191,11 +192,19 @@ function TrainingStatusCard() {
     const { mood, paragraphs } = parsed
 
     if (pending && paragraphs.length === 0) {
+      // Issue #43: on the agentic path the first rounds are tool calls with no
+      // prose at all, so without this the card would sit on "Koutsi is
+      // thinking…" for the whole gathering phase and then jump to a finished
+      // answer. `progressText` falls back to exactly that generic line when
+      // there is no code — the non-agentic path, or a code this build predates.
       content = (
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-3">
             <KoutsiAvatar mood="knowing" />
-            <KoutsiBubble text={t('trainingStatus.thinking')} isPartial />
+            <KoutsiBubble
+              text={progressText(tLlm, data?.progress, t('trainingStatus.thinking'))}
+              isPartial
+            />
           </div>
           <AiDisclosure />
         </div>

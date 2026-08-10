@@ -505,6 +505,8 @@
       "autoAnalyzeDesc": "Automatically generate AI coaching analysis when a workout is uploaded or synced. Requires an LLM configured by your team administrator.",
       "autoTrainingStatus": "Auto daily coaching feedback",
       "autoTrainingStatusDesc": "Automatically generate a daily training status overview on the dashboard after uploads and syncs. Requires an LLM configured by your team administrator.",
+      "agenticKoutsi": "Let Koutsi look things up",
+      "agenticKoutsiDesc": "Instead of being handed a fixed summary, Koutsi decides what it needs and looks it up — so it can follow a thread, like checking the rides behind a form number instead of just repeating it. Slower and uses more of the AI budget, and only works with models that support tool calling; everything else falls back to the usual feedback automatically.",
       "askForRpe": "Ask me to rate effort after uploads",
       "askForRpeDesc": "After a significant cycling ride is uploaded or synced, prompt me on the dashboard to rate how hard it felt (RPE, 1–10).",
       "gamification": "Show achievements and streaks",

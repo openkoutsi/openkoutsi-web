@@ -505,6 +505,8 @@
       "autoAnalyzeDesc": "Luo automaattisesti tekoälyvalmennusanalyysi, kun harjoitus ladataan tai synkronoidaan. Vaatii tiimin ylläpitäjän määrittämän LLM:n.",
       "autoTrainingStatus": "Automaattinen päivittäinen valmennus­palaute",
       "autoTrainingStatusDesc": "Luo automaattisesti päivittäisen harjoittelun tilannekatsauksen kojelaudalle latausten ja synkronointien jälkeen. Vaatii tiimin ylläpitäjän määrittämän LLM:n.",
+      "agenticKoutsi": "Anna Koutsin etsiä tietoja itse",
+      "agenticKoutsiDesc": "Valmiin yhteenvedon sijaan Koutsi päättää itse, mitä tietoja se tarvitsee, ja hakee ne — jolloin se voi seurata johtolankaa, esimerkiksi katsoa kuntoluvun taustalla olevat lenkit sen sijaan että vain toistaisi luvun. Hitaampi ja kuluttaa enemmän tekoälybudjettia, ja toimii vain työkalukutsuja tukevilla malleilla; muissa tapauksissa palataan automaattisesti tavalliseen palautteeseen.",
       "askForRpe": "Pyydä arvioimaan rasitus latausten jälkeen",
       "askForRpeDesc": "Kun merkittävä pyöräilylenkki on ladattu tai synkronoitu, pyydä minua kojelaudalla arvioimaan, miltä se tuntui (RPE, 1–10).",
       "gamification": "Näytä saavutukset ja putket",
