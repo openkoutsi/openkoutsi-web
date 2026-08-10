@@ -335,6 +335,24 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleAgenticKoutsiToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), agentic_koutsi: checked },
+        }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
   async function handleShowAdherenceToggle(checked: boolean) {
     try {
       await apiFetch('/api/athlete', {
@@ -989,6 +1007,23 @@ export default function ProfilePage() {
             <Switch
               checked={Boolean(profile?.app_settings?.auto_training_status)}
               onCheckedChange={handleAutoTrainingStatusToggle}
+              disabled={!profile}
+            />
+          </div>
+          {/* Issue #43. Opt-in while the agentic path beds in: the fixed-prompt
+              coach is well-tuned, and whether letting Koutsi go and look things
+              up actually produces a better answer is a question the athlete can
+              settle for themselves with a toggle rather than a deploy. */}
+          <div className="flex items-start justify-between gap-4 mt-4 pt-4 border-t">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('settings.analysis.agenticKoutsi')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.analysis.agenticKoutsiDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={Boolean(profile?.app_settings?.agentic_koutsi)}
+              onCheckedChange={handleAgenticKoutsiToggle}
               disabled={!profile}
             />
           </div>

@@ -139,6 +139,41 @@ Two conditional lines carry the whole point of the switch:
   has a credential to hold. The two switches interact, and the second one is where
   the admin finds out.
 
+## Koutsi's progress line
+
+When the athlete turns on **Settings → Analysis → Let Koutsi look things up**,
+the daily feedback card and the activity analysis stop being generated from a
+fixed summary and become an agent loop over the backend's coaching tools. The
+frontend consequence is small but not optional: the first rounds of that loop are
+tool calls that produce **no prose at all**, so a card that used to fill in token
+by token would instead spin for a long time and then jump to a finished answer.
+
+The backend therefore reports a `progress` field alongside the pending status
+(`progress` on the training status, `analysis_progress` on an activity), and the
+cards render it via `progressText` in `src/components/koutsi-chat.tsx`.
+
+Three things about that field are worth knowing before touching this code:
+
+- **It is a code, not a sentence.** `thinking`, or `tool.<backend tool name>`.
+  The coaching prompts run in fourteen languages while every tool name and
+  description is English, so a model-written progress line would be untranslated
+  the moment the athlete is not reading English — and could put tool internals in
+  front of them. The strings live in `common.llm.progress.*`.
+- **An unknown code must not be shown.** `progressText` falls back to the generic
+  "Koutsi is thinking…" for a `tool.*` suffix this build has never heard of. That
+  is what lets the backend publish a new tool without a lockstep frontend
+  release; rendering `tool.get_sleep_quality` at an athlete is the alternative.
+- **It is a separate field, not part of the prose.** `parseMoodAndParagraphs`
+  reads the analysis text as raw prose and the dashboard card, the activity page
+  and the goal-guidance card all share it. A structured envelope inside that text
+  would have broken all three. The `MOOD:` contract is unchanged, including its
+  tolerance of a missing line — which the agentic path makes *more* likely, since
+  models obey a leading-format rule less reliably on a turn that follows tool
+  results.
+
+The field is null for the whole non-agentic path and null once the answer starts,
+so a finished card looks exactly as it always did.
+
 ## Scripts
 
 ```bash

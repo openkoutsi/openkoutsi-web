@@ -51,6 +51,20 @@
     "aiGenerated": {
       "label": "AI-generated",
       "notice": "Written by a large language model from your training data. It can be wrong or incomplete — treat it as a suggestion, not medical or professional advice."
+    },
+    "progress": {
+      "thinking": "Koutsi is thinking…",
+      "tools": {
+        "find_activity": "Koutsi is looking up a session…",
+        "get_activity_detail": "Koutsi is going through that session in detail…",
+        "get_goal_progress": "Koutsi is checking your goals…",
+        "get_intensity_distribution": "Koutsi is looking at how hard you've been training…",
+        "get_plan_status": "Koutsi is checking your training plan…",
+        "get_power_profile": "Koutsi is checking your power curve…",
+        "get_training_status": "Koutsi is checking how you're doing right now…",
+        "get_zone_totals": "Koutsi is adding up your time in each zone…",
+        "list_recent_activities": "Koutsi is looking over your recent sessions…"
+      }
     }
   }
 }

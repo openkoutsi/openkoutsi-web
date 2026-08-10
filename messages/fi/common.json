@@ -51,6 +51,20 @@
     "aiGenerated": {
       "label": "Tekoälyn tuottama",
       "notice": "Tämän on kirjoittanut suuri kielimalli harjoitustietojesi pohjalta. Se voi olla virheellinen tai puutteellinen — käsittele sitä ehdotuksena, ei lääketieteellisenä tai ammatillisena neuvona."
+    },
+    "progress": {
+      "thinking": "Koutsi miettii…",
+      "tools": {
+        "find_activity": "Koutsi etsii harjoitusta…",
+        "get_activity_detail": "Koutsi perehtyy harjoitukseen tarkemmin…",
+        "get_goal_progress": "Koutsi tarkistaa tavoitteesi…",
+        "get_intensity_distribution": "Koutsi katsoo, miten kovaa olet harjoitellut…",
+        "get_plan_status": "Koutsi tarkistaa harjoitusohjelmasi…",
+        "get_power_profile": "Koutsi tarkistaa tehokäyrääsi…",
+        "get_training_status": "Koutsi tarkistaa, missä kunnossa olet juuri nyt…",
+        "get_zone_totals": "Koutsi laskee yhteen aikaasi eri tehoalueilla…",
+        "list_recent_activities": "Koutsi käy läpi viimeaikaisia harjoituksiasi…"
+      }
     }
   }
 }
