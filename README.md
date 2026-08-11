@@ -174,6 +174,64 @@ Three things about that field are worth knowing before touching this code:
 The field is null for the whole non-agentic path and null once the answer starts,
 so a finished card looks exactly as it always did.
 
+## Ask Koutsi
+
+`/chat` (issue #44) is where the athlete puts their own questions to Koutsi
+instead of reading a card it wrote unprompted. The nav entry appears only when
+**Settings → Analysis → Let Koutsi look things up** is on: chat is worth nothing
+without tools, so it rides the same switch rather than offering a surface that
+would have to explain itself on arrival.
+
+The client sends **one string**. It never builds a message array — the system
+prompt, the scope policy and the replayed history are all assembled server-side,
+which is what keeps the guardrails out of reach of anyone holding an access
+token. Rendering reuses `KoutsiAvatar`, `KoutsiBubble`, `parseMoodAndParagraphs`
+and `progressText` unchanged, so an answer here looks like the daily card and one
+parser serves both.
+
+Three things about this surface differ from every other AI view in the app, and
+all three come from the same fact — chat has no single-shot prompt to fall back
+on, because the question is arbitrary:
+
+- **Failures are visible and typed.** Everywhere else an unusable model quietly
+  degrades to the blob prompt. Here the turn carries an `error_code`, and each
+  gets its own sentence: `busy`, `tools_unsupported`, `no_answer`, `upstream`,
+  `unreachable`, `stalled`. Unknown codes fall back to generic copy, the same
+  contract the progress codes have. Only `tools_unsupported` withholds the retry
+  button — it is a settled property of the athlete's model, so a retry would fail
+  identically.
+- **There is a `queued` state**, which exists nowhere else. A chat turn competes
+  for the same agent slots as the background daily-status runs; rather than being
+  refused it waits, and the wait is shown as waiting rather than as thinking,
+  because nothing is being written yet.
+- **The page can be unusable up front.** A model that cannot call tools, a
+  missing opt-in, or a gated instance are all answered before the athlete types —
+  discovering any of them *after* composing a question is a bad way to learn a
+  permanent fact about your own setup.
+
+Polling is 600 ms while a turn is pending and 1500 ms while it is queued, rather
+than the card's flat 1500 ms: someone is watching this one. It stays polling
+rather than streaming for the reason the card does — the answer is persisted, so
+a reload mid-answer resumes instead of losing the turn, which matters more for a
+conversation than it ever did for a card. Availability is refetched whenever a
+turn *settles*, not when one is sent: the backend does not charge for failures
+that never reached a provider, so the remaining count is only knowable once the
+turn is over — and without the refetch the budget warning would show the number
+it had at page load right up to the 429 it exists to pre-empt.
+
+**Try again** re-runs the failed answer in place (`POST …/messages/{id}/retry`)
+rather than re-posting the question. Re-asking would show the athlete their own
+question twice at the exact moment something has visibly gone wrong, spend a
+second turn of the budget, and send a history ending with the same question
+adjacent to itself. Only the newest turn offers the button, since that is the
+only one the page acts on.
+
+The medical boundary is a **standing notice** by the composer, not a per-message
+marker. A `BAND:` line beside `MOOD:` was the obvious design and was rejected: it
+would be one more leading-format rule, degrading on exactly the small local models
+BYOK users run and on exactly the post-tool-result turns, so the disclosure would
+go missing from the answers most likely to need it.
+
 ## Scripts
 
 ```bash

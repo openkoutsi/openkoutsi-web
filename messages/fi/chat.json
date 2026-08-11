@@ -1,0 +1,64 @@
+{
+  "title": "Kysy Koutsilta",
+  "subtitle": "Valmentajasi, harjoitustietosi edessään.",
+  "newConversation": "Uusi keskustelu",
+  "conversations": "Keskustelut",
+  "noConversations": "Ei vielä keskusteluja.",
+  "untitled": "Uusi keskustelu",
+  "delete": "Poista keskustelu",
+  "deleteTitle": "Poistetaanko tämä keskustelu?",
+  "deleteBody": "Koko keskustelu poistetaan, myös kaikki kirjoittamasi. Tätä ei voi perua.",
+  "deleteConfirm": "Poista",
+  "deleteCancel": "Säilytä",
+  "composerPlaceholder": "Kysy harjoittelustasi…",
+  "composerPlaceholderShort": "Kysy tarkentava kysymys…",
+  "send": "Lähetä",
+  "sending": "Lähetetään…",
+  "openConversations": "Näytä keskustelut",
+  "closeConversations": "Piilota keskustelut",
+  "boundary": "Koutsi on valmentaja, ei lääkäri. Oireisiin, vammoihin, sairauksiin ja lääkitykseen liittyvissä asioissa ota yhteyttä lääkäriin.",
+  "empty": {
+    "greeting": "Mitä haluaisit kysyä?",
+    "hint": "Koutsi voi katsoa aktiviteettejasi, ohjelmaasi, tavoitteitasi ja kuntolukujasi vastatakseen. Tässä muutama aloitus.",
+    "starters": [
+      "Tapahtumaani on kolme viikkoa ja kuntoni on yhä miinuksella — pitäisikö olla huolissaan?",
+      "Ensi viikko menee töihin. Mistä harjoituksista kannattaa tinkiä?",
+      "Kynnysvetoni hajoavat aina viimeisellä toistolla. Mitä sille voi tehdä?",
+      "Pitäisikö minun tehdä nyt enemmän Z2:ta vai enemmän kovaa?",
+      "Mitä kannattaa syödä neljän tunnin lenkillä?"
+    ]
+  },
+  "status": {
+    "queued": "Koutsi viimeistelee muuta — kysymyksesi on seuraavana…",
+    "thinking": "Koutsi miettii…"
+  },
+  "lookedAt": "Koutsi katsoi: {tools}",
+  "planLink": "Avaa ohjelmasi",
+  "retry": "Yritä uudelleen",
+  "errors": {
+    "busy": "Koutsilla oli muuta työn alla eikä se ehtinyt tähän ajoissa. Yritä hetken kuluttua uudelleen.",
+    "tools_unsupported": "Tekoälymallisi ei osaa käyttää työkaluja, joita Koutsi tarvitsee tietojesi lukemiseen.",
+    "no_answer": "Tekoälymallisi ei palauttanut vastausta. Yritä uudelleen.",
+    "upstream": "Tekoälypalvelimella oli ongelma vastaamisessa. Yritä hetken kuluttua uudelleen.",
+    "unreachable": "Tekoälypalvelimeen ei saatu yhteyttä. Tarkista että se on käynnissä ja yritä uudelleen.",
+    "stalled": "Vastaus katkesi kesken. Yritä uudelleen.",
+    "unavailable": "Vastaamisessa meni jotain pieleen. Yritä uudelleen."
+  },
+  "unavailable": {
+    "disabledTitle": "Keskustelu vaatii agenttivalmentajan",
+    "disabledBody": "Koutsi voi keskustella vain kun se saa hakea tietoja tiedoistasi. Ota agenttivalmentaja käyttöön profiilissasi.",
+    "disabledLink": "Siirry profiiliin",
+    "toolsTitle": "Tekoälymallisi ei pysty tähän",
+    "toolsBody": "Keskustelu vaatii mallin joka osaa kutsua työkaluja, jotta Koutsi voi lukea aktiviteettisi, ohjelmasi ja kuntolukusi. Valitsemasi malli ei osaa. Valitse toinen malli tekoälyasetuksista.",
+    "toolsLink": "Siirry tekoälyasetuksiin"
+  },
+  "budget": {
+    "remaining": "{count} kysymystä jäljellä tänään",
+    "remainingOne": "1 kysymys jäljellä tänään",
+    "spentTitle": "Tämän päivän kysymykset on käytetty",
+    "spentBody": "Lisää vapautuu päivän edetessä.",
+    "conversationFullTitle": "Tämä keskustelu on täynnä",
+    "conversationFullBody": "Aloita uusi jatkaaksesi — Koutsi ei menetä otetta harjoittelustasi, se hakee tiedot joka kerta uudestaan.",
+    "turnInFlight": "Koutsi vastaa vielä edelliseen kysymykseesi."
+  }
+}

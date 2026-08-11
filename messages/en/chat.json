@@ -1,0 +1,64 @@
+{
+  "title": "Ask Koutsi",
+  "subtitle": "Your coach, with your training data in front of it.",
+  "newConversation": "New conversation",
+  "conversations": "Conversations",
+  "noConversations": "No conversations yet.",
+  "untitled": "New conversation",
+  "delete": "Delete conversation",
+  "deleteTitle": "Delete this conversation?",
+  "deleteBody": "The whole thread goes, including everything you wrote. This cannot be undone.",
+  "deleteConfirm": "Delete",
+  "deleteCancel": "Keep it",
+  "composerPlaceholder": "Ask about your training…",
+  "composerPlaceholderShort": "Ask a follow-up…",
+  "send": "Send",
+  "sending": "Sending…",
+  "openConversations": "Show conversations",
+  "closeConversations": "Hide conversations",
+  "boundary": "Koutsi is a coach, not a clinician. For anything about symptoms, injury, illness or medication, talk to a doctor.",
+  "empty": {
+    "greeting": "What would you like to ask?",
+    "hint": "Koutsi can look at your activities, plan, goals and fitness numbers to answer. Here are some things to start with.",
+    "starters": [
+      "I'm three weeks out from my event and my form is still negative — should I be worried?",
+      "Work is going to eat next week. What should I cut?",
+      "My threshold intervals keep falling apart in the last rep. What do I do about that?",
+      "Should I be doing more Z2 or more intensity right now?",
+      "What should I eat on a four hour ride?"
+    ]
+  },
+  "status": {
+    "queued": "Koutsi is finishing something else — your question is next…",
+    "thinking": "Koutsi is thinking…"
+  },
+  "lookedAt": "Koutsi looked at: {tools}",
+  "planLink": "Open your plan",
+  "retry": "Try again",
+  "errors": {
+    "busy": "Koutsi was busy with other work and couldn't get to this in time. Try again in a moment.",
+    "tools_unsupported": "Your AI model can't use the tools Koutsi needs to look at your data.",
+    "no_answer": "Your AI model didn't return an answer. Try again.",
+    "upstream": "The AI server had a problem answering. Try again in a moment.",
+    "unreachable": "Couldn't reach the AI server. Check it's running, then try again.",
+    "stalled": "This answer stopped partway through. Try again.",
+    "unavailable": "Something went wrong answering this. Try again."
+  },
+  "unavailable": {
+    "disabledTitle": "Chat needs the agentic coach",
+    "disabledBody": "Koutsi can only chat when it's allowed to look things up in your data. Turn on the agentic coach in your profile to use this.",
+    "disabledLink": "Go to profile",
+    "toolsTitle": "Your AI model can't do this",
+    "toolsBody": "Chatting needs a model that can call tools, so Koutsi can go and read your activities, plan and fitness numbers. The model you've selected can't. Pick a different model in your AI settings.",
+    "toolsLink": "Go to AI settings"
+  },
+  "budget": {
+    "remaining": "{count} questions left today",
+    "remainingOne": "1 question left today",
+    "spentTitle": "That's today's questions used up",
+    "spentBody": "More become available as the day rolls on.",
+    "conversationFullTitle": "This conversation is full",
+    "conversationFullBody": "Start a new one to carry on — Koutsi won't lose track of your training, it looks it up fresh each time.",
+    "turnInFlight": "Koutsi is still answering your last question."
+  }
+}

@@ -734,3 +734,69 @@ export interface Achievements {
   /** True when the athlete has opted out; the UI hides the feature entirely. */
   disabled: boolean
 }
+
+// ── Conversational Koutsi (issue #44) ──────────────────────────────────────
+
+/**
+ * What an assistant turn is doing.
+ *
+ * `queued` is the one with no equivalent anywhere else in the app. A chat turn
+ * competes for the same agent slots as the background daily-status runs, and
+ * unlike them it has no single-shot prompt to fall back to — so instead of
+ * being refused it waits, and the wait is a state the athlete can read rather
+ * than a spinner that means nothing.
+ */
+export type ChatMessageStatus = 'queued' | 'pending' | 'complete' | 'error'
+
+export interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  /** Grows as the answer streams in; empty while queued. */
+  content: string
+  /** Null on the athlete's own turns — nothing about them is pending. */
+  status: ChatMessageStatus | null
+  /**
+   * Issue #43's progress code while the turn is still gathering. Render it
+   * through `progressText`, exactly as the dashboard card does.
+   */
+  progress?: string | null
+  /**
+   * Why a turn failed, as a machine key this app localises. Unknown codes fall
+   * back to generic copy: the backend can learn a new failure mode without a
+   * frontend release, the same contract the progress codes have.
+   */
+  error_code?: string | null
+  /** Registry tool names the turn consulted — never arguments or results. */
+  tool_names?: string[] | null
+  created_at: string
+}
+
+export interface ChatConversation {
+  id: string
+  title: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ChatConversationDetail extends ChatConversation {
+  messages: ChatMessage[]
+}
+
+/**
+ * Why chat is or is not usable, answered *before* the athlete types.
+ *
+ * Chat is the only LLM surface with nothing to degrade to, so its reasons for
+ * not working have to be knowable up front — discovering "your model can't call
+ * tools" as a failed turn, after composing a question, is a bad way to learn a
+ * permanent fact about your own setup.
+ */
+export interface ChatAvailability {
+  /** The `agentic_koutsi` opt-in. Chat needs tools to be worth anything. */
+  enabled: boolean
+  /** False disables the surface: a settled property, not a transient failure. */
+  tools_supported: boolean
+  entitled: boolean
+  turns_remaining_today: number
+  max_turns_per_conversation: number
+  max_message_chars: number
+}
