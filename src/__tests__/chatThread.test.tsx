@@ -166,4 +166,40 @@ describe('ChatThread', () => {
     render(h(ChatThread, { messages: [message({ status: 'error', error_code: 'upstream' })] }))
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })
+
+  it('offers retry only on the newest turn', () => {
+    // `retry()` in the page always acts on the last message, so a button on an
+    // older error bubble would look live and re-run something else. Reachable
+    // the ordinary way: fail, then rephrase instead of retrying.
+    const onRetry = vi.fn()
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ role: 'user', status: null, content: 'first' }),
+          message({ status: 'error', error_code: 'upstream' }),
+          message({ role: 'user', status: null, content: 'rephrased' }),
+          message({ status: 'complete', content: 'MOOD:knowing\n\nHere you go.' }),
+        ],
+        onRetry,
+      }),
+    )
+    // The old failure is still shown — it is part of the record — but without
+    // an action that would do the wrong thing.
+    expect(screen.getByText('errors.upstream')).toBeInTheDocument()
+    expect(screen.queryByText('retry')).not.toBeInTheDocument()
+  })
+
+  it('still offers retry when the failure is the newest turn', () => {
+    const onRetry = vi.fn()
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ role: 'user', status: null, content: 'q' }),
+          message({ status: 'error', error_code: 'upstream' }),
+        ],
+        onRetry,
+      }),
+    )
+    expect(screen.getByText('retry')).toBeInTheDocument()
+  })
 })

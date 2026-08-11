@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MessagesSquare, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import useSWR from 'swr'
@@ -13,6 +13,7 @@ import { LlmUpsell } from '@/components/LlmUpsell'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { ApiCodeError, apiFetch, fetcher } from '@/lib/api'
+import { REFUSAL_KEYS } from './refusals'
 import { Link } from '@/navigation'
 import type {
   ChatAvailability,
@@ -41,15 +42,18 @@ const CONVERSATIONS_KEY = '/api/chat/conversations'
 const POLL_PENDING_MS = 600
 const POLL_QUEUED_MS = 1500
 
+
 export default function ChatPage() {
   const t = useTranslations('chat')
+  const tCommon = useTranslations('common')
   const locale = useLocale()
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [listOpen, setListOpen] = useState(false)
   const [sending, setSending] = useState(false)
 
-  const { data: availability } = useSWR<ChatAvailability>(AVAILABILITY_KEY, fetcher)
+  const { data: availability, mutate: mutateAvailability } =
+    useSWR<ChatAvailability>(AVAILABILITY_KEY, fetcher)
   const { data: conversations, mutate: mutateList } = useSWR<ChatConversation[]>(
     CONVERSATIONS_KEY,
     fetcher,
@@ -73,6 +77,20 @@ export default function ChatPage() {
   const turnInFlight =
     lastMessage?.status === 'pending' || lastMessage?.status === 'queued'
 
+  // Refetch the budget whenever a turn settles. Without this, availability is
+  // whatever it was at mount for the whole session — which quietly disables the
+  // warning it exists to give: the counter appears at five left and still says
+  // five on the last one, then the athlete gets a 429 with no build-up. Tied to
+  // *settlement* rather than to sending, because the backend no longer charges
+  // for failures that never reached a provider, so the number is only knowable
+  // once the turn is over.
+  const settledAt = turnInFlight ? null : lastMessage?.id ?? null
+  useEffect(() => {
+    if (settledAt !== null) mutateAvailability()
+  }, [settledAt, mutateAvailability])
+
+  // Safe to read unguarded below: the early return for `undefined` runs before
+  // any of this is used for rendering.
   const conversationFull =
     availability !== undefined &&
     messages.filter((m) => m.role === 'assistant').length >=
@@ -83,18 +101,10 @@ export default function ChatPage() {
   const reportError = useCallback(
     (error: unknown) => {
       if (error instanceof ApiCodeError) {
-        const key = `budget.${
-          error.code === 'chat_daily_budget'
-            ? 'spentBody'
-            : error.code === 'chat_conversation_budget'
-              ? 'conversationFullBody'
-              : error.code === 'chat_turn_in_flight'
-                ? 'turnInFlight'
-                : ''
-        }`
+        const key = REFUSAL_KEYS[error.code]
         toast({
           title: t('title'),
-          description: t.has(key) ? t(key) : error.message,
+          description: key && t.has(key) ? t(key) : error.message,
           variant: 'destructive',
         })
         return
@@ -138,23 +148,25 @@ export default function ChatPage() {
   )
 
   const retry = useCallback(async () => {
-    // The failed answer's own question is re-sent: the row that failed carries
-    // no prose worth keeping, and the athlete should not have to retype.
-    const lastUser = [...messages].reverse().find((m) => m.role === 'user')
-    if (!lastUser || !activeId) return
+    // Re-runs the failed answer *in place* rather than re-asking. Re-posting the
+    // text would show the athlete their own question twice, right after
+    // something has visibly gone wrong; it would spend a second turn of the
+    // budget; and it would send a history ending with the same question twice
+    // over, which strict chat templates reject or merge.
+    if (!activeId || lastMessage?.status !== 'error') return
     setSending(true)
     try {
-      await apiFetch(`${CONVERSATIONS_KEY}/${activeId}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({ message: lastUser.content, locale }),
-      })
+      await apiFetch(
+        `${CONVERSATIONS_KEY}/${activeId}/messages/${lastMessage.id}/retry`,
+        { method: 'POST', body: JSON.stringify({ locale }) },
+      )
       await mutateActive()
     } catch (error) {
       reportError(error)
     } finally {
       setSending(false)
     }
-  }, [activeId, locale, messages, mutateActive, reportError])
+  }, [activeId, locale, lastMessage, mutateActive, reportError])
 
   const remove = useCallback(
     async (id: string) => {
@@ -175,8 +187,23 @@ export default function ChatPage() {
   // Chat is the one LLM surface with no single-shot prompt behind it, so a model
   // that cannot call tools is a permanent fact about their setup — and learning
   // that *after* composing a question is a bad way to learn it.
+  //
+  // Which is exactly why this waits for the answer rather than assuming yes.
+  // Every gate below reads `availability`, so while the fetch is in flight they
+  // all fall through to the full chat UI — handing the athlete a working-looking
+  // composer and then replacing it with "your model can't do this". A flash of
+  // empty state would be untidy; a flash of *an invitation to do the thing that
+  // will not work* is the failure this whole section exists to prevent.
+  if (availability === undefined) {
+    return (
+      <div className="mx-auto max-w-2xl p-6">
+        <h1 className="mb-4 text-2xl font-semibold">{t('title')}</h1>
+        <p className="text-sm text-muted-foreground">{tCommon('loading')}</p>
+      </div>
+    )
+  }
 
-  if (availability && !availability.enabled) {
+  if (!availability.enabled) {
     return (
       <Unavailable
         title={t('unavailable.disabledTitle')}
@@ -187,7 +214,7 @@ export default function ChatPage() {
     )
   }
 
-  if (availability && !availability.entitled) {
+  if (!availability.entitled) {
     return (
       <div className="mx-auto max-w-2xl p-6">
         <h1 className="mb-4 text-2xl font-semibold">{t('title')}</h1>
@@ -196,7 +223,7 @@ export default function ChatPage() {
     )
   }
 
-  if (availability && !availability.tools_supported) {
+  if (!availability.tools_supported) {
     return (
       <Unavailable
         title={t('unavailable.toolsTitle')}

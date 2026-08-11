@@ -26,6 +26,9 @@ import type { ChatMessage } from '@/lib/types'
  */
 const PLAN_TOOLS = new Set(['get_plan_status'])
 
+/** How far off the bottom counts as "reading something else, leave me alone". */
+const STICK_TO_BOTTOM_PX = 120
+
 function UserTurn({ message }: { message: ChatMessage }) {
   return (
     <div className="flex justify-end">
@@ -179,18 +182,37 @@ export function ChatThread({
     // jsdom, and following the answer down the page is a nicety — it must never
     // be the thing that stops the thread rendering.
     const end = endRef.current
-    if (typeof end?.scrollIntoView === 'function') {
-      end.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    if (typeof end?.scrollIntoView !== 'function') return
+
+    // Only follow an athlete who is already at the bottom. This effect fires on
+    // every poll while an answer streams, so scrolling up to re-read something
+    // earlier would otherwise drag them back down twice a second — the page
+    // fighting the reader, in a view whose entire purpose is reading.
+    const scroller = end.closest('.overflow-y-auto')
+    if (scroller instanceof HTMLElement) {
+      const distanceFromBottom =
+        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight
+      if (distanceFromBottom > STICK_TO_BOTTOM_PX) return
     }
+    end.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [lastId, lastContentLength])
 
   return (
     <div className="flex flex-col gap-6">
-      {messages.map((message) =>
+      {messages.map((message, index) =>
         message.role === 'user' ? (
           <UserTurn key={message.id} message={message} />
         ) : (
-          <AssistantTurn key={message.id} message={message} onRetry={onRetry} />
+          <AssistantTurn
+            key={message.id}
+            message={message}
+            // Only the newest turn offers a retry, because that is the only one
+            // the page's `retry()` acts on. A button on an older error bubble
+            // would look live and re-run something else entirely — reachable in
+            // the ordinary way, by rephrasing after a failure instead of
+            // retrying it.
+            onRetry={index === messages.length - 1 ? onRetry : undefined}
+          />
         ),
       )}
       <div ref={endRef} />

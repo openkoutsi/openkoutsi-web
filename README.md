@@ -213,7 +213,18 @@ Polling is 600 ms while a turn is pending and 1500 ms while it is queued, rather
 than the card's flat 1500 ms: someone is watching this one. It stays polling
 rather than streaming for the reason the card does — the answer is persisted, so
 a reload mid-answer resumes instead of losing the turn, which matters more for a
-conversation than it ever did for a card.
+conversation than it ever did for a card. Availability is refetched whenever a
+turn *settles*, not when one is sent: the backend does not charge for failures
+that never reached a provider, so the remaining count is only knowable once the
+turn is over — and without the refetch the budget warning would show the number
+it had at page load right up to the 429 it exists to pre-empt.
+
+**Try again** re-runs the failed answer in place (`POST …/messages/{id}/retry`)
+rather than re-posting the question. Re-asking would show the athlete their own
+question twice at the exact moment something has visibly gone wrong, spend a
+second turn of the budget, and send a history ending with the same question
+adjacent to itself. Only the newest turn offers the button, since that is the
+only one the page acts on.
 
 The medical boundary is a **standing notice** by the composer, not a per-message
 marker. A `BAND:` line beside `MOOD:` was the obvious design and was rejected: it
