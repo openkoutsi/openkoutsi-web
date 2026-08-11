@@ -1,0 +1,84 @@
+import { describe, expect, it } from 'vitest'
+
+import chatEn from '../../messages/en/chat.json'
+import chatFi from '../../messages/fi/chat.json'
+import commonEn from '../../messages/en/common.json'
+import commonFi from '../../messages/fi/common.json'
+
+/**
+ * Error codes `services/llm_agent.py` can put on a failed chat turn, plus the
+ * one `settle_stuck_turns` writes.
+ *
+ * Chat is the only LLM surface with nothing to degrade to, so a failure here is
+ * a sentence the athlete reads rather than an invisible fallback — and a missing
+ * translation would show a raw key at exactly the moment something has already
+ * gone wrong.
+ */
+const ERROR_CODES = [
+  'busy',
+  'tools_unsupported',
+  'no_answer',
+  'upstream',
+  'unreachable',
+  'stalled',
+  // The fallback the UI uses for any code this build predates.
+  'unavailable',
+] as const
+
+function keysOf(value: unknown, prefix = ''): string[] {
+  if (typeof value !== 'object' || value === null) return [prefix]
+  if (Array.isArray(value)) return [prefix]
+  return Object.entries(value as Record<string, unknown>).flatMap(([k, v]) =>
+    keysOf(v, prefix ? `${prefix}.${k}` : k),
+  )
+}
+
+describe('chat i18n', () => {
+  it('defines a message for every backend error code', () => {
+    for (const code of ERROR_CODES) {
+      expect(chatEn.errors, `en.errors.${code}`).toHaveProperty(code)
+      expect(chatFi.errors, `fi.errors.${code}`).toHaveProperty(code)
+    }
+  })
+
+  it('keeps the whole namespace structurally identical across locales', () => {
+    expect(keysOf(chatFi).sort()).toEqual(keysOf(chatEn).sort())
+  })
+
+  it('has a nav label in both locales', () => {
+    expect(commonEn.nav).toHaveProperty('chat')
+    expect(commonFi.nav).toHaveProperty('chat')
+  })
+
+  it('offers the same number of starter questions in both locales', () => {
+    // The empty state carries the whole burden of teaching what Koutsi will
+    // answer, since a bare text box tells the athlete nothing about where the
+    // scope boundary is. A locale short of starters teaches less.
+    expect(chatEn.empty.starters.length).toBeGreaterThanOrEqual(4)
+    expect(chatFi.empty.starters.length).toBe(chatEn.empty.starters.length)
+  })
+
+  it('states the medical boundary in both locales', () => {
+    // The one piece of copy that is a safety property rather than a nicety.
+    // It is a standing notice rather than a per-message marker precisely so it
+    // cannot degrade — but that only helps if it says the thing.
+    expect(chatEn.boundary.toLowerCase()).toContain('doctor')
+    expect(chatEn.boundary.toLowerCase()).toContain('not a clinician')
+    expect(chatFi.boundary.toLowerCase()).toContain('lääkäri')
+  })
+
+  it('explains the queued state as waiting rather than as an error', () => {
+    // `queued` has no equivalent anywhere else in the app: the turn is accepted
+    // and waiting for an agent slot. Copy that read like a failure would
+    // misrepresent a turn that is about to run perfectly well.
+    expect(chatEn.status.queued.toLowerCase()).not.toContain('error')
+    expect(chatEn.status.queued.toLowerCase()).not.toContain('failed')
+  })
+
+  it('tells the athlete a full conversation loses no context', () => {
+    // Koutsi looks its facts up fresh each turn, so starting a new conversation
+    // costs nothing but the thread. Without saying so, the cap reads as losing
+    // your coach's memory.
+    expect(chatEn.budget.conversationFullBody.toLowerCase()).toContain('looks it up')
+  })
+})

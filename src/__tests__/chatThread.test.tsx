@@ -1,0 +1,169 @@
+import { describe, expect, it, vi } from 'vitest'
+import { createElement as h } from 'react'
+import { render, screen } from '@testing-library/react'
+
+import type { ChatMessage } from '@/lib/types'
+
+// Echoing translator, matching the other component tests here. `has` reports
+// every key as present so the fallback branches are exercised separately below.
+vi.mock('next-intl', () => {
+  const t = Object.assign((key: string) => key, {
+    has: (key: string) => !key.includes('__missing__'),
+    raw: (key: string) => [key],
+  })
+  return { useTranslations: () => t }
+})
+
+vi.mock('@/navigation', () => ({
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) =>
+    h('a', { href }, children),
+}))
+
+import { ChatThread } from '@/components/chat/ChatThread'
+
+let counter = 0
+function message(partial: Partial<ChatMessage>): ChatMessage {
+  return {
+    id: `m${counter++}`,
+    role: 'assistant',
+    content: '',
+    status: 'complete',
+    created_at: '2026-08-11T09:00:00Z',
+    ...partial,
+  }
+}
+
+describe('ChatThread', () => {
+  it('shows the athlete their own question immediately', () => {
+    render(
+      h(ChatThread, {
+        messages: [message({ role: 'user', status: null, content: 'How is my form?' })],
+      }),
+    )
+    expect(screen.getByText('How is my form?')).toBeInTheDocument()
+  })
+
+  it('explains a queued turn as waiting, not as thinking', () => {
+    // Queued means no agent slot has been claimed yet, so there is no progress
+    // code and nothing is being written. Showing the generic "thinking" line
+    // here would claim work that has not started.
+    render(h(ChatThread, { messages: [message({ status: 'queued' })] }))
+    expect(screen.getByText('status.queued')).toBeInTheDocument()
+  })
+
+  it('shows the progress code once the run is gathering', () => {
+    render(
+      h(ChatThread, {
+        messages: [message({ status: 'pending', progress: 'tool.get_training_status' })],
+      }),
+    )
+    expect(
+      screen.getByText('progress.tools.get_training_status'),
+    ).toBeInTheDocument()
+  })
+
+  it('renders a finished answer as bubbles, without the MOOD line', () => {
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:stern\n\nYou missed two sessions.\n\nFix the Tuesday one.',
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('You missed two sessions.')).toBeInTheDocument()
+    expect(screen.getByText('Fix the Tuesday one.')).toBeInTheDocument()
+    expect(screen.queryByText(/MOOD:/)).not.toBeInTheDocument()
+  })
+
+  it('names what Koutsi consulted, but only once it has answered', () => {
+    const { rerender } = render(
+      h(ChatThread, {
+        messages: [
+          message({
+            status: 'pending',
+            content: 'MOOD:knowing\n\nPartial…',
+            tool_names: ['get_training_status'],
+          }),
+        ],
+      }),
+    )
+    expect(screen.queryByText(/lookedAt/)).not.toBeInTheDocument()
+
+    rerender(
+      h(ChatThread, {
+        messages: [
+          message({
+            status: 'complete',
+            content: 'MOOD:knowing\n\nDone.',
+            tool_names: ['get_training_status'],
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText(/lookedAt/)).toBeInTheDocument()
+  })
+
+  it('links to the plan when the answer consulted it', () => {
+    // Koutsi can advise but not act — write tools are deferred by #42 — so the
+    // turns that are about the plan hand the athlete somewhere to go.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ content: 'MOOD:knowing\n\nCut Thursday.', tool_names: ['get_plan_status'] }),
+        ],
+      }),
+    )
+    expect(screen.getByText('planLink')).toHaveAttribute('href', '/plan')
+  })
+
+  it('does not link to the plan when the answer was about something else', () => {
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ content: 'MOOD:knowing\n\nYour curve is fine.', tool_names: ['get_power_profile'] }),
+        ],
+      }),
+    )
+    expect(screen.queryByText('planLink')).not.toBeInTheDocument()
+  })
+
+  it('offers a retry on a failure that could go differently', () => {
+    const onRetry = vi.fn()
+    render(
+      h(ChatThread, { messages: [message({ status: 'error', error_code: 'busy' })], onRetry }),
+    )
+    expect(screen.getByText('errors.busy')).toBeInTheDocument()
+    expect(screen.getByText('retry')).toBeInTheDocument()
+  })
+
+  it('does not offer a retry when the model simply cannot do this', () => {
+    // `tools_unsupported` is a settled property of the athlete's model, so a
+    // retry would fail identically. Offering one would be a lie about the fix.
+    const onRetry = vi.fn()
+    render(
+      h(ChatThread, {
+        messages: [message({ status: 'error', error_code: 'tools_unsupported' })],
+        onRetry,
+      }),
+    )
+    expect(screen.getByText('errors.tools_unsupported')).toBeInTheDocument()
+    expect(screen.queryByText('retry')).not.toBeInTheDocument()
+  })
+
+  it('falls back to generic copy for a failure code it does not know', () => {
+    // Same contract the progress codes have: the backend can learn a new
+    // failure mode without a frontend release, and an older build must not show
+    // a raw key at the athlete.
+    render(
+      h(ChatThread, { messages: [message({ status: 'error', error_code: '__missing__' })] }),
+    )
+    expect(screen.getByText('errors.unavailable')).toBeInTheDocument()
+  })
+
+  it('marks a failed turn as an alert for assistive technology', () => {
+    render(h(ChatThread, { messages: [message({ status: 'error', error_code: 'upstream' })] }))
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+})

@@ -59,6 +59,37 @@ export function isSubscriptionRequiredDetail(
   )
 }
 
+// ── Coded API errors (issue #44) ───────────────────────────────────────────
+
+/**
+ * A `{code, message}` error detail the caller is expected to branch on.
+ *
+ * Chat needs this in a way the rest of the API does not. Every other surface
+ * has one way to fail and one sentence for it, while a refused chat turn has
+ * five quite different causes — the instance is busy, the model cannot call
+ * tools, today's budget is spent, this conversation is full, an answer is
+ * already running — and they want five different sentences, in fourteen
+ * languages. So the backend sends a machine key and the web app owns the copy;
+ * `message` is the English fallback for a code this build predates.
+ */
+export class ApiCodeError extends Error {
+  constructor(readonly code: string, message?: string, readonly status?: number) {
+    super(message || code)
+    this.name = 'ApiCodeError'
+  }
+}
+
+/** Type guard for any structured `{code, message}` detail. */
+export function isCodedDetail(
+  detail: unknown,
+): detail is { code: string; message?: string } {
+  return (
+    typeof detail === 'object' &&
+    detail !== null &&
+    typeof (detail as { code?: unknown }).code === 'string'
+  )
+}
+
 export type LlmAccessMode = 'ungated' | 'byok' | 'entitled' | 'none'
 
 export interface LlmAccess {
@@ -146,11 +177,17 @@ export async function apiFetch<T>(
   if (!res.ok) {
     let message = `HTTP ${res.status}`
     let subscriptionRequired: LlmSubscriptionRequiredError | null = null
+    let coded: ApiCodeError | null = null
     try {
       const err = await res.json()
       if (isSubscriptionRequiredDetail(err?.detail)) {
         // Issue #9: a gated instance denied an LLM feature.
         subscriptionRequired = new LlmSubscriptionRequiredError(err.detail.message)
+      } else if (isCodedDetail(err?.detail)) {
+        // Any other structured `{code, message}` refusal (issue #44). Checked
+        // after the subscription case so that keeps its own typed error and the
+        // `LlmUpsell` handling every AI surface already has.
+        coded = new ApiCodeError(err.detail.code, err.detail.message, res.status)
       } else if (typeof err.detail === 'string') {
         message = err.detail
       } else if (Array.isArray(err.detail) && err.detail.length > 0) {
@@ -165,6 +202,7 @@ export async function apiFetch<T>(
       // ignore parse errors
     }
     if (subscriptionRequired) throw subscriptionRequired
+    if (coded) throw coded
     throw new Error(message)
   }
 

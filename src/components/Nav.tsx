@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth'
 import { fetcher } from '@/lib/api'
 import type { UnreadCount } from '@/lib/types'
 import { Button } from './ui/button'
-import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, Trophy } from 'lucide-react'
+import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy } from 'lucide-react'
 import { gamificationEnabled } from '@/lib/gamification'
 import { cn } from '@/lib/utils'
 import { LocaleSwitcher } from './LocaleSwitcher'
@@ -33,6 +33,13 @@ function NavInner({ onClose }: NavInnerProps) {
 
   const navItems = [
     { href: `/dashboard`, labelKey: 'nav.dashboard' as const, icon: BarChart2 },
+    // Conversational Koutsi (issue #44). Hidden unless the agentic coach is on:
+    // chat is only worth anything when Koutsi may go and read the athlete's
+    // data, so it rides the same switch rather than offering a surface that
+    // would have to explain itself on arrival.
+    ...(athlete?.app_settings?.agentic_koutsi
+      ? [{ href: `/chat`, labelKey: 'nav.chat' as const, icon: MessagesSquare }]
+      : []),
     { href: `/activities`, labelKey: 'nav.activities' as const, icon: Activity },
     { href: `/power`, labelKey: 'nav.power' as const, icon: Zap },
     { href: `/records`, labelKey: 'nav.records' as const, icon: Timer },

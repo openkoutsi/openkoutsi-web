@@ -506,7 +506,7 @@
       "autoTrainingStatus": "Auto daily coaching feedback",
       "autoTrainingStatusDesc": "Automatically generate a daily training status overview on the dashboard after uploads and syncs. Requires an LLM configured by your team administrator.",
       "agenticKoutsi": "Let Koutsi look things up",
-      "agenticKoutsiDesc": "Instead of being handed a fixed summary, Koutsi decides what it needs and looks it up — so it can follow a thread, like checking the rides behind a form number instead of just repeating it. Slower and uses more of the AI budget, and only works with models that support tool calling; everything else falls back to the usual feedback automatically.",
+      "agenticKoutsiDesc": "Instead of being handed a fixed summary, Koutsi decides what it needs and looks it up — so it can follow a thread, like checking the rides behind a form number instead of just repeating it. This also unlocks Ask Koutsi, where you can put your own questions to it. Slower and uses more of the AI budget, and only works with models that support tool calling; the daily feedback falls back to the usual summary automatically, but chat needs it.",
       "askForRpe": "Ask me to rate effort after uploads",
       "askForRpeDesc": "After a significant cycling ride is uploaded or synced, prompt me on the dashboard to rate how hard it felt (RPE, 1–10).",
       "gamification": "Show achievements and streaks",
