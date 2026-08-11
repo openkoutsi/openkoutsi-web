@@ -29,6 +29,15 @@ const PLAN_TOOLS = new Set(['get_plan_status'])
 /** How far off the bottom counts as "reading something else, leave me alone". */
 const STICK_TO_BOTTOM_PX = 120
 
+/**
+ * Marks the element the thread scrolls inside.
+ *
+ * Exported so the page that owns the scroll container and the effect that reads
+ * it cannot drift apart — the coupling is one grep rather than an assumption
+ * about which utility class is doing the scrolling.
+ */
+export const SCROLLER_ATTR = 'data-chat-scroller'
+
 function UserTurn({ message }: { message: ChatMessage }) {
   return (
     <div className="flex justify-end">
@@ -188,7 +197,12 @@ export function ChatThread({
     // every poll while an answer streams, so scrolling up to re-read something
     // earlier would otherwise drag them back down twice a second — the page
     // fighting the reader, in a view whose entire purpose is reading.
-    const scroller = end.closest('.overflow-y-auto')
+    //
+    // Found by an explicit marker rather than by the Tailwind class that happens
+    // to make it scroll: reworking those classes would leave `closest` returning
+    // null, the guard skipped, and the fighting silently back — with nothing
+    // failing and no test noticing.
+    const scroller = end.closest(`[${SCROLLER_ATTR}]`)
     if (scroller instanceof HTMLElement) {
       const distanceFromBottom =
         scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight

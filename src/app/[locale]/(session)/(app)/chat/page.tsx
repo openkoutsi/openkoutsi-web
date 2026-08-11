@@ -5,7 +5,7 @@ import { MessagesSquare, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-
 import { useLocale, useTranslations } from 'next-intl'
 import useSWR from 'swr'
 
-import { ChatThread } from '@/components/chat/ChatThread'
+import { ChatThread, SCROLLER_ATTR } from '@/components/chat/ChatThread'
 import { Composer } from '@/components/chat/Composer'
 import { ConversationList } from '@/components/chat/ConversationList'
 import { EmptyThread } from '@/components/chat/EmptyThread'
@@ -283,7 +283,8 @@ export default function ChatPage() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        {/* The marker `ChatThread` looks for; see `SCROLLER_ATTR`. */}
+        <div className="flex-1 overflow-y-auto px-4 py-4" {...{ [SCROLLER_ATTR]: true }}>
           {messages.length === 0 ? (
             <EmptyThread onPick={send} />
           ) : (
