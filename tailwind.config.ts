@@ -10,6 +10,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      spacing: {
+        // The width of Koutsi's avatar column: `w-10` plus the `gap-3` after
+        // it. Anything meant to line up with a speech bubble rather than with
+        // the face beside it — the thread's lookup steps, the plan link, the
+        // starter questions — indents by exactly this. Tailwind's default scale
+        // skips 13, so every `pl-13` in the chat views was silently producing no
+        // padding at all until this existed.
+        13: '3.25rem',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

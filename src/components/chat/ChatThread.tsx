@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { AlertCircle, RotateCcw } from 'lucide-react'
+import { AlertCircle, RotateCcw, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { AiDisclosure } from '@/components/AiDisclosure'
@@ -10,6 +10,8 @@ import {
   KoutsiBubble,
   parseMoodAndParagraphs,
   progressText,
+  toolLabelText,
+  toolNameFromCode,
 } from '@/components/koutsi-chat'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/navigation'
@@ -65,10 +67,16 @@ function ErrorTurn({
   // transient failure, so it is the one cause a retry would repeat verbatim.
   const retryable = message.error_code !== 'tools_unsupported'
 
+  // A failure keeps the steps it got through. "It read your plan and your goals
+  // and *then* fell over" is a different event from "it never got going", and
+  // the athlete deciding whether to retry is the one who wants to know which.
+  const tools = message.tool_names ?? []
+
   return (
     <div className="flex items-start gap-3">
       <KoutsiAvatar mood="stern" />
       <div className="flex flex-col items-start gap-2">
+        {tools.length > 0 && <ToolSteps names={tools} indent={false} />}
         <p
           className="flex items-start gap-2 rounded-2xl rounded-tl-sm border border-destructive/30 bg-destructive/5 px-4 py-2.5 text-sm leading-relaxed max-w-prose"
           role="alert"
@@ -84,6 +92,49 @@ function ErrorTurn({
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * The lookups this turn has already finished, in the order it made them.
+ *
+ * Rendered *above* the answer rather than under it, because that is where they
+ * happened: the loop gathers first and writes afterwards — prose that turns out
+ * to precede a tool call is discarded as a preamble by the backend, so an answer
+ * never interleaves with its own lookups. A footer put the record of the slow
+ * part after the thing it produced, and read as an afterthought about a turn
+ * that had apparently answered instantly.
+ */
+function ToolSteps({
+  names,
+  // Off the avatar column by default, so the steps line up with the bubbles they
+  // led to rather than with the faces. A failure nests them inside that column
+  // already and passes `false`.
+  indent = true,
+}: {
+  names: string[]
+  indent?: boolean
+}) {
+  const t = useTranslations('chat')
+  const tLlm = useTranslations('common.llm')
+
+  return (
+    <ul
+      aria-label={t('stepsLabel')}
+      className={`flex flex-col gap-1 ${indent ? 'pl-13' : ''}`}
+    >
+      {names.map((name, i) => (
+        // Keyed by position as well as name: a turn may consult the same tool
+        // twice with different arguments, and those are two steps.
+        <li
+          key={`${name}-${i}`}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
+          <Search className="h-3 w-3 shrink-0" aria-hidden />
+          <span>{toolLabelText(tLlm, name)}</span>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -112,9 +163,26 @@ function AssistantTurn({
   // through the whole gathering phase and then jump to a finished answer.
   // `queued` is earlier still: no slot has been claimed, so there is not even a
   // progress code to show — just an honest sentence about the wait.
-  if (pending && paragraphs.length === 0) {
-    return (
-      <div className="flex flex-col gap-3">
+  const gathering = pending && paragraphs.length === 0
+
+  const tools = message.tool_names ?? []
+  // The lookup currently running is the live line, not a finished step: the
+  // backend appends its name the moment the call is dispatched, so the last
+  // entry duplicates what the progress code is already saying. Only while
+  // `gathering` — the code is *not* cleared when prose starts, and by then that
+  // last lookup is genuinely behind us.
+  const running = gathering ? toolNameFromCode(message.progress) : null
+  const done =
+    running !== null && tools[tools.length - 1] === running
+      ? tools.slice(0, -1)
+      : tools
+  const showPlanLink =
+    message.status === 'complete' && tools.some((name) => PLAN_TOOLS.has(name))
+
+  return (
+    <div className="flex flex-col gap-3">
+      {done.length > 0 && <ToolSteps names={done} />}
+      {gathering ? (
         <div className="flex items-start gap-3">
           <KoutsiAvatar mood="knowing" />
           <KoutsiBubble
@@ -126,38 +194,16 @@ function AssistantTurn({
             isPartial
           />
         </div>
-        <AiDisclosure />
-      </div>
-    )
-  }
-
-  const tools = message.tool_names ?? []
-  const showPlanLink =
-    message.status === 'complete' && tools.some((name) => PLAN_TOOLS.has(name))
-
-  return (
-    <div className="flex flex-col gap-3">
-      {paragraphs.map((paragraph, i) => {
-        const isLast = i === paragraphs.length - 1
-        return (
-          <div key={i} className="flex items-start gap-3">
-            <KoutsiAvatar mood={mood} />
-            <KoutsiBubble text={paragraph} isPartial={pending && isLast} />
-          </div>
-        )
-      })}
-      {tools.length > 0 && message.status === 'complete' && (
-        <p className="pl-13 text-xs text-muted-foreground">
-          {t('lookedAt', {
-            tools: tools
-              .map((name) =>
-                tLlm.has(`progress.tools.${name}`)
-                  ? tLlm(`progress.tools.${name}`)
-                  : name,
-              )
-              .join(', '),
-          })}
-        </p>
+      ) : (
+        paragraphs.map((paragraph, i) => {
+          const isLast = i === paragraphs.length - 1
+          return (
+            <div key={i} className="flex items-start gap-3">
+              <KoutsiAvatar mood={mood} />
+              <KoutsiBubble text={paragraph} isPartial={pending && isLast} />
+            </div>
+          )
+        })
       )}
       {showPlanLink && (
         <Link
