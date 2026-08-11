@@ -226,6 +226,33 @@ second turn of the budget, and send a history ending with the same question
 adjacent to itself. Only the newest turn offers the button, since that is the
 only one the page acts on.
 
+### The lookups are part of the thread
+
+A turn's tool calls are drawn as steps **above** the answer, in the order they
+were made, rather than as a "Koutsi looked at…" footer under it. That is where
+they happened: the loop gathers first and writes afterwards — the backend
+discards prose that turns out to precede a tool call, so an answer never
+interleaves with its own lookups — and a footer put the record of the slow part
+after the thing it produced, reading as an afterthought about a turn that had
+apparently answered instantly.
+
+The steps appear **as they are made**, not when the turn settles: the backend
+writes `tool_names` through on every progress marker, so a live turn shows the
+lookups already behind it with the current one still running as the usual
+progress line beneath them. The running lookup is deliberately not also drawn as
+a finished step — it is in `tool_names` from the moment it is dispatched, and the
+progress code is already describing it. Once prose starts, everything in
+`tool_names` is behind us, which matters because the backend does *not* clear the
+progress code when the answer begins.
+
+A finished step is a short label ("Your power curve"), not the present-tense
+sentence the progress line uses; both vocabularies live in `common.llm.progress.*`
+and both fall back to generic copy for a tool this build has never heard of, so
+`get_sleep_quality` is never shown to an athlete. A failed turn keeps the steps it
+got through — "it read your plan and then fell over" is a different event from "it
+never got going", and the athlete deciding whether to retry is the one who wants
+to know which.
+
 The medical boundary is a **standing notice** by the composer, not a per-message
 marker. A `BAND:` line beside `MOOD:` was the obvious design and was rejected: it
 would be one more leading-format rule, degrading on exactly the small local models

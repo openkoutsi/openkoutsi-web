@@ -32,7 +32,7 @@
     "queued": "Koutsi viimeistelee muuta — kysymyksesi on seuraavana…",
     "thinking": "Koutsi miettii…"
   },
-  "lookedAt": "Koutsi katsoi: {tools}",
+  "stepsLabel": "Mitä Koutsi katsoi",
   "planLink": "Avaa ohjelmasi",
   "retry": "Yritä uudelleen",
   "errors": {

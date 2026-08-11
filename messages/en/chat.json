@@ -32,7 +32,7 @@
     "queued": "Koutsi is finishing something else — your question is next…",
     "thinking": "Koutsi is thinking…"
   },
-  "lookedAt": "Koutsi looked at: {tools}",
+  "stepsLabel": "What Koutsi looked at",
   "planLink": "Open your plan",
   "retry": "Try again",
   "errors": {

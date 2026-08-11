@@ -4,7 +4,13 @@ import commonEn from '../../messages/en/common.json'
 import commonFi from '../../messages/fi/common.json'
 import appEn from '../../messages/en/app.json'
 import appFi from '../../messages/fi/app.json'
-import { parseMoodAndParagraphs, progressMessageKey, progressText } from '@/components/koutsi-chat'
+import {
+  parseMoodAndParagraphs,
+  progressMessageKey,
+  progressText,
+  toolLabelText,
+  toolNameFromCode,
+} from '@/components/koutsi-chat'
 
 /**
  * The agentic coach's progress line, and the MOOD contract it must not disturb
@@ -113,19 +119,68 @@ describe('progressText', () => {
   })
 })
 
+describe('toolNameFromCode', () => {
+  it('pulls the registry name out of a tool code', () => {
+    expect(toolNameFromCode('tool.get_power_profile')).toBe('get_power_profile')
+  })
+
+  it('has no name for anything that is not a tool code', () => {
+    for (const code of ['thinking', '', null, undefined, 'tool.', 'tool.<script>']) {
+      expect(toolNameFromCode(code), String(code)).toBeNull()
+    }
+  })
+})
+
+describe('toolLabelText', () => {
+  const t = translator(commonEn.llm as Record<string, unknown>)
+
+  it('names a finished lookup as a thing, not as a status', () => {
+    // The step is in the thread's record of what happened, above the answer it
+    // fed. "Koutsi is checking your power curve…" is the *live* line and reads
+    // as a lie once the lookup is behind us.
+    expect(toolLabelText(t, 'get_power_profile')).toBe(
+      commonEn.llm.progress.toolLabels.get_power_profile,
+    )
+  })
+
+  it('falls back for a tool this build has never heard of', () => {
+    // Same contract the progress codes have: the backend can publish a tenth
+    // tool without a lockstep frontend release, and the athlete must not be
+    // shown `get_sleep_quality`.
+    expect(toolLabelText(t, 'get_sleep_quality')).toBe(
+      commonEn.llm.progress.toolLabelUnknown,
+    )
+  })
+
+  it('never renders a name that did not come from the registry', () => {
+    for (const name of ['', 'ab', 'Get-Power', '../../etc/passwd', '<script>']) {
+      expect(toolLabelText(t, name), name).toBe(commonEn.llm.progress.toolLabelUnknown)
+    }
+  })
+})
+
 describe('progress strings', () => {
   it('translates every published tool in both locales', () => {
     for (const name of TOOL_CODES) {
       expect(commonEn.llm.progress.tools, `en ${name}`).toHaveProperty(name)
       expect(commonFi.llm.progress.tools, `fi ${name}`).toHaveProperty(name)
+      // The other half of the vocabulary: the live sentence *and* the label the
+      // thread shows once the lookup is a step in the record.
+      expect(commonEn.llm.progress.toolLabels, `en label ${name}`).toHaveProperty(name)
+      expect(commonFi.llm.progress.toolLabels, `fi label ${name}`).toHaveProperty(name)
     }
     expect(commonEn.llm.progress).toHaveProperty('thinking')
     expect(commonFi.llm.progress).toHaveProperty('thinking')
+    expect(commonEn.llm.progress).toHaveProperty('toolLabelUnknown')
+    expect(commonFi.llm.progress).toHaveProperty('toolLabelUnknown')
   })
 
   it('keeps the two locales structurally identical', () => {
     expect(Object.keys(commonFi.llm.progress.tools).sort()).toEqual(
       Object.keys(commonEn.llm.progress.tools).sort(),
+    )
+    expect(Object.keys(commonFi.llm.progress.toolLabels).sort()).toEqual(
+      Object.keys(commonEn.llm.progress.toolLabels).sort(),
     )
   })
 
@@ -136,6 +191,14 @@ describe('progress strings', () => {
     for (const [name, line] of Object.entries(commonEn.llm.progress.tools)) {
       expect(line, name).not.toContain('_')
       expect(line, name).toMatch(/^Koutsi is /)
+    }
+  })
+
+  it('labels a finished step without leaking the tool name', () => {
+    // Same rule as the sentences, for the same reason — these sit in the thread
+    // under the athlete's own question, not in a developer's log.
+    for (const [name, label] of Object.entries(commonEn.llm.progress.toolLabels)) {
+      expect(label, name).not.toContain('_')
     }
   })
 

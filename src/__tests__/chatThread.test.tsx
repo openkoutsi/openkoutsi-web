@@ -77,32 +77,110 @@ describe('ChatThread', () => {
     expect(screen.queryByText(/MOOD:/)).not.toBeInTheDocument()
   })
 
-  it('names what Koutsi consulted, but only once it has answered', () => {
-    const { rerender } = render(
-      h(ChatThread, {
-        messages: [
-          message({
-            status: 'pending',
-            content: 'MOOD:knowing\n\nPartial…',
-            tool_names: ['get_training_status'],
-          }),
-        ],
-      }),
-    )
-    expect(screen.queryByText(/lookedAt/)).not.toBeInTheDocument()
-
-    rerender(
+  it('shows each lookup where it happened: above the answer it fed', () => {
+    // The loop gathers and *then* writes — prose that turns out to precede a
+    // tool call is discarded by the backend as a preamble — so the lookups
+    // belong ahead of the answer. As a footer they read as an afterthought
+    // about a turn that had apparently answered instantly.
+    const { container } = render(
       h(ChatThread, {
         messages: [
           message({
             status: 'complete',
             content: 'MOOD:knowing\n\nDone.',
-            tool_names: ['get_training_status'],
+            tool_names: ['get_training_status', 'get_goal_progress'],
           }),
         ],
       }),
     )
-    expect(screen.getByText(/lookedAt/)).toBeInTheDocument()
+    const steps = screen.getByRole('list')
+    expect(steps).toHaveAccessibleName('stepsLabel')
+    expect(
+      Array.from(steps.querySelectorAll('li')).map((li) => li.textContent),
+    ).toEqual([
+      'progress.toolLabels.get_training_status',
+      'progress.toolLabels.get_goal_progress',
+    ])
+    // Ahead of the prose in the document, which is the whole point.
+    expect(
+      steps.compareDocumentPosition(screen.getByText('Done.')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(container).toBeTruthy()
+  })
+
+  it('shows the steps already taken while the next one is still running', () => {
+    // Without this the timeline is empty for the whole slow part and then three
+    // steps land at once with the answer. The running lookup is the live line,
+    // not a step: the backend appends its name as soon as it dispatches, so the
+    // last entry is the one the progress code is already describing.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            status: 'pending',
+            progress: 'tool.get_goal_progress',
+            tool_names: ['get_training_status', 'get_goal_progress'],
+          }),
+        ],
+      }),
+    )
+    expect(
+      Array.from(screen.getByRole('list').querySelectorAll('li')).map(
+        (li) => li.textContent,
+      ),
+    ).toEqual(['progress.toolLabels.get_training_status'])
+    expect(screen.getByText('progress.tools.get_goal_progress')).toBeInTheDocument()
+  })
+
+  it('counts the last lookup as done once the answer has started', () => {
+    // The backend does not clear the progress code when prose starts, so
+    // trusting it here would hide the final step for the whole of the answer.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            status: 'pending',
+            progress: 'tool.get_goal_progress',
+            content: 'MOOD:knowing\n\nPartial…',
+            tool_names: ['get_training_status', 'get_goal_progress'],
+          }),
+        ],
+      }),
+    )
+    expect(
+      Array.from(screen.getByRole('list').querySelectorAll('li')).map(
+        (li) => li.textContent,
+      ),
+    ).toEqual([
+      'progress.toolLabels.get_training_status',
+      'progress.toolLabels.get_goal_progress',
+    ])
+  })
+
+  it('keeps the steps a failed turn got through', () => {
+    // "It read your plan and then fell over" is a different event from "it never
+    // got going", and the athlete deciding whether to retry wants to know which.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ status: 'error', error_code: 'upstream', tool_names: ['get_plan_status'] }),
+        ],
+      }),
+    )
+    expect(screen.getByText('progress.toolLabels.get_plan_status')).toBeInTheDocument()
+    expect(screen.getByText('errors.upstream')).toBeInTheDocument()
+  })
+
+  it('shows no step list at all for a turn that looked nothing up', () => {
+    // "What does TSB actually mean?" is answered straight off. An empty list
+    // header would invent a gathering phase that never happened.
+    render(
+      h(ChatThread, {
+        messages: [message({ status: 'complete', content: 'MOOD:knowing\n\nIt is form.' })],
+      }),
+    )
+    expect(screen.queryByRole('list')).not.toBeInTheDocument()
   })
 
   it('links to the plan when the answer consulted it', () => {

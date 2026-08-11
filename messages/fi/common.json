@@ -65,7 +65,19 @@
         "get_training_status": "Koutsi tarkistaa, missä kunnossa olet juuri nyt…",
         "get_zone_totals": "Koutsi laskee yhteen aikaasi eri tehoalueilla…",
         "list_recent_activities": "Koutsi käy läpi viimeaikaisia harjoituksiasi…"
-      }
+      },
+      "toolLabels": {
+        "find_activity": "Kysymäsi harjoitus",
+        "get_activity_detail": "Harjoitus tarkemmin",
+        "get_goal_progress": "Tavoitteesi",
+        "get_intensity_distribution": "Kuinka kovaa olet harjoitellut",
+        "get_plan_status": "Harjoitusohjelmasi",
+        "get_power_profile": "Tehokäyräsi",
+        "get_training_status": "Kuntotilanteesi juuri nyt",
+        "get_zone_totals": "Aikasi eri tehoalueilla",
+        "list_recent_activities": "Viimeaikaiset harjoituksesi"
+      },
+      "toolLabelUnknown": "Jotain harjoitustiedoistasi"
     }
   }
 }

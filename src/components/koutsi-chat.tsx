@@ -42,12 +42,46 @@ export function progressMessageKey(code: string | null | undefined): string | nu
   if (!code) return null
   if (code === 'thinking') return 'progress.thinking'
   if (code.startsWith('tool.')) {
-    const name = code.slice('tool.'.length)
-    // The registry constrains tool names to lowercase snake_case; anything else
-    // did not come from it, so it is not something to look up or display.
-    return /^[a-z][a-z0-9_]{2,47}$/.test(name) ? `progress.tools.${name}` : null
+    const name = toolNameFromCode(code)
+    return name ? `progress.tools.${name}` : null
   }
   return null
+}
+
+/**
+ * The registry tool name inside a `tool.<name>` progress code, if it is one.
+ *
+ * The registry constrains tool names to lowercase snake_case; anything else did
+ * not come from it, so it is not something to look up or display. Returns null
+ * for `thinking`, for a cleared code, and for anything that fails that shape.
+ */
+export function toolNameFromCode(code: string | null | undefined): string | null {
+  if (!code || !code.startsWith('tool.')) return null
+  const name = code.slice('tool.'.length)
+  return /^[a-z][a-z0-9_]{2,47}$/.test(name) ? name : null
+}
+
+/**
+ * What one finished lookup is called in the thread's list of steps.
+ *
+ * A short noun phrase — "Your power curve" — rather than the sentence
+ * `progress.tools.*` holds, because a step that has already happened is a line
+ * in a record and not a status. The sentences stay where they belong: on the
+ * step currently running, and on the cards, which only ever show the live one.
+ *
+ * `t` is a `common.llm` translator. Same contract as the progress codes: a name
+ * this build does not know falls back to a generic label rather than showing the
+ * athlete `get_something_new`, so a backend that has learned a new tool does not
+ * need a frontend release to stay presentable.
+ */
+export function toolLabelText(
+  t: { (key: string): string; has: (key: string) => boolean },
+  name: string,
+): string {
+  const key = /^[a-z][a-z0-9_]{2,47}$/.test(name)
+    ? `progress.toolLabels.${name}`
+    : null
+  return key && t.has(key) ? t(key) : t('progress.toolLabelUnknown')
 }
 
 /**

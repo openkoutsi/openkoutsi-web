@@ -65,7 +65,19 @@
         "get_training_status": "Koutsi is checking how you're doing right now…",
         "get_zone_totals": "Koutsi is adding up your time in each zone…",
         "list_recent_activities": "Koutsi is looking over your recent sessions…"
-      }
+      },
+      "toolLabels": {
+        "find_activity": "A session you asked about",
+        "get_activity_detail": "That session in detail",
+        "get_goal_progress": "Your goals",
+        "get_intensity_distribution": "How hard you've been training",
+        "get_plan_status": "Your training plan",
+        "get_power_profile": "Your power curve",
+        "get_training_status": "How you're doing right now",
+        "get_zone_totals": "Your time in each zone",
+        "list_recent_activities": "Your recent sessions"
+      },
+      "toolLabelUnknown": "Something in your training data"
     }
   }
 }
