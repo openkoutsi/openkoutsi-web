@@ -11,6 +11,7 @@ import {
   Legend,
   ReferenceLine,
 } from 'recharts'
+import { useTranslations } from 'next-intl'
 import type { FitnessPoint } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -18,11 +19,10 @@ interface Props {
   data: FitnessPoint[]
   /** Projected days from /api/metrics/fitness/forecast, all dated after today. */
   forecast?: FitnessPoint[]
-  /** Label on the reference line separating measured days from modeled ones. */
-  todayLabel?: string
 }
 
-export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
+export function FitnessChart({ data, forecast }: Props) {
+  const t = useTranslations('dashboard')
   const projected = forecast ?? []
   const hasForecast = projected.length > 0
   const lastMeasured = data.length > 0 ? formatDate(data[data.length - 1].date) : null
@@ -80,14 +80,14 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
             x={lastMeasured}
             stroke="hsl(var(--muted-foreground))"
             strokeDasharray="2 2"
-            label={{ value: todayLabel, position: 'insideTopRight', fontSize: 11 }}
+            label={{ value: t('forecast.today'), position: 'insideTopRight', fontSize: 11 }}
           />
         )}
-        <Bar yAxisId="right" dataKey="daily_load" name="Load" fill="hsl(var(--muted-foreground))" radius={2} opacity={0.4} />
+        <Bar yAxisId="right" dataKey="daily_load" name={t('chart.load')} fill="hsl(var(--muted-foreground))" radius={2} opacity={0.4} />
         <Bar
           yAxisId="right"
           dataKey="projectedLoad"
-          name="Planned Load"
+          name={t('chart.plannedLoad')}
           fill="hsl(var(--muted-foreground))"
           radius={2}
           opacity={0.2}
@@ -97,7 +97,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="fitness"
-          name="Fitness"
+          name={t('metrics.fitness')}
           stroke="hsl(var(--primary))"
           dot={false}
           strokeWidth={2}
@@ -106,7 +106,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="fatigue"
-          name="Fatigue"
+          name={t('metrics.fatigue')}
           stroke="hsl(var(--destructive))"
           dot={false}
           strokeWidth={2}
@@ -115,7 +115,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="form"
-          name="Form"
+          name={t('metrics.form')}
           stroke="hsl(var(--accent-foreground))"
           dot={false}
           strokeWidth={1.5}
@@ -128,7 +128,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="fitnessProjected"
-          name="Fitness (projected)"
+          name={t('chart.fitnessProjected')}
           stroke="hsl(var(--primary))"
           dot={false}
           strokeWidth={2}
@@ -140,7 +140,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="fatigueProjected"
-          name="Fatigue (projected)"
+          name={t('chart.fatigueProjected')}
           stroke="hsl(var(--destructive))"
           dot={false}
           strokeWidth={2}
@@ -152,7 +152,7 @@ export function FitnessChart({ data, forecast, todayLabel = 'Today' }: Props) {
           yAxisId="left"
           type="monotone"
           dataKey="formProjected"
-          name="Form (projected)"
+          name={t('chart.formProjected')}
           stroke="hsl(var(--accent-foreground))"
           dot={false}
           strokeWidth={1.5}

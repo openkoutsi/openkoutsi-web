@@ -26,6 +26,13 @@
     "caption": "The dashed section projects the next {days} days from your active plans, assuming every planned session gets done. Days with no planned workout count as rest.",
     "goalOutlook": "projected form on {date}: {form}"
   },
+  "chart": {
+    "load": "Load",
+    "plannedLoad": "Planned load",
+    "fitnessProjected": "Fitness (projected)",
+    "fatigueProjected": "Fatigue (projected)",
+    "formProjected": "Form (projected)"
+  },
   "activitySummary": {
     "numActivities": "Activities",
     "activeTime": "Active time",

@@ -470,11 +470,7 @@ export default function DashboardPage() {
         <CardContent>
           {history && history.length > 0 ? (
             <>
-              <FitnessChart
-                data={history}
-                forecast={chartForecast}
-                todayLabel={t('forecast.today')}
-              />
+              <FitnessChart data={history} forecast={chartForecast} />
               {chartForecast && chartForecast.length > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   {t('forecast.caption', { days: chartForecast.length })}
