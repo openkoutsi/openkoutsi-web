@@ -24,11 +24,12 @@ import {
  * and a code we *don't* know still renders something an athlete can read.
  */
 
-// The nine tools the backend's registry publishes. A code arrives as
+// The ten tools the backend's registry publishes. A code arrives as
 // `tool.<name>`; see `backend/app/services/llm_agent.py:progress_vocabulary`.
 const TOOL_CODES = [
   'find_activity',
   'get_activity_detail',
+  'get_athlete_profile',
   'get_goal_progress',
   'get_intensity_distribution',
   'get_plan_status',

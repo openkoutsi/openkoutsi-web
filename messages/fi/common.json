@@ -58,6 +58,7 @@
       "tools": {
         "find_activity": "Koutsi etsii harjoitusta…",
         "get_activity_detail": "Koutsi perehtyy harjoitukseen tarkemmin…",
+        "get_athlete_profile": "Koutsi tarkistaa profiilisi ja harjoitusvyöhykkeesi…",
         "get_goal_progress": "Koutsi tarkistaa tavoitteesi…",
         "get_intensity_distribution": "Koutsi katsoo, miten kovaa olet harjoitellut…",
         "get_plan_status": "Koutsi tarkistaa harjoitusohjelmasi…",
@@ -69,6 +70,7 @@
       "toolLabels": {
         "find_activity": "Kysymäsi harjoitus",
         "get_activity_detail": "Harjoitus tarkemmin",
+        "get_athlete_profile": "Profiilisi ja harjoitusvyöhykkeesi",
         "get_goal_progress": "Tavoitteesi",
         "get_intensity_distribution": "Kuinka kovaa olet harjoitellut",
         "get_plan_status": "Harjoitusohjelmasi",
