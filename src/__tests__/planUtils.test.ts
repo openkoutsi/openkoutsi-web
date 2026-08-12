@@ -146,14 +146,14 @@ describe('aggregatePlannedLoadByWeek', () => {
   it('skips plans with status !== "active"', () => {
     const plan = makePlan({
       status: 'draft',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
+      workouts: [makeWorkout({ workout_type: 'easy' })],
     })
     expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
   })
 
   it('skips workouts with null target_load', () => {
     const plan = makePlan({
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: null, completed_activity_id: null }],
+      workouts: [makeWorkout({ workout_type: 'easy', target_load: null })],
     })
     expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
   })
@@ -161,7 +161,7 @@ describe('aggregatePlannedLoadByWeek', () => {
   it('maps a single workout to the correct week key', () => {
     // Plan starts 2025-01-06 (Monday). Week 1 day 1 → 2025-01-06 → weekKey '2025-01-06'
     const plan = makePlan({
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 80, completed_activity_id: null }],
+      workouts: [makeWorkout({ workout_type: 'easy', target_load: 80 })],
     })
     const map = aggregatePlannedLoadByWeek([plan])
     expect(map.get('2025-01-06')).toBe(80)
@@ -170,8 +170,8 @@ describe('aggregatePlannedLoadByWeek', () => {
   it('sums two workouts in the same week', () => {
     const plan = makePlan({
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 60, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_load: 100, completed_activity_id: null },
+        makeWorkout({ workout_type: 'easy', target_load: 60 }),
+        makeWorkout({ id: 'w2', day_of_week: 3, workout_type: 'threshold', duration_min: 90, target_load: 100 }),
       ],
     })
     const map = aggregatePlannedLoadByWeek([plan])
@@ -181,8 +181,8 @@ describe('aggregatePlannedLoadByWeek', () => {
   it('puts workouts in different weeks into separate keys', () => {
     const plan = makePlan({
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 60, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'threshold', description: null, duration_min: 90, target_load: 100, completed_activity_id: null },
+        makeWorkout({ workout_type: 'easy', target_load: 60 }),
+        makeWorkout({ id: 'w2', week_number: 2, day_of_week: 3, workout_type: 'threshold', duration_min: 90, target_load: 100 }),
       ],
     })
     const map = aggregatePlannedLoadByWeek([plan])
@@ -194,12 +194,12 @@ describe('aggregatePlannedLoadByWeek', () => {
   it('sums workouts from two active plans falling in the same week', () => {
     const plan1 = makePlan({
       id: 'p1',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
+      workouts: [makeWorkout({ day_of_week: 2, workout_type: 'easy' })],
     })
     const plan2 = makePlan({
       id: 'p2',
       start_date: '2025-01-06',
-      workouts: [{ id: 'w2', plan_id: 'p2', week_number: 1, day_of_week: 4, workout_type: 'long', description: null, duration_min: 120, target_load: 70, completed_activity_id: null }],
+      workouts: [makeWorkout({ id: 'w2', plan_id: 'p2', day_of_week: 4, workout_type: 'long', duration_min: 120, target_load: 70 })],
     })
     const map = aggregatePlannedLoadByWeek([plan1, plan2])
     expect(map.get('2025-01-06')).toBe(120) // 50 + 70
@@ -214,7 +214,7 @@ describe('groupPlannedWorkoutsByDate', () => {
   it('returns empty map when plan is not active', () => {
     const plan = makePlan({
       status: 'archived',
-      workouts: [{ id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null }],
+      workouts: [makeWorkout({ workout_type: 'easy' })],
     })
     expect(groupPlannedWorkoutsByDate(plan).size).toBe(0)
   })
@@ -223,9 +223,9 @@ describe('groupPlannedWorkoutsByDate', () => {
     const plan = makePlan({
       start_date: '2025-01-06',
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'easy', description: null, duration_min: 60, target_load: 50, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'endurance', description: null, duration_min: 90, target_load: 80, completed_activity_id: null },
-        { id: 'w3', plan_id: 'p1', week_number: 2, day_of_week: 3, workout_type: 'tempo', description: null, duration_min: 45, target_load: 40, completed_activity_id: null },
+        makeWorkout({ workout_type: 'easy' }),
+        makeWorkout({ id: 'w2', workout_type: 'endurance', duration_min: 90, target_load: 80 }),
+        makeWorkout({ id: 'w3', week_number: 2, day_of_week: 3, workout_type: 'tempo', duration_min: 45, target_load: 40 }),
       ],
     })
 
@@ -239,8 +239,8 @@ describe('groupPlannedWorkoutsByDate', () => {
     const plan = makePlan({
       start_date: '2025-01-06',
       workouts: [
-        { id: 'w1', plan_id: 'p1', week_number: 1, day_of_week: 1, workout_type: 'rest', description: null, duration_min: null, target_load: null, completed_activity_id: null },
-        { id: 'w2', plan_id: 'p1', week_number: 1, day_of_week: 2, workout_type: 'endurance', description: null, duration_min: 90, target_load: 80, completed_activity_id: null },
+        makeWorkout({ workout_type: 'rest', duration_min: null, target_load: null }),
+        makeWorkout({ id: 'w2', day_of_week: 2, workout_type: 'endurance', duration_min: 90, target_load: 80 }),
       ],
     })
 

@@ -24,6 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install --prefer-offline
 
+      # Covers the test files too, which nothing else does: Vitest transpiles
+      # without typechecking, and `next build` only walks the app graph.
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Run tests
         run: npm run test:coverage
         env:

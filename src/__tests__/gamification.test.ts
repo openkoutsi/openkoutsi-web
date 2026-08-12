@@ -21,6 +21,10 @@ const definition: AchievementDefinition = {
   tiers: [1, 10, 50],
   unit: 'count',
   requires: null,
+  // Not a streak: the tiers count activities outright, with no per-period bar
+  // to clear.
+  threshold: null,
+  threshold_unit: null,
 }
 
 function unlock(id: string, tier: number, achievedOn = '2026-01-01'): AchievementUnlock {
