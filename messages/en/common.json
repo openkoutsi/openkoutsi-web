@@ -58,6 +58,7 @@
       "tools": {
         "find_activity": "Koutsi is looking up a session…",
         "get_activity_detail": "Koutsi is going through that session in detail…",
+        "get_athlete_profile": "Koutsi is checking your profile and training zones…",
         "get_goal_progress": "Koutsi is checking your goals…",
         "get_intensity_distribution": "Koutsi is looking at how hard you've been training…",
         "get_plan_status": "Koutsi is checking your training plan…",
@@ -69,6 +70,7 @@
       "toolLabels": {
         "find_activity": "A session you asked about",
         "get_activity_detail": "That session in detail",
+        "get_athlete_profile": "Your profile and training zones",
         "get_goal_progress": "Your goals",
         "get_intensity_distribution": "How hard you've been training",
         "get_plan_status": "Your training plan",
