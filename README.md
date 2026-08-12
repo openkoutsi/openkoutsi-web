@@ -266,6 +266,7 @@ npm run dev            # start the dev server
 npm run build          # production build (standalone output)
 npm run start          # run the production build
 npm run lint           # eslint
+npm run typecheck      # tsc --noEmit, app and tests (CI runs this too)
 npx vitest run         # run tests once
 npm run test:coverage  # run tests with coverage
 ```
