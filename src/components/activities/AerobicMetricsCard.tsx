@@ -8,6 +8,7 @@ import {
   formatVariabilityIndex,
   formatWPrime,
 } from '@/lib/utils'
+import { isCommute, isCyclingSport } from '@/lib/sports'
 import { ActivityDetail } from '@/lib/types'
 
 /**
@@ -22,6 +23,14 @@ import { ActivityDetail } from '@/lib/types'
 export function AerobicMetricsCard({ activity }: { activity: ActivityDetail }) {
   const t = useTranslations('activities')
 
+  // Every figure here is a cycling power/HR reading, and every hint is written
+  // about a ride. On a run or a gym session the card would either be empty or,
+  // worse, dress up a number computed from data the metrics were never defined
+  // against. Commutes are cycling, but they are transport: stops, traffic and a
+  // rucksack make efficiency factor and decoupling describe the journey rather
+  // than the athlete, so the card stays off there too.
+  const applies = isCyclingSport(activity.sport_type) && !isCommute(activity)
+
   const hasDecoupling = activity.decoupling_pct != null
   // The backend sends a reason code whenever it withheld a figure; fall back to
   // the generic line if it ever sends one this build doesn't know about.
@@ -31,6 +40,10 @@ export function AerobicMetricsCard({ activity }: { activity: ActivityDetail }) {
     reasonKey && t.has(reasonPath)
       ? t(reasonPath)
       : t('detail.aerobic.decouplingReasons.unknown')
+
+  if (!applies) {
+    return null
+  }
 
   // Nothing to say at all — no power and no heart rate.
   if (
