@@ -19,12 +19,12 @@ import {
 } from '@/lib/customFunctions'
 import { CustomFunctionDialog } from '@/components/activities/CustomFunctionDialog'
 import { OverlayStream } from '@/components/charts/CombinedStreamChart'
-import type { AthleteProfile } from '@/lib/types'
+import type { AthleteProfile, StreamMap } from '@/lib/types'
 
 const OVERLAY_COLORS = ['#06b6d4', '#ec4899', '#84cc16', '#f97316', '#8b5cf6']
 
 interface Props {
-  streams: Record<string, number[]>
+  streams: StreamMap
   activityId: string
   athlete: AthleteProfile | null
   overlayStreams: OverlayStream[]

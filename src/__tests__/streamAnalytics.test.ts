@@ -74,3 +74,54 @@ describe('rollingAverage', () => {
     expect(result).toEqual([1, 2, 3])
   })
 })
+
+// ── gaps ────────────────────────────────────────────────────────────────────
+//
+// Streams carry `null` where a sensor recorded nothing. A gap is not a zero:
+// reading one as zero lets a dropped strap or a dead power meter lower every
+// figure on the panel, which looks to the athlete like a bad ride rather than a
+// bad sensor. See `openkoutsi/streams.py` for the backend half of the contract.
+
+describe('gaps are not zeros', () => {
+  it('totalEnergyKj skips gaps instead of adding zero joules', () => {
+    // 200 W for 10 recorded seconds, whatever else the stream spans.
+    expect(totalEnergyKj({ power: [...new Array(10).fill(200), null, null] })).toBe(2)
+  })
+
+  it('totalEnergyKj returns null when the whole stream is gaps', () => {
+    expect(totalEnergyKj({ power: [null, null, null] })).toBeNull()
+  })
+
+  it('weightedPower is unchanged by a dropout', () => {
+    const steady = new Array(300).fill(250)
+    const gappy = [...steady.slice(0, 150), ...new Array(60).fill(null), ...steady.slice(150)]
+    expect(weightedPower({ power: gappy })).toBe(weightedPower({ power: steady }))
+  })
+
+  it('weightedPower needs 30 recorded seconds, not 30 slots', () => {
+    const mostlyGaps = [...new Array(20).fill(250), ...new Array(50).fill(null)]
+    expect(weightedPower({ power: mostlyGaps })).toBeNull()
+  })
+
+  it('rollingAverage keeps each sample on its own second', () => {
+    // The chart draws this against the clock, so the output must stay
+    // index-for-index with the input rather than closing the gap up.
+    const result = rollingAverage([2, 2, null, 2, 2], 3)
+    expect(result).toHaveLength(5)
+  })
+
+  it('rollingAverage averages the samples a window does have', () => {
+    // Window [2, null, 2] is 2, not 4/3 — the gap is not a sample worth zero.
+    const result = rollingAverage([2, null, 2, 2, 2], 3)
+    expect(result[2]).toBe(2)
+  })
+
+  it('rollingAverage reports NaN for a window with nothing in it', () => {
+    const result = rollingAverage([null, null, null, 2, 2], 3)
+    expect(isNaN(result[2])).toBe(true)
+  })
+
+  it('rollingAverage passes gaps through as NaN when the window is disabled', () => {
+    expect(rollingAverage([1, null, 3], 0).map(isNaN)).toEqual([false, true, false])
+  })
+})

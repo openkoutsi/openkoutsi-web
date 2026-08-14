@@ -293,8 +293,25 @@ export interface Interval {
   is_auto_split: boolean
 }
 
+/**
+ * A per-second sample, or `null` where the sensor recorded nothing.
+ *
+ * Streams are 1 Hz series on one shared clock: index `i` is second `i` of the
+ * activity, in every channel. A `null` is a gap — a strap dropout, or a stretch
+ * the device didn't record at all — and is **not** a zero. Reading one as zero
+ * draws a plunge to 0 W where the athlete was riding normally, and quietly
+ * lowers anything that averages over the stream.
+ *
+ * Activities processed before the backend put streams on this clock carry dense
+ * arrays with no nulls; they move onto it when reprocessed. Both shapes have to
+ * render, so treat a null as "no value here" rather than branching on the ride.
+ */
+export type StreamSample = number | null
+
+export type StreamMap = Record<string, StreamSample[]>
+
 export interface ActivityDetail extends Activity {
-  streams: Record<string, number[]>
+  streams: StreamMap
   power_bests: Record<number, number>
   distance_bests: Record<number, number>
   power_pr_badges: Record<number, Record<string, string>>

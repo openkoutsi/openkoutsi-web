@@ -16,23 +16,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/components/ui/use-toast'
 import { apiFetch } from '@/lib/api'
 import { CustomFunction, executeCustomFunction, getCustomFunctions } from '@/lib/customFunctions'
-import type { AthleteProfile } from '@/lib/types'
+import type { AthleteProfile, StreamMap } from '@/lib/types'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   existing?: CustomFunction
-  streams?: Record<string, number[]>
+  streams?: StreamMap
   athlete: AthleteProfile | null
   onSaved: (fn: CustomFunction) => void
 }
 
-const SCALAR_PLACEHOLDER = `// Available: streams (Record<string, number[]>), info ({duration_s, ftp, weight_kg})
+const SCALAR_PLACEHOLDER = `// Available: streams (Record<string, (number|null)[]>), info ({duration_s, ftp, weight_kg})
+// A null is a gap — a second the sensor recorded nothing. It is not a zero.
 // Return a number or string.
 const power = streams.power || [];
 return power.reduce((sum, p) => sum + p, 0) / 1000; // total kJ`
 
-const STREAM_PLACEHOLDER = `// Available: streams (Record<string, number[]>), info ({duration_s, ftp, weight_kg})
+const STREAM_PLACEHOLDER = `// Available: streams (Record<string, (number|null)[]>), info ({duration_s, ftp, weight_kg})
+// A null is a gap — a second the sensor recorded nothing. It is not a zero.
 // Return an array of numbers with the same length as the input stream.
 const power = streams.power || [];
 const window = 30;
