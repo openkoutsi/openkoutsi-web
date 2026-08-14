@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { formatChartTime, niceTickStepMinutes } from '@/lib/utils'
 import { downsample } from '@/lib/chartUtils'
-import { Interval } from '@/lib/types'
+import { Interval, StreamMap } from '@/lib/types'
 
 type StreamKey = 'power' | 'heartrate' | 'speed' | 'altitude' | 'cadence' | 'torque' | 'w_bal'
 
@@ -113,7 +113,7 @@ export interface OverlayStream {
 }
 
 interface Props {
-  streams: Record<string, number[]>
+  streams: StreamMap
   intervals?: Interval[]
   overlayStreams?: OverlayStream[]
   height?: number | '100%'
@@ -166,13 +166,16 @@ export function CombinedStreamChart({
     )
 
     const data = indices.map((i) => {
-      const point: Record<string, number> = { time: timeRaw[i] / 60 }
+      const point: Record<string, number> = { time: (timeRaw[i] ?? i) / 60 }
       for (const k of STREAM_KEYS) {
-        const raw = streams[k]
-        if (raw?.[i] !== undefined) {
-          const cfg = STREAM_CONFIG[k]
-          point[k] = cfg.transform ? cfg.transform(raw[i]) : raw[i]
-        }
+        const v = streams[k]?.[i]
+        // A gap leaves the key off the point entirely, so Recharts breaks the
+        // line there. Assigning it would be worse than useless: `transform` maps
+        // a null straight to 0, drawing a plunge to zero across a stretch the
+        // sensor simply didn't cover.
+        if (v === null || v === undefined) continue
+        const cfg = STREAM_CONFIG[k]
+        point[k] = cfg.transform ? cfg.transform(v) : v
       }
       for (const ov of overlayStreams) {
         const v = ov.data[i]

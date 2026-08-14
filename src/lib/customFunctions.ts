@@ -1,3 +1,5 @@
+import type { StreamMap } from './types'
+
 export interface CustomFunction {
   id: string
   name: string
@@ -22,7 +24,7 @@ export interface ExecutionResult {
 
 export function executeCustomFunction(
   fn: CustomFunction,
-  streams: Record<string, number[]>,
+  streams: StreamMap,
   info: StreamFunctionInfo,
 ): ExecutionResult {
   try {

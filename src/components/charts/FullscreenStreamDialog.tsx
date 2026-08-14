@@ -13,7 +13,7 @@ import {
   Brush,
 } from 'recharts'
 import { fetcher } from '@/lib/api'
-import { Interval } from '@/lib/types'
+import { Interval, StreamMap } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,12 +27,12 @@ import { downsample } from '@/lib/chartUtils'
 import { formatChartTime } from '@/lib/utils'
 
 interface ActivityStreamsResponse {
-  streams: Record<string, number[]>
+  streams: StreamMap
 }
 
 interface Props {
   activityId: string
-  streams: Record<string, number[]>
+  streams: StreamMap
   intervals?: Interval[]
   overlayStreams?: OverlayStream[]
 }
@@ -41,15 +41,15 @@ const OVERVIEW_POINTS = 1000
 
 /** Slice raw streams to [startFrac, endFrac] of the total length. */
 function sliceStreams(
-  raw: Record<string, number[]>,
+  raw: StreamMap,
   startFrac: number,
   endFrac: number,
-): Record<string, number[]> {
+): StreamMap {
   const refLen = Object.values(raw).find((arr) => Array.isArray(arr) && arr.length > 0)?.length ?? 0
   if (!refLen) return raw
   const start = Math.floor(startFrac * refLen)
   const end = Math.ceil(endFrac * refLen)
-  const sliced: Record<string, number[]> = {}
+  const sliced: StreamMap = {}
   for (const [key, arr] of Object.entries(raw)) {
     if (Array.isArray(arr)) sliced[key] = arr.slice(start, end)
   }
@@ -81,7 +81,10 @@ export function FullscreenStreamDialog({ activityId, streams, intervals, overlay
       Array.from({ length: contextArr.length }, (_, i) => i),
       OVERVIEW_POINTS,
     )
-    return indices.map((i) => ({ t: timeRaw[i] / 60, v: contextArr[i] ?? 0 }))
+    // `null`, not 0, where the context series has a gap: this is the overview
+    // strip the athlete brushes over, and an altitude trace diving to sea level
+    // across a device pause reads as a descent that never happened.
+    return indices.map((i) => ({ t: (timeRaw[i] ?? i) / 60, v: contextArr[i] ?? null }))
   }, [rawStreams, streams])
 
   // Zoomed streams: slice raw data to the brush range, then pass to chart (which downsamples to 1000)
@@ -118,7 +121,7 @@ export function FullscreenStreamDialog({ activityId, streams, intervals, overlay
         Object.values(src).find((a) => Array.isArray(a) && a.length > 0)?.length ?? 0
       if (!refLen) return
       const timeRaw = src['time'] ?? Array.from({ length: refLen }, (_, i) => i)
-      const totalDurationMin = timeRaw[timeRaw.length - 1] / 60
+      const totalDurationMin = (timeRaw[timeRaw.length - 1] ?? refLen - 1) / 60
 
       // Convert chart minutes (relative to current slice) to absolute fractions
       const sliceStart = brushRange[0]
