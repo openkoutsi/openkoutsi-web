@@ -64,6 +64,7 @@ export default function ActivityDetailPage({ params }: Props) {
   const t = useTranslations('activities')
   const tCommon = useTranslations('common')
   const tLlm = useTranslations('common.llm')
+  const tImport = useTranslations('activities.import')
   const locale = useLocale()
   const { id } = use(params)
   const router = useRouter()
@@ -202,7 +203,11 @@ export default function ActivityDetailPage({ params }: Props) {
   async function handleDownloadFit() {
     try {
       const name = activity?.name ?? id
-      await apiDownload(`/api/activities/${id}/fit`, `${name}.fit`)
+      // The stored original is whatever was uploaded — a FIT, a GPX or a TCX
+      // (issue #36) — so the suggested filename follows the format the API
+      // reports rather than claiming everything is a FIT.
+      const format = activity?.original_format ?? 'fit'
+      await apiDownload(`/api/activities/${id}/fit`, `${name}.${format}`)
     } catch (err) {
       toast({
         title: t('detail.downloadFailed'),
@@ -336,7 +341,14 @@ export default function ActivityDetailPage({ params }: Props) {
             </Button>
           )}
           {activity.has_fit_file && (
-            <Button variant="outline" size="icon" onClick={handleDownloadFit} title={t('detail.downloadFit')}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleDownloadFit}
+              title={t('detail.downloadOriginal', {
+                format: (activity.original_format ?? 'fit').toUpperCase(),
+              })}
+            >
               <Download className="h-4 w-4" />
             </Button>
           )}
@@ -378,6 +390,13 @@ export default function ActivityDetailPage({ params }: Props) {
           </Card>
         ))}
       </div>
+
+      {/* A GPX carries no power, so a ride imported from one shows dashes in
+          three of the tiles above. Saying why beats letting it read as a
+          broken import (issue #36). */}
+      {activity.original_format === 'gpx' && activity.avg_power == null && (
+        <p className="text-sm text-muted-foreground">{tImport('noPowerNote')}</p>
+      )}
 
       {/* Aerobic response metrics */}
       <AerobicMetricsCard activity={activity} />

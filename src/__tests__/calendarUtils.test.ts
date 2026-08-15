@@ -37,6 +37,7 @@ function makeActivity(id: string, start_time: string): Activity {
     notes: null,
     rpe: null,
     has_fit_file: false,
+    original_format: null,
     status: 'done',
     created_at: start_time,
   }

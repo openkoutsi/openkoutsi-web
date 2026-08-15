@@ -78,6 +78,12 @@ export default function ActivitiesPage() {
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 1
 
+  // "No activities at all", not "no activities matching this filter" — the
+  // first-run import prompt is for someone who has never uploaded anything.
+  const hasFilters =
+    filtersToParams(filters, 1).toString() !== filtersToParams(EMPTY_FILTERS, 1).toString()
+  const hasNoActivities = !isLoading && data?.total === 0 && !hasFilters
+
   const handleFiltersChange = useCallback((next: ActivityFilters) => {
     setFilters(next)
     setPage(1)
@@ -104,7 +110,15 @@ export default function ActivitiesPage() {
         <ManualActivityForm onCreated={() => { mutate(); setRpeSignal((n) => n + 1) }} />
       </div>
 
-      <UploadDropzone onUploaded={() => { mutate(); setRpeSignal((n) => n + 1) }} />
+      {/* An athlete with nothing here yet is being asked the hardest question
+          of adopting openkoutsi — how do I get my history in? — so that is the
+          moment to answer it, rather than leaving a dashed box to imply it
+          (issue #36). Keyed off the unfiltered total so a filter that matches
+          nothing does not turn the page back into onboarding. */}
+      <UploadDropzone
+        variant={hasNoActivities ? 'firstRun' : 'compact'}
+        onUploaded={() => { mutate(); setRpeSignal((n) => n + 1) }}
+      />
 
       <RpePrompt reloadSignal={rpeSignal} />
 

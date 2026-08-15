@@ -25,6 +25,37 @@ frontend talks to it purely over HTTP (`/api/*`) — the only coupling is config
 | i18n | next-intl (English + Finnish) |
 | Tests | Vitest · Testing Library |
 
+## Importing a training history
+
+Two upload paths, chosen by `src/lib/imports.ts` from what was dropped rather
+than by a mode the athlete has to pick first:
+
+- **A couple of plain `.fit` files** go straight to `POST /api/activities/upload`,
+  which returns the created activity, shows it immediately, and is the only path
+  that attaches a device file to an already-synced ride so it gains its laps.
+- **Anything else** — a `.gpx`, a `.tcx`, a gzipped file, a `.zip`, or more than
+  `DIRECT_UPLOAD_MAX_FILES` files at once — becomes a background job via
+  `POST /api/activities/import`. `ImportProgress` polls
+  `GET /api/activities/imports/{id}` until it settles, then shows the per-file
+  outcome list: which files were skipped as duplicates, which failed, and the
+  reason the backend gave for each. Successes are collapsed behind a toggle,
+  because nine hundred lines saying "imported" bury the fifty that need a look.
+
+The split exists because the upload endpoint is rate limited to 30/hour, which
+is what made importing a history one file at a time impossible in the first
+place; a drop big enough to be a backlog should not be spending that budget.
+
+An athlete whose activity list is empty gets the dropzone in its `firstRun`
+form, which says what a Strava bulk export is and that the whole zip can be
+dropped in unopened. Getting a history across is the hardest part of adopting
+openkoutsi, so that is the moment to answer it rather than leave a dashed box to
+imply it.
+
+Activities carry `original_format` (`fit` / `gpx` / `tcx`), which the detail page
+uses to name the download and to explain that a GPX-sourced ride has no power
+data because the file never had any — rather than letting three empty tiles read
+as a failed import.
+
 ## Data freshness
 
 Screens that show live data poll with SWR's `refreshInterval`, but a timer alone

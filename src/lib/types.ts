@@ -247,8 +247,54 @@ export interface Activity {
   notes: string | null
   rpe: number | null
   has_fit_file: boolean
+  // Which format the stored original is in (issue #36). `has_fit_file` still
+  // means "there is an original to download"; this says what the download will
+  // be, and it is what tells the UI that a ride with no power data came from a
+  // GPX rather than from a broken import. Null when there is no file.
+  original_format: ActivityFileFormat | null
   status: string
   created_at: string
+}
+
+/** Formats openkoutsi can ingest and store an original of (issue #36). */
+export type ActivityFileFormat = 'fit' | 'gpx' | 'tcx'
+
+/** What became of one file in a bulk import. */
+export type ImportOutcome = 'imported' | 'skipped_duplicate' | 'failed'
+
+export interface ImportFileResult {
+  filename: string
+  outcome: ImportOutcome
+  /** Prose from the backend explaining a skip or a failure. */
+  reason: string | null
+  activity_id: string | null
+  format: ActivityFileFormat | null
+}
+
+export interface ImportJob {
+  id: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  source_name: string | null
+  /** 0 until the archives have been walked — see `processed`. */
+  total_files: number
+  imported: number
+  skipped_duplicate: number
+  failed: number
+  processed: number
+  /** Why the *job* died, as opposed to why one file did. */
+  error: string | null
+  created_at: string
+  updated_at: string | null
+  completed_at: string | null
+  results: ImportFileResult[]
+}
+
+/** The list view, which omits per-file detail — it can be thousands of rows. */
+export type ImportJobSummary = Omit<ImportJob, 'results'>
+
+export interface PaginatedImports {
+  items: ImportJobSummary[]
+  total: number
 }
 
 export interface ManualActivityCreate {

@@ -1,6 +1,6 @@
 {
   "title": "Activities",
-  "noActivities": "No activities yet. Upload a .fit file above.",
+  "noActivities": "No activities yet.",
   "loading": "Loading…",
   "search": {
     "placeholder": "Search activities…",
@@ -28,12 +28,12 @@
     "clearAll": "Clear all"
   },
   "upload": {
-    "drop": "Drop .fit files here, or click to browse",
+    "drop": "Drop activity files or an export archive here, or click to browse",
     "uploading": "Uploading…",
     "invalidFile": "Invalid file",
-    "invalidFileDesc": "Only .fit files are supported",
+    "invalidFileDesc": "Supported: .fit, .gpx, .tcx, and .zip or .gz archives of them",
     "someSkipped": "Some files skipped",
-    "someSkippedDesc": "Only .fit files are supported",
+    "someSkippedDesc": "Supported: .fit, .gpx, .tcx, and .zip or .gz archives of them",
     "uploaded": "Uploaded",
     "uploadedMultiple": "Uploaded {count} files",
     "processing": "{name} is being processed",
@@ -81,6 +81,7 @@
     "notFound": "Activity not found",
     "clickToRename": "Click to rename",
     "downloadFit": "Download FIT file",
+    "downloadOriginal": "Download original ({format})",
     "reprocessIntervals": "Refresh intervals",
     "reprocessFailed": "Failed to refresh intervals",
     "renameFailed": "Rename failed",
@@ -221,5 +222,29 @@
       "analysisFailed": "Analysis failed",
       "analysisFailedToStart": "Analysis failed to start"
     }
+  },
+  "import": {
+    "title": "Import",
+    "firstRunTitle": "Bring your training history with you",
+    "firstRunBody": "Drop in a Strava bulk export — the whole zip, no need to unpack it — or any pile of activity files. They are imported in the background, and you can carry on using openkoutsi while it runs.",
+    "chooseFiles": "Choose files or an archive",
+    "formats": "FIT, GPX and TCX — gzipped or in a .zip",
+    "starting": "Starting…",
+    "startFailed": "Could not start the import",
+    "reading": "Reading the archive…",
+    "progress": "{processed} of {total} files",
+    "summary": "{imported} imported · {skipped} already here · {failed} failed",
+    "jobFailed": "The import stopped before it finished",
+    "allImported": "All {count} files imported",
+    "needsAttention": "{count} files need a look",
+    "showAll": "Show the {count} imported files too",
+    "showOnlyNotable": "Show only what needs a look",
+    "dismiss": "Dismiss",
+    "outcome": {
+      "imported": "Imported",
+      "skipped_duplicate": "Already here",
+      "failed": "Failed"
+    },
+    "noPowerNote": "This activity came from a GPX file, which records no power. Its Load is derived from heart rate instead."
   }
 }

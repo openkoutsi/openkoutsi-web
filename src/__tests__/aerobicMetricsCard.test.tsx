@@ -43,6 +43,7 @@ function activity(overrides: Partial<ActivityDetail> = {}): ActivityDetail {
     notes: null,
     rpe: null,
     has_fit_file: true,
+    original_format: null,
     status: 'processed',
     created_at: '2026-08-01T08:00:00Z',
     streams: {},
