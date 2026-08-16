@@ -66,6 +66,7 @@ function ride(id: string, name = `Ride ${id}`): Activity {
     notes: null,
     rpe: null,
     has_fit_file: true,
+    original_format: null,
     status: 'processed',
     created_at: `2026-08-01T07:00:00Z`,
   }

@@ -1,6 +1,6 @@
 {
   "title": "Harjoitukset",
-  "noActivities": "Ei harjoituksia vielä. Lataa .fit-tiedosto yllä.",
+  "noActivities": "Ei harjoituksia vielä.",
   "loading": "Ladataan…",
   "search": {
     "placeholder": "Hae harjoituksia…",
@@ -28,12 +28,12 @@
     "clearAll": "Tyhjennä kaikki"
   },
   "upload": {
-    "drop": "Pudota .fit-tiedostot tähän tai napsauta selataksesi",
+    "drop": "Pudota harjoitustiedostoja tai vientiarkisto tähän tai napsauta selataksesi",
     "uploading": "Ladataan…",
     "invalidFile": "Virheellinen tiedosto",
-    "invalidFileDesc": "Vain .fit-tiedostot ovat tuettuja",
+    "invalidFileDesc": "Tuetut: .fit, .gpx, .tcx sekä niitä sisältävät .zip- ja .gz-arkistot",
     "someSkipped": "Joitain tiedostoja ohitettu",
-    "someSkippedDesc": "Vain .fit-tiedostot ovat tuettuja",
+    "someSkippedDesc": "Tuetut: .fit, .gpx, .tcx sekä niitä sisältävät .zip- ja .gz-arkistot",
     "uploaded": "Ladattu",
     "uploadedMultiple": "Ladattu {count} tiedostoa",
     "processing": "{name} käsitellään",
@@ -81,6 +81,7 @@
     "notFound": "Harjoitusta ei löydy",
     "clickToRename": "Napsauta nimetäksesi uudelleen",
     "downloadFit": "Lataa FIT-tiedosto",
+    "downloadOriginal": "Lataa alkuperäinen ({format})",
     "reprocessIntervals": "Päivitä intervallit",
     "reprocessFailed": "Intervallien päivitys epäonnistui",
     "renameFailed": "Uudelleennimeäminen epäonnistui",
@@ -221,5 +222,29 @@
       "analysisFailed": "Analyysi epäonnistui",
       "analysisFailedToStart": "Analyysin käynnistys epäonnistui"
     }
+  },
+  "import": {
+    "title": "Tuonti",
+    "firstRunTitle": "Tuo harjoitushistoriasi mukanasi",
+    "firstRunBody": "Pudota tähän Stravan joukkovienti — koko zip-tiedosto, sitä ei tarvitse purkaa — tai mikä tahansa määrä harjoitustiedostoja. Tuonti tapahtuu taustalla, ja voit käyttää openkoutsia sen aikana.",
+    "chooseFiles": "Valitse tiedostot tai arkisto",
+    "formats": "FIT, GPX ja TCX — gzip-pakattuna tai .zip-arkistossa",
+    "starting": "Aloitetaan…",
+    "startFailed": "Tuontia ei voitu aloittaa",
+    "reading": "Luetaan arkistoa…",
+    "progress": "{processed}/{total} tiedostoa",
+    "summary": "{imported} tuotu · {skipped} jo täällä · {failed} epäonnistui",
+    "jobFailed": "Tuonti keskeytyi ennen valmistumista",
+    "allImported": "Kaikki {count} tiedostoa tuotiin",
+    "needsAttention": "{count} tiedostoa vaatii huomiota",
+    "showAll": "Näytä myös {count} tuotua tiedostoa",
+    "showOnlyNotable": "Näytä vain huomiota vaativat",
+    "dismiss": "Sulje",
+    "outcome": {
+      "imported": "Tuotu",
+      "skipped_duplicate": "Jo täällä",
+      "failed": "Epäonnistui"
+    },
+    "noPowerNote": "Tämä harjoitus tuotiin GPX-tiedostosta, joka ei tallenna tehoa. Kuormitus on laskettu sykkeestä."
   }
 }
