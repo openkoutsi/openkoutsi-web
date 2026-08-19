@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { SendHorizontal } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { AiDisclosure } from '@/components/AiDisclosure'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { CoachBoundaryNotice } from './CoachBoundaryNotice'
@@ -83,7 +84,21 @@ export function Composer({
       </div>
 
       <div className="flex items-start justify-between gap-4">
-        <CoachBoundaryNotice className="flex-1" />
+        {/*
+         * Both standing notices, stacked. `min-w-0` so their copy wraps rather
+         * than squeezing the counter on the right off the row.
+         */}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {/*
+           * Withheld until there is a turn to label: the copy is written about
+           * text that exists ("Written by a large language model…"), and an
+           * empty thread has none. It appears as soon as the first question is
+           * sent, the same as on the other surfaces, which show it while the
+           * answer is still being written.
+           */}
+          {!isFirstMessage && <AiDisclosure />}
+          <CoachBoundaryNotice />
+        </div>
         <div className="shrink-0 text-xs text-muted-foreground text-right">
           {tooLong && (
             <p className="text-destructive">

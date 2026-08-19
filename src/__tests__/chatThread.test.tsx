@@ -280,4 +280,24 @@ describe('ChatThread', () => {
     )
     expect(screen.getByText('retry')).toBeInTheDocument()
   })
+
+  it('leaves the AI disclosure to the composer instead of repeating it', () => {
+    // Issue #41 labels Koutsi's prose wherever it is shown, and on the
+    // single-block surfaces that is one footnote under one answer. A thread is
+    // many blocks: the same sentence under every turn stops being read by the
+    // third one, so it stands once by the composer. Nothing else in the thread
+    // is a `note` — the lookups are a labelled list and a failure is an alert —
+    // so an empty count is the exact assertion.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ role: 'user', status: null, content: 'How is my form?' }),
+          message({ status: 'complete', content: 'MOOD:knowing\n\nSharp.' }),
+          message({ role: 'user', status: null, content: 'And next week?' }),
+          message({ status: 'complete', content: 'MOOD:stern\n\nEasier.' }),
+        ],
+      }),
+    )
+    expect(screen.queryAllByRole('note')).toHaveLength(0)
+  })
 })
