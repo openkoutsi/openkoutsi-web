@@ -1,0 +1,107 @@
+{
+  "title": "Courses",
+  "subtitle": "Upload a course you are going to ride and get a segment table and a pacing plan.",
+  "stillAir": "Every speed and split assumes still air and dry pavement. A headwind will move them, and a group will beat these numbers on the flat.",
+  "list": {
+    "add": "Add a course",
+    "cancelAdd": "Cancel",
+    "open": "Open",
+    "hide": "Hide",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleteTitle": "Delete this course?",
+    "deleteBody": "\"{name}\", its analysis and the file you uploaded will be removed. This cannot be undone.",
+    "deleted": "\"{name}\" deleted",
+    "deleteFailed": "Could not delete the course",
+    "targetMissed": "Target not reachable"
+  },
+  "upload": {
+    "drop": "Drop a GPX course here, or click to choose one",
+    "firstRunTitle": "Plan a course before you ride it",
+    "firstRunBody": "Drop in the GPX of an event or a route you are about to ride. openkoutsi splits it into segments, works out what power to hold and how long each one takes at your own FTP and weight, and can write you a pacing plan.",
+    "invalidFile": "That is not a GPX file",
+    "invalidFileDesc": "A course is a route, so openkoutsi needs a .gpx file.",
+    "name": "Name",
+    "namePlaceholder": "Taken from the file if you leave this empty",
+    "bike": "Bike",
+    "targetTime": "Target time",
+    "targetTimePlaceholder": "4:30:00",
+    "targetTimeHelp": "Optional, as h:mm:ss or h:mm. Leave empty for a steady, sustainable effort.",
+    "badTargetTime": "That is not a time",
+    "badTargetTimeDesc": "Write the target as h:mm:ss or h:mm — for example 4:30:00.",
+    "goal": "Goal",
+    "noGoal": "Not linked to a goal",
+    "startDate": "Start date",
+    "startTime": "Start time",
+    "analyse": "Analyse course",
+    "analysing": "Analysing…",
+    "cancel": "Cancel",
+    "failed": "Could not analyse this course",
+    "needBikeTitle": "Add a bike first",
+    "needBikeBody": "The pacing physics needs to know your tyre width and riding position, so add a bike before uploading a course.",
+    "reason": {
+      "no_elevation_data": "This file has no elevation data, so gradients cannot be worked out from it.",
+      "course_too_short": "This course is too short to analyse.",
+      "missing_rider_data": "Set your FTP and weight on your profile first — the pacing physics needs both."
+    }
+  },
+  "bikes": {
+    "manage": "Bikes",
+    "title": "Your bikes",
+    "why": "The pacing model reads two things off a bike: tyre width, which sets rolling resistance, and riding position, which sets how much air you push. Nothing else about it matters here.",
+    "name": "Name",
+    "namePlaceholder": "Road bike",
+    "tyreWidth": "Tyre width (mm)",
+    "ridingPosition": "Riding position",
+    "add": "Add bike",
+    "saving": "Saving…",
+    "delete": "Delete bike",
+    "saveFailed": "Could not save the bike",
+    "deleteFailed": "Could not delete the bike",
+    "position": {
+      "tops": "On the tops",
+      "hoods": "On the hoods",
+      "drops": "In the drops",
+      "aero": "Aero bars"
+    }
+  },
+  "profile": {
+    "km": "km",
+    "metres": "m"
+  },
+  "segments": {
+    "start": "Start",
+    "length": "Length",
+    "gradient": "Gradient",
+    "power": "Power",
+    "speed": "Speed",
+    "split": "Split",
+    "elapsed": "Elapsed",
+    "coast": "coast"
+  },
+  "detail": {
+    "loading": "Loading…",
+    "distance": "Distance",
+    "elevation": "Elevation",
+    "predicted": "Predicted",
+    "intensity": "Intensity",
+    "solvedFor": "Solved for",
+    "pickBike": "Pick a bike",
+    "clearTarget": "Clear target time",
+    "reanalyseFailed": "Could not re-analyse this course"
+  },
+  "refusal": {
+    "title": "That target time is not reachable",
+    "target_faster_than_physics": "No human power gets round this course in the time you asked for. The fastest ride the model can produce is {fastest}.",
+    "exceeds_sustainable_power": "Reaching that time would take an average of {required} × your FTP, which is more than anyone holds for a ride this long. The plan below is built around what you could actually sustain."
+  },
+  "plan": {
+    "title": "Pacing plan",
+    "getPlan": "Get pacing plan",
+    "getPlanHelp": "Koutsi is given the segment table above — never the route itself — and writes how to ride it.",
+    "thinking": "Let me look at this course…",
+    "refresh": "Rewrite",
+    "retry": "Try again",
+    "error": "Something went wrong writing your plan. Give it another go."
+  }
+}

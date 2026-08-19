@@ -863,3 +863,78 @@ export interface ChatAvailability {
   max_turns_per_conversation: number
   max_message_chars: number
 }
+
+// ── Course recon (issue #55) ────────────────────────────────────────────────
+
+/** A bike, described only as much as the pacing physics reads. */
+export interface Bike {
+  id: string
+  name: string
+  tyre_width_mm: number | null
+  riding_position: RidingPosition
+  created_at: string
+  updated_at: string
+}
+
+export type RidingPosition = 'tops' | 'hoods' | 'drops' | 'aero'
+
+export type SegmentType = 'climb' | 'flat' | 'descent'
+
+export interface CourseSegment {
+  segment_index: number
+  start_distance_m: number
+  end_distance_m: number
+  length_m: number
+  /** A fraction, not a percentage: 0.072 is a 7.2% grade. */
+  avg_gradient: number
+  elevation_change_m: number
+  segment_type: SegmentType
+  power_w: number | null
+  speed_ms: number | null
+  duration_s: number | null
+  start_offset_s: number | null
+  /** The descent was bounded by the speed cap rather than by power. */
+  speed_capped: boolean
+}
+
+/** Why a requested target time could not be met. Both are results, not errors. */
+export type RefusalReason = 'target_faster_than_physics' | 'exceeds_sustainable_power'
+
+export interface CourseSummary {
+  id: string
+  name: string
+  goal_id: string | null
+  bike_id: string | null
+  status: 'ready' | 'error'
+  distance_m: number
+  elevation_gain_m: number | null
+  target_time_s: number | null
+  start_time: string | null
+  predicted_time_s: number | null
+  feasible: boolean | null
+  refusal_reason: RefusalReason | null
+  plan_status: string | null
+  created_at: string
+}
+
+export interface CourseDetail extends CourseSummary {
+  error: string | null
+  ftp_w_used: number | null
+  weight_kg_used: number | null
+  elevation_loss_m: number | null
+  min_elevation_m: number | null
+  max_elevation_m: number | null
+  intensity: number | null
+  required_intensity: number | null
+  /** `[distance_m, elevation_m, gradient]` per point, ≤400 of them. */
+  profile: [number, number, number][] | null
+  segments: CourseSegment[]
+}
+
+export interface CoursePlan {
+  status: string | null
+  mood: string | null
+  plan: string | null
+  updated_at: string | null
+  plan_ai_generated: boolean
+}
