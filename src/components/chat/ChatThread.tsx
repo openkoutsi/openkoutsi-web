@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import { AlertCircle, RotateCcw, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { AiDisclosure } from '@/components/AiDisclosure'
 import {
   KoutsiAvatar,
   KoutsiBubble,
@@ -213,8 +212,6 @@ function AssistantTurn({
           {t('planLink')}
         </Link>
       )}
-      {/* Issue #41: model output is labelled wherever it is shown. */}
-      <AiDisclosure />
     </div>
   )
 }

@@ -20,8 +20,9 @@ import { cn } from '@/lib/utils'
  * before the athlete has typed anything — which is when someone deciding
  * whether to ask about a chest pain actually needs to read it.
  *
- * Distinct from `AiDisclosure`, which says *a machine wrote this* and still
- * renders under Koutsi's prose here as it does everywhere else. This one says
+ * Distinct from `AiDisclosure`, which stands beside it in the composer for a
+ * reason of its own — a thread is too many blocks of prose to label one by one.
+ * The two are not variants: that one says *a machine wrote this*, this one says
  * *this machine is not a doctor*, and they are different claims.
  */
 export function CoachBoundaryNotice({ className }: { className?: string }) {

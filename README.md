@@ -290,6 +290,13 @@ would be one more leading-format rule, degrading on exactly the small local mode
 BYOK users run and on exactly the post-tool-result turns, so the disclosure would
 go missing from the answers most likely to need it.
 
+The **AI-generated label** stands there too, for a different reason. Issue #41 puts
+it directly beneath Koutsi's prose everywhere else, which works because those
+surfaces show one block per screen. A thread is many blocks, and the same sentence
+repeated under every turn stops being read by the third one — so chat states it once,
+where it cannot scroll away from the answers it applies to. It appears with the first
+question rather than on an empty thread, since its copy is about text that exists.
+
 ## Scripts
 
 ```bash
