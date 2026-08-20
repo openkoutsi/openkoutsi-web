@@ -26,7 +26,7 @@ function buildCsp(): string {
 const PROTECTED_PREFIXES = [
   '/dashboard', '/activities', '/power', '/records',
   '/goals', '/plan', '/profile', '/settings', '/admin',
-  '/workouts', '/inbox', '/onboarding',
+  '/workouts', '/inbox', '/onboarding', '/courses',
 ]
 
 // Public auth-page prefixes

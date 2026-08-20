@@ -1,0 +1,107 @@
+{
+  "title": "Reitit",
+  "subtitle": "Lataa reitti, jonka aiot ajaa, ja saat osuustaulukon sekä tahditussuunnitelman.",
+  "stillAir": "Kaikki nopeudet ja väliajat olettavat tyynen ilman ja kuivan asfaltin. Vastatuuli siirtää niitä, ja ryhmässä ajaen tasaiset osuudet menevät näitä lukemia nopeammin.",
+  "list": {
+    "add": "Lisää reitti",
+    "cancelAdd": "Peruuta",
+    "open": "Avaa",
+    "hide": "Piilota",
+    "delete": "Poista",
+    "cancel": "Peruuta",
+    "deleteTitle": "Poistetaanko tämä reitti?",
+    "deleteBody": "”{name}”, sen analyysi ja lataamasi tiedosto poistetaan. Tätä ei voi perua.",
+    "deleted": "”{name}” poistettu",
+    "deleteFailed": "Reitin poistaminen ei onnistunut",
+    "targetMissed": "Tavoite ei saavutettavissa"
+  },
+  "upload": {
+    "drop": "Pudota GPX-reitti tähän tai valitse tiedosto klikkaamalla",
+    "firstRunTitle": "Suunnittele reitti ennen kuin ajat sen",
+    "firstRunBody": "Pudota tähän tapahtuman tai ajettavan reitin GPX. openkoutsi jakaa sen osuuksiin, laskee omalla FTP:lläsi ja painollasi mitä tehoa kullakin pidetään ja kauanko se kestää, ja voi kirjoittaa sinulle tahditussuunnitelman.",
+    "invalidFile": "Tämä ei ole GPX-tiedosto",
+    "invalidFileDesc": "Reitti on reitti, joten openkoutsi tarvitsee .gpx-tiedoston.",
+    "name": "Nimi",
+    "namePlaceholder": "Otetaan tiedostosta, jos jätät tyhjäksi",
+    "bike": "Pyörä",
+    "targetTime": "Tavoiteaika",
+    "targetTimePlaceholder": "4:30:00",
+    "targetTimeHelp": "Valinnainen, muodossa h:mm:ss tai h:mm. Jätä tyhjäksi, niin saat tasaisen, kestävän vedon.",
+    "badTargetTime": "Tämä ei ole aika",
+    "badTargetTimeDesc": "Kirjoita tavoite muodossa h:mm:ss tai h:mm — esimerkiksi 4:30:00.",
+    "goal": "Tavoite",
+    "noGoal": "Ei liitetty tavoitteeseen",
+    "startDate": "Aloituspäivä",
+    "startTime": "Aloitusaika",
+    "analyse": "Analysoi reitti",
+    "analysing": "Analysoidaan…",
+    "cancel": "Peruuta",
+    "failed": "Reitin analysointi ei onnistunut",
+    "needBikeTitle": "Lisää ensin pyörä",
+    "needBikeBody": "Tahditusfysiikka tarvitsee renkaan leveyden ja ajoasennon, joten lisää pyörä ennen reitin lataamista.",
+    "reason": {
+      "no_elevation_data": "Tiedostossa ei ole korkeustietoja, joten nousuprosentteja ei voi laskea siitä.",
+      "course_too_short": "Tämä reitti on liian lyhyt analysoitavaksi.",
+      "missing_rider_data": "Aseta ensin FTP ja paino profiiliisi — tahditusfysiikka tarvitsee molemmat."
+    }
+  },
+  "bikes": {
+    "manage": "Pyörät",
+    "title": "Pyöräsi",
+    "why": "Tahditusmalli lukee pyörästä kaksi asiaa: renkaan leveyden, joka määrää vierintävastuksen, ja ajoasennon, joka määrää kuinka paljon ilmaa työnnät. Muulla ei ole tässä merkitystä.",
+    "name": "Nimi",
+    "namePlaceholder": "Maantiepyörä",
+    "tyreWidth": "Renkaan leveys (mm)",
+    "ridingPosition": "Ajoasento",
+    "add": "Lisää pyörä",
+    "saving": "Tallennetaan…",
+    "delete": "Poista pyörä",
+    "saveFailed": "Pyörän tallennus ei onnistunut",
+    "deleteFailed": "Pyörän poistaminen ei onnistunut",
+    "position": {
+      "tops": "Ylätangolla",
+      "hoods": "Jarrukahvoilla",
+      "drops": "Alatangolla",
+      "aero": "Aerotangoilla"
+    }
+  },
+  "profile": {
+    "km": "km",
+    "metres": "m"
+  },
+  "segments": {
+    "start": "Alku",
+    "length": "Pituus",
+    "gradient": "Nousu",
+    "power": "Teho",
+    "speed": "Nopeus",
+    "split": "Väliaika",
+    "elapsed": "Kokonaisaika",
+    "coast": "vapaalla"
+  },
+  "detail": {
+    "loading": "Ladataan…",
+    "distance": "Matka",
+    "elevation": "Nousu",
+    "predicted": "Ennuste",
+    "intensity": "Teholuku",
+    "solvedFor": "Laskettu pyörälle",
+    "pickBike": "Valitse pyörä",
+    "clearTarget": "Poista tavoiteaika",
+    "reanalyseFailed": "Reitin uudelleenanalysointi ei onnistunut"
+  },
+  "refusal": {
+    "title": "Tavoiteaika ei ole saavutettavissa",
+    "target_faster_than_physics": "Millään inhimillisellä teholla tätä reittiä ei kierretä pyytämässäsi ajassa. Nopein malli tuottama ajo on {fastest}.",
+    "exceeds_sustainable_power": "Tuohon aikaan pääseminen vaatisi keskimäärin {required} × FTP:si, mikä on enemmän kuin kukaan jaksaa näin pitkällä ajolla. Alla oleva suunnitelma on rakennettu sen varaan, mitä todella jaksaisit."
+  },
+  "plan": {
+    "title": "Tahditussuunnitelma",
+    "getPlan": "Hae tahditussuunnitelma",
+    "getPlanHelp": "Koutsi saa yllä olevan osuustaulukon — ei koskaan itse reittiä — ja kirjoittaa miten se ajetaan.",
+    "thinking": "Katsotaanpa tätä reittiä…",
+    "refresh": "Kirjoita uudelleen",
+    "retry": "Yritä uudelleen",
+    "error": "Suunnitelman kirjoittamisessa meni jokin pieleen. Kokeile uudestaan."
+  }
+}

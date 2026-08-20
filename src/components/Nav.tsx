@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth'
 import { fetcher } from '@/lib/api'
 import type { UnreadCount } from '@/lib/types'
 import { Button } from './ui/button'
-import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy } from 'lucide-react'
+import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy, Map } from 'lucide-react'
 import { gamificationEnabled } from '@/lib/gamification'
 import { cn } from '@/lib/utils'
 import { LocaleSwitcher } from './LocaleSwitcher'
@@ -48,6 +48,7 @@ function NavInner({ onClose }: NavInnerProps) {
       ? [{ href: `/achievements`, labelKey: 'nav.achievements' as const, icon: Trophy }]
       : []),
     { href: `/goals`, labelKey: 'nav.goals' as const, icon: Target },
+    { href: `/courses`, labelKey: 'nav.courses' as const, icon: Map },
     { href: `/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
     { href: `/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
     { href: `/profile`, labelKey: 'nav.profile' as const, icon: User },
