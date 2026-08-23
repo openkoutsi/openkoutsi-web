@@ -3,9 +3,92 @@
  *
  * The charts in this repo are deliberately dumb, so everything here is the
  * arithmetic and vocabulary they render: how a gradient becomes a colour, how
- * a segment's numbers are worded, and the shape the profile chart consumes.
+ * a segment's numbers are worded, the shape the profile chart consumes, and
+ * how a pacing target is read off the athlete and written back (issue #61) —
+ * shared, because the upload form and the detail editor have to agree on what
+ * "4:30" and "210" mean.
  */
-import type { CourseDetail, CourseSegment, SegmentType } from './types'
+import type { CourseDetail, CourseSegment, CourseSummary, SegmentType } from './types'
+
+/**
+ * What a course is being paced to. The two targets are alternatives — the
+ * backend clears one when the other is set — so this is a single mode rather
+ * than two independent fields, and the UI asks for it that way.
+ */
+export type TargetMode = 'none' | 'time' | 'power'
+
+export function targetModeOf(
+  course: Pick<CourseSummary, 'target_time_s' | 'target_power_w'>,
+): TargetMode {
+  if (course.target_power_w != null) return 'power'
+  if (course.target_time_s != null) return 'time'
+  return 'none'
+}
+
+/**
+ * The seconds behind "4:30:00" or "4:30". Null when it is not a time at all.
+ *
+ * Two parts are read as **hours and minutes**, not minutes and seconds: a
+ * course target is a finish time, and finish times for something worth
+ * uploading a GPX of are hours. The field says so, so that "45:00" is not
+ * quietly read as forty-five minutes by one of us and forty-five hours by the
+ * other.
+ */
+export function parseTargetTime(value: string): number | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const parts = trimmed.split(':').map((p) => Number(p))
+  if (parts.some((p) => !Number.isFinite(p) || p < 0)) return null
+  if (parts.length === 2) return parts[0] * 3600 + parts[1] * 60
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
+  return null
+}
+
+/**
+ * A stored target time back in the notation the field accepts, so opening the
+ * editor on an existing target shows what was asked for rather than an empty
+ * box: 16200 → "4:30:00".
+ */
+export function formatTargetTime(seconds: number | null | undefined): string {
+  if (seconds == null) return ''
+  const whole = Math.round(seconds)
+  const h = Math.floor(whole / 3600)
+  const m = Math.floor((whole % 3600) / 60)
+  const s = whole % 60
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+/**
+ * The watts behind "210" or "210 W". Null when it is not a usable power —
+ * which includes zero and anything negative, both of which the API rejects.
+ */
+export function parseTargetPower(value: string): number | null {
+  const trimmed = value.trim().replace(/\s*w$/i, '')
+  if (!trimmed || !/^\d+$/.test(trimmed)) return null
+  const watts = Number(trimmed)
+  return watts > 0 ? watts : null
+}
+
+/**
+ * The re-analysis body for a picked target, or `null` when the field does not
+ * hold a usable value and the caller should say so instead of sending it.
+ *
+ * Only the target being *set* is sent: the backend clears the other one, which
+ * is what makes switching a course from a time to a power one request. Only
+ * `none` names both, because clearing has to say which.
+ */
+export function targetReanalyzeBody(
+  mode: TargetMode,
+  value: string,
+): { target_time_s?: number | null; target_power_w?: number | null } | null {
+  if (mode === 'none') return { target_time_s: null, target_power_w: null }
+  if (mode === 'time') {
+    const seconds = parseTargetTime(value)
+    return seconds == null ? null : { target_time_s: seconds }
+  }
+  const watts = parseTargetPower(value)
+  return watts == null ? null : { target_power_w: watts }
+}
 
 /**
  * Gradient bands and their colours, cool through warm.

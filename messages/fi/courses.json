@@ -2,6 +2,24 @@
   "title": "Reitit",
   "subtitle": "Lataa reitti, jonka aiot ajaa, ja saat osuustaulukon sekä tahditussuunnitelman.",
   "stillAir": "Kaikki nopeudet ja väliajat olettavat tyynen ilman ja kuivan asfaltin. Vastatuuli siirtää niitä, ja ryhmässä ajaen tasaiset osuudet menevät näitä lukemia nopeammin.",
+  "target": {
+    "label": "Tavoite",
+    "none": "Ei tavoitetta",
+    "time": "Maaliintuloaika",
+    "power": "Keskiteho",
+    "timePlaceholder": "4:30:00",
+    "powerPlaceholder": "210",
+    "watts": "W",
+    "noneHelp": "Ei tavoitetta: tasainen veto, jonka jaksaisit koko reitin ajan.",
+    "timeHelp": "Muodossa h:mm:ss tai h:mm. Suunnitelma lasketaan maalista taaksepäin ja panostaa nousuihin, joissa watti ostaa eniten aikaa.",
+    "powerHelp": "Watteina, pidettynä koko ajon keskitehona — nousuissa sen yli, laskuissa sen alle. Maaliintuloaika on se, minkä tämä tuottaa.",
+    "badTime": "Tämä ei ole aika",
+    "badTimeDesc": "Kirjoita tavoite muodossa h:mm:ss tai h:mm — esimerkiksi 4:30:00.",
+    "badPower": "Tämä ei ole teho",
+    "badPowerDesc": "Kirjoita tavoite watteina — kokonaisluku, joka on suurempi kuin nolla, esimerkiksi 210.",
+    "apply": "Käytä",
+    "applying": "Lasketaan uudelleen…"
+  },
   "list": {
     "add": "Lisää reitti",
     "cancelAdd": "Peruuta",
@@ -13,7 +31,8 @@
     "deleteBody": "”{name}”, sen analyysi ja lataamasi tiedosto poistetaan. Tätä ei voi perua.",
     "deleted": "”{name}” poistettu",
     "deleteFailed": "Reitin poistaminen ei onnistunut",
-    "targetMissed": "Tavoite ei saavutettavissa"
+    "targetMissed": "Tavoite ei saavutettavissa",
+    "targetUnsustainable": "Enemmän kuin jaksaisit"
   },
   "upload": {
     "drop": "Pudota GPX-reitti tähän tai valitse tiedosto klikkaamalla",
@@ -24,11 +43,6 @@
     "name": "Nimi",
     "namePlaceholder": "Otetaan tiedostosta, jos jätät tyhjäksi",
     "bike": "Pyörä",
-    "targetTime": "Tavoiteaika",
-    "targetTimePlaceholder": "4:30:00",
-    "targetTimeHelp": "Valinnainen, muodossa h:mm:ss tai h:mm. Jätä tyhjäksi, niin saat tasaisen, kestävän vedon.",
-    "badTargetTime": "Tämä ei ole aika",
-    "badTargetTimeDesc": "Kirjoita tavoite muodossa h:mm:ss tai h:mm — esimerkiksi 4:30:00.",
     "goal": "Tavoite",
     "noGoal": "Ei liitetty tavoitteeseen",
     "startDate": "Aloituspäivä",
@@ -87,13 +101,14 @@
     "intensity": "Teholuku",
     "solvedFor": "Laskettu pyörälle",
     "pickBike": "Valitse pyörä",
-    "clearTarget": "Poista tavoiteaika",
     "reanalyseFailed": "Reitin uudelleenanalysointi ei onnistunut"
   },
   "refusal": {
     "title": "Tavoiteaika ei ole saavutettavissa",
     "target_faster_than_physics": "Millään inhimillisellä teholla tätä reittiä ei kierretä pyytämässäsi ajassa. Nopein malli tuottama ajo on {fastest}.",
-    "exceeds_sustainable_power": "Tuohon aikaan pääseminen vaatisi keskimäärin {required} × FTP:si, mikä on enemmän kuin kukaan jaksaa näin pitkällä ajolla. Alla oleva suunnitelma on rakennettu sen varaan, mitä todella jaksaisit."
+    "exceeds_sustainable_power": "Tuohon aikaan pääseminen vaatisi keskimäärin {required} × FTP:si, mikä on enemmän kuin kukaan jaksaa näin pitkällä ajolla. Alla oleva suunnitelma on rakennettu sen varaan, mitä todella jaksaisit.",
+    "powerTitle": "Tuo on enemmän tehoa kuin jaksaisit pitää",
+    "power_exceeds_sustainable": "{required} × FTP:si pitäminen {duration} ajan on enemmän kuin kukaan jaksaa. Alla olevat väliajat ovat juuri se ajo, jota pyysit — pidä niitä sinä, mitä se vaatisi, älä suunnitelmana, ja kevennä tavoitetta jos haluat sellaisen jonka saat maaliin."
   },
   "plan": {
     "title": "Tahditussuunnitelma",

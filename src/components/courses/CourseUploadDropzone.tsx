@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 
 import { apiFetch, ApiCodeError } from '@/lib/api'
 import type { Bike, CourseDetail } from '@/lib/types'
+import type { TargetMode } from '@/lib/courses'
+import { parseTargetPower, parseTargetTime } from '@/lib/courses'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -17,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CourseTargetPicker, targetHelpKey } from './CourseTargetPicker'
 import { Map, Upload } from 'lucide-react'
 
 interface Goal {
@@ -39,25 +42,6 @@ interface Props {
 /** A course is a route, and a route is a GPX. */
 const ACCEPT = '.gpx'
 
-/**
- * The seconds behind "4:30:00" or "4:30". Null when it is not a time at all.
- *
- * Two parts are read as **hours and minutes**, not minutes and seconds: a
- * course target is a finish time, and finish times for something worth
- * uploading a GPX of are hours. The field says so, so that "45:00" is not
- * quietly read as forty-five minutes by one of us and forty-five hours by the
- * other.
- */
-export function parseTargetTime(value: string): number | null {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const parts = trimmed.split(':').map((p) => Number(p))
-  if (parts.some((p) => !Number.isFinite(p) || p < 0)) return null
-  if (parts.length === 2) return parts[0] * 3600 + parts[1] * 60
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
-  return null
-}
-
 export function CourseUploadDropzone({
   bikes,
   goals,
@@ -71,7 +55,8 @@ export function CourseUploadDropzone({
   const [name, setName] = useState('')
   const [bikeId, setBikeId] = useState<string>(bikes[0]?.id ?? '')
   const [goalId, setGoalId] = useState<string>('_none')
-  const [targetTime, setTargetTime] = useState('')
+  const [targetMode, setTargetMode] = useState<TargetMode>('none')
+  const [targetValue, setTargetValue] = useState('')
   const [startDate, setStartDate] = useState('')
   const [startTime, setStartTime] = useState('')
   const dropRef = useRef<HTMLDivElement>(null)
@@ -139,11 +124,23 @@ export function CourseUploadDropzone({
     e.preventDefault()
     if (!file || !bikeId) return
 
-    const target = parseTargetTime(targetTime)
-    if (targetTime.trim() && target == null) {
+    // A target the athlete typed but that does not parse is a mistake worth
+    // stopping on: uploading it as "no target" would answer a question they
+    // did not ask.
+    const targetSeconds = targetMode === 'time' ? parseTargetTime(targetValue) : null
+    const targetWatts = targetMode === 'power' ? parseTargetPower(targetValue) : null
+    if (targetMode === 'time' && targetSeconds == null) {
       toast({
-        title: t('upload.badTargetTime'),
-        description: t('upload.badTargetTimeDesc'),
+        title: t('target.badTime'),
+        description: t('target.badTimeDesc'),
+        variant: 'destructive',
+      })
+      return
+    }
+    if (targetMode === 'power' && targetWatts == null) {
+      toast({
+        title: t('target.badPower'),
+        description: t('target.badPowerDesc'),
         variant: 'destructive',
       })
       return
@@ -154,7 +151,10 @@ export function CourseUploadDropzone({
     form.append('bike_id', bikeId)
     if (name.trim()) form.append('name', name.trim())
     if (goalId !== '_none') form.append('goal_id', goalId)
-    if (target != null) form.append('target_time_s', String(target))
+    // Only ever one of the two: they are alternatives, and the API refuses a
+    // request that names both.
+    if (targetSeconds != null) form.append('target_time_s', String(targetSeconds))
+    if (targetWatts != null) form.append('target_power_w', String(targetWatts))
     if (startDate) {
       form.append('start_time', new Date(`${startDate}T${startTime || '00:00'}`).toISOString())
     }
@@ -167,7 +167,8 @@ export function CourseUploadDropzone({
       })
       setFile(null)
       setName('')
-      setTargetTime('')
+      setTargetMode('none')
+      setTargetValue('')
       setStartDate('')
       setStartTime('')
       onCreated(course)
@@ -278,14 +279,18 @@ export function CourseUploadDropzone({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="course-target">{t('upload.targetTime')}</Label>
-              <Input
+              <Label htmlFor="course-target">{t('target.label')}</Label>
+              <CourseTargetPicker
                 id="course-target"
-                value={targetTime}
-                onChange={(e) => setTargetTime(e.target.value)}
-                placeholder={t('upload.targetTimePlaceholder')}
+                mode={targetMode}
+                value={targetValue}
+                onModeChange={(mode) => {
+                  setTargetMode(mode)
+                  setTargetValue('')
+                }}
+                onValueChange={setTargetValue}
               />
-              <p className="text-xs text-muted-foreground">{t('upload.targetTimeHelp')}</p>
+              <p className="text-xs text-muted-foreground">{t(targetHelpKey(targetMode))}</p>
             </div>
 
             <div className="space-y-2">

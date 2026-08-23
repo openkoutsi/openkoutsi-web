@@ -17,15 +17,24 @@ const UPLOAD_REASON_CODES = [
 ] as const
 
 /**
- * The refusals `openkoutsi/course.py` can return for an unreachable target
- * time. A refusal is a result the athlete asked for, so it is rendered rather
- * than swallowed — a missing translation would show a raw key at the moment
- * the app is explaining itself.
+ * The refusals `openkoutsi/course.py` can return for a target it cannot
+ * honour. A refusal is a result the athlete asked for, so it is rendered
+ * rather than swallowed — a missing translation would show a raw key at the
+ * moment the app is explaining itself.
+ *
+ * `power_exceeds_sustainable` is the same refusal reached from a *power*
+ * target, which needs its own sentence: that one keeps its splits, so it says
+ * how long the athlete would be holding the number rather than describing a
+ * plan built around something else.
  */
 const REFUSAL_REASONS = [
   'target_faster_than_physics',
   'exceeds_sustainable_power',
+  'power_exceeds_sustainable',
 ] as const
+
+/** The modes the target picker offers, each with a label and a help line. */
+const TARGET_MODES = ['none', 'time', 'power'] as const
 
 /** The riding positions the backend's `Bike.RIDING_POSITIONS` accepts. */
 const RIDING_POSITIONS = ['tops', 'hoods', 'drops', 'aero'] as const
@@ -52,6 +61,24 @@ describe('courses translations', () => {
   it.each(REFUSAL_REASONS)('explains the %s refusal', (reason) => {
     for (const messages of [coursesEn, coursesFi]) {
       expect(messages.refusal).toHaveProperty(reason)
+    }
+  })
+
+  it.each(TARGET_MODES)('names and explains the %s target mode', (mode) => {
+    for (const messages of [coursesEn, coursesFi]) {
+      expect(messages.target).toHaveProperty(mode)
+      expect(messages.target).toHaveProperty(`${mode}Help`)
+    }
+  })
+
+  it('keeps the placeholders the refusal sentences interpolate', () => {
+    for (const messages of [coursesEn, coursesFi]) {
+      expect(messages.refusal.target_faster_than_physics).toContain('{fastest}')
+      expect(messages.refusal.exceeds_sustainable_power).toContain('{required}')
+      // The power refusal names the duration too — the number that makes an
+      // average power unsustainable rather than merely hard.
+      expect(messages.refusal.power_exceeds_sustainable).toContain('{required}')
+      expect(messages.refusal.power_exceeds_sustainable).toContain('{duration}')
     }
   })
 

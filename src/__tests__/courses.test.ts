@@ -6,13 +6,17 @@ import {
   formatKm,
   formatPercentFtp,
   formatSpeedFromMs,
+  formatTargetTime,
   gradientColor,
   isPlanPending,
+  parseTargetPower,
+  parseTargetTime,
   profileSeries,
   segmentAtKm,
   segmentTypeOf,
+  targetModeOf,
+  targetReanalyzeBody,
 } from '@/lib/courses'
-import { parseTargetTime } from '@/components/courses/CourseUploadDropzone'
 import type { CourseSegment } from '@/lib/types'
 
 function seg(over: Partial<CourseSegment> = {}): CourseSegment {
@@ -177,5 +181,64 @@ describe('parseTargetTime', () => {
     expect(parseTargetTime('4')).toBeNull()
     expect(parseTargetTime('1:2:3:4')).toBeNull()
     expect(parseTargetTime('-1:00')).toBeNull()
+  })
+})
+
+describe('formatTargetTime', () => {
+  it('round-trips through parseTargetTime', () => {
+    for (const seconds of [3600, 16200, 45 * 60, 9 * 3600 + 7 * 60 + 3]) {
+      expect(parseTargetTime(formatTargetTime(seconds))).toBe(seconds)
+    }
+  })
+
+  it('is empty for no target, so the field opens empty', () => {
+    expect(formatTargetTime(null)).toBe('')
+    expect(formatTargetTime(undefined)).toBe('')
+  })
+})
+
+describe('parseTargetPower', () => {
+  it('reads whole watts, with or without the unit', () => {
+    expect(parseTargetPower('210')).toBe(210)
+    expect(parseTargetPower(' 210 W ')).toBe(210)
+    expect(parseTargetPower('210w')).toBe(210)
+  })
+
+  it('is null for anything the API would reject', () => {
+    // The API takes an integer above zero, so everything else is a mistake
+    // worth naming rather than a request worth sending.
+    expect(parseTargetPower('')).toBeNull()
+    expect(parseTargetPower('0')).toBeNull()
+    expect(parseTargetPower('-40')).toBeNull()
+    expect(parseTargetPower('210.5')).toBeNull()
+    expect(parseTargetPower('hard')).toBeNull()
+  })
+})
+
+describe('targetModeOf', () => {
+  it('reads the mode off whichever target is set', () => {
+    expect(targetModeOf({ target_time_s: null, target_power_w: null })).toBe('none')
+    expect(targetModeOf({ target_time_s: 3600, target_power_w: null })).toBe('time')
+    expect(targetModeOf({ target_time_s: null, target_power_w: 210 })).toBe('power')
+  })
+})
+
+describe('targetReanalyzeBody', () => {
+  it('sends only the target being set, and lets the API clear the other', () => {
+    expect(targetReanalyzeBody('time', '4:30')).toEqual({ target_time_s: 4 * 3600 + 30 * 60 })
+    expect(targetReanalyzeBody('power', '210')).toEqual({ target_power_w: 210 })
+  })
+
+  it('names both only to clear both', () => {
+    expect(targetReanalyzeBody('none', '')).toEqual({
+      target_time_s: null,
+      target_power_w: null,
+    })
+  })
+
+  it('is null for a value that does not parse, so the caller can say so', () => {
+    expect(targetReanalyzeBody('time', 'soon')).toBeNull()
+    expect(targetReanalyzeBody('power', '')).toBeNull()
+    expect(targetReanalyzeBody('power', '-1')).toBeNull()
   })
 })
