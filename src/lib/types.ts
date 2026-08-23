@@ -908,7 +908,13 @@ export interface CourseSummary {
   status: 'ready' | 'error'
   distance_m: number
   elevation_gain_m: number | null
+  /**
+   * At most one of these is ever set: a course is paced to a finish time or to
+   * an average power, never to both. The backend clears one when the other is
+   * set, so `target_power_w != null` is what "this is a power target" means.
+   */
   target_time_s: number | null
+  target_power_w: number | null
   start_time: string | null
   predicted_time_s: number | null
   feasible: boolean | null

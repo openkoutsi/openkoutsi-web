@@ -2,6 +2,24 @@
   "title": "Courses",
   "subtitle": "Upload a course you are going to ride and get a segment table and a pacing plan.",
   "stillAir": "Every speed and split assumes still air and dry pavement. A headwind will move them, and a group will beat these numbers on the flat.",
+  "target": {
+    "label": "Target",
+    "none": "No target",
+    "time": "Finish time",
+    "power": "Average power",
+    "timePlaceholder": "4:30:00",
+    "powerPlaceholder": "210",
+    "watts": "W",
+    "noneHelp": "No target: a steady effort you could sustain for the whole course.",
+    "timeHelp": "As h:mm:ss or h:mm. The plan works backwards from the finish, spending on the climbs where a watt buys the most time.",
+    "powerHelp": "Watts, held as the average for the whole ride — above it on the climbs, below it on the descents. The finish time is whatever that produces.",
+    "badTime": "That is not a time",
+    "badTimeDesc": "Write the target as h:mm:ss or h:mm — for example 4:30:00.",
+    "badPower": "That is not a power",
+    "badPowerDesc": "Write the target in watts — a whole number above zero, for example 210.",
+    "apply": "Apply",
+    "applying": "Re-solving…"
+  },
   "list": {
     "add": "Add a course",
     "cancelAdd": "Cancel",
@@ -13,7 +31,8 @@
     "deleteBody": "\"{name}\", its analysis and the file you uploaded will be removed. This cannot be undone.",
     "deleted": "\"{name}\" deleted",
     "deleteFailed": "Could not delete the course",
-    "targetMissed": "Target not reachable"
+    "targetMissed": "Target not reachable",
+    "targetUnsustainable": "More than you could hold"
   },
   "upload": {
     "drop": "Drop a GPX course here, or click to choose one",
@@ -24,11 +43,6 @@
     "name": "Name",
     "namePlaceholder": "Taken from the file if you leave this empty",
     "bike": "Bike",
-    "targetTime": "Target time",
-    "targetTimePlaceholder": "4:30:00",
-    "targetTimeHelp": "Optional, as h:mm:ss or h:mm. Leave empty for a steady, sustainable effort.",
-    "badTargetTime": "That is not a time",
-    "badTargetTimeDesc": "Write the target as h:mm:ss or h:mm — for example 4:30:00.",
     "goal": "Goal",
     "noGoal": "Not linked to a goal",
     "startDate": "Start date",
@@ -87,13 +101,14 @@
     "intensity": "Intensity",
     "solvedFor": "Solved for",
     "pickBike": "Pick a bike",
-    "clearTarget": "Clear target time",
     "reanalyseFailed": "Could not re-analyse this course"
   },
   "refusal": {
     "title": "That target time is not reachable",
     "target_faster_than_physics": "No human power gets round this course in the time you asked for. The fastest ride the model can produce is {fastest}.",
-    "exceeds_sustainable_power": "Reaching that time would take an average of {required} × your FTP, which is more than anyone holds for a ride this long. The plan below is built around what you could actually sustain."
+    "exceeds_sustainable_power": "Reaching that time would take an average of {required} × your FTP, which is more than anyone holds for a ride this long. The plan below is built around what you could actually sustain.",
+    "powerTitle": "That is more power than you could hold",
+    "power_exceeds_sustainable": "Holding {required} × your FTP for {duration} is more than anyone sustains. The splits below are exactly the ride you asked for — treat them as what it would take, not as a plan, and ease the target if you want one you can finish."
   },
   "plan": {
     "title": "Pacing plan",

@@ -130,7 +130,11 @@ export default function CoursesPage() {
                     )}
                     <span>{formatDate(course.created_at)}</span>
                     {course.feasible === false && (
-                      <Badge variant="destructive">{t('list.targetMissed')}</Badge>
+                      <Badge variant="destructive">
+                        {course.target_power_w != null
+                          ? t('list.targetUnsustainable')
+                          : t('list.targetMissed')}
+                      </Badge>
                     )}
                   </div>
                 </div>
