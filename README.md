@@ -106,7 +106,12 @@ to be exactly that, and so never asked about rides that synced while the app was
 backgrounded; it now holds the pending queue as an SWR key and additionally takes
 the resume signal itself, so a resume re-prompts even when the queue came back
 unchanged (a deep-equal refetch leaves the cached object — and therefore the
-effects watching it — untouched).
+effects watching it — untouched). Rating or skipping a ride also drops it from
+that cached queue there and then, rather than waiting for the next poll to say
+so: the cache is what a remount is served synchronously, so leaving the dashboard
+and coming back used to re-open the prompt on a ride the athlete had just
+answered. Deferring with "Ask again later" deliberately does not — that ride is
+meant to lead the queue on the next visit.
 
 ## Prerequisites
 

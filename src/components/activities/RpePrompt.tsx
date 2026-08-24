@@ -160,7 +160,10 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
     setQueue([])
     setIndex(0)
     resetForm()
-  }, [resetForm])
+    // Make the cache authoritative again now that the dialog is down and
+    // `applyQueue` will act on what comes back.
+    mutate().catch(() => {})
+  }, [resetForm, mutate])
 
   const advance = useCallback(() => {
     if (index + 1 < queue.length) {
@@ -178,6 +181,20 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
       method: 'PATCH',
       body: JSON.stringify({ app_settings: { rpe_head: activity.created_at } }),
     })
+
+    // Take the ride out of the cached queue as well (issue #86). Without this
+    // the cache still holds it, and the next mount — navigating away from the
+    // dashboard and back — is served that stale queue synchronously while
+    // `seenIdsRef` starts empty, so an already-rated ride reads as new and the
+    // prompt re-opens on it. The revalidation that would correct it arrives to
+    // find the dialog open and backs off, leaving it up. Revalidating is left
+    // to `finish`: it must not race the next ride into view.
+    seenIdsRef.current.add(activity.id)
+    mutate(
+      (prev) =>
+        prev && { ...prev, items: prev.items.filter((a) => a.id !== activity.id) },
+      { revalidate: false },
+    ).catch(() => {})
   }
 
   function withCommute(activity: Activity): string[] {
