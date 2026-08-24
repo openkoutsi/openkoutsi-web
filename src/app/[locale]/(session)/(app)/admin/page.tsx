@@ -71,6 +71,96 @@ function RoleBadge({ role }: { role: string }) {
 // indistinguishable from one the user created. Every revocation is audited and
 // lands in the user's inbox.
 
+/**
+ * Set or clear a user's email address — the recovery path (issue #62).
+ *
+ * A user changing their own address needs approval from the address being left
+ * as well as the one being claimed, which is what stops somebody holding only
+ * the password from moving the account's password-reset target. That same rule
+ * strands anyone whose old mailbox is simply gone, and this is their way out.
+ *
+ * It is blunt on purpose, so the dialog says so before you use it: the account
+ * may be in the wrong hands, so saving signs out every session and revokes every
+ * access token the user holds.
+ */
+function UserEmailDialog({
+  user,
+  onSave,
+}: {
+  user: UserResponse
+  onSave: (userId: string, email: string | null) => Promise<void>
+}) {
+  const t = useTranslations('admin')
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState(user.email ?? '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function save(email: string | null) {
+    setSaving(true)
+    setError(null)
+    try {
+      await onSave(user.id, email)
+      setOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('users.updateFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (next) {
+          setValue(user.email ?? '')
+          setError(null)
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          {t('users.email')}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('users.emailTitle')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <p className="text-sm text-muted-foreground">{t('users.emailDesc')}</p>
+          <Input
+            type="email"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={t('users.emailPlaceholder')}
+          />
+          <p className="text-xs text-muted-foreground">{t('users.emailWarning')}</p>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          {user.email && (
+            <Button
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              disabled={saving}
+              onClick={() => save(null)}
+            >
+              {t('users.emailClear')}
+            </Button>
+          )}
+          <Button disabled={saving || !value.trim()} onClick={() => save(value.trim())}>
+            {saving ? t('users.emailSaving') : t('users.emailSave')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+
 function UserTokensDialog({ user }: { user: UserResponse }) {
   const t = useTranslations('admin')
   const [open, setOpen] = useState(false)
@@ -254,6 +344,15 @@ function UsersTab() {
     }
   }
 
+  async function setUserEmail(userId: string, email: string | null) {
+    await apiFetch(`/api/admin/users/${userId}/email`, {
+      method: 'PATCH',
+      body: JSON.stringify({ email }),
+    })
+    toast({ title: t('users.emailUpdated') })
+    mutate()
+  }
+
   async function generatePasswordReset(userId: string) {
     try {
       const res = await apiFetch<{ reset_url: string }>(
@@ -367,6 +466,7 @@ function UsersTab() {
                         {t('users.passwordReset')}
                       </Button>
                       <UserTokensDialog user={u} />
+                      <UserEmailDialog user={u} onSave={setUserEmail} />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button size="sm" variant="destructive">

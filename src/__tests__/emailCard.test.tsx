@@ -48,6 +48,9 @@ function account(overrides: Partial<AccountResponse> = {}): AccountResponse {
     email: 'rider@example.com',
     email_verified: true,
     pending_email: null,
+    pending_requires_old: false,
+    pending_confirmed_new: false,
+    pending_confirmed_old: false,
     ...overrides,
   }
 }
@@ -185,7 +188,10 @@ describe('EmailCard', () => {
     mocks.apiFetch.mockResolvedValue(undefined)
     mountWith({
       '/api/public/instance-info': instanceInfo(true),
-      '/api/auth/account': account({ pending_email: 'new@example.com' }),
+      '/api/auth/account': account({
+        pending_email: 'new@example.com',
+        pending_requires_old: true,
+      }),
     })
 
     await waitFor(() => {
@@ -198,5 +204,64 @@ describe('EmailCard', () => {
         method: 'POST',
       })
     })
+  })
+
+  it('lists both approvals while a change is outstanding', async () => {
+    // Someone expecting one link reads the second mail as a duplicate and never
+    // opens it, and the change then expires with both parties thinking it is done.
+    mountWith({
+      '/api/public/instance-info': instanceInfo(true),
+      '/api/auth/account': account({
+        pending_email: 'new@example.com',
+        pending_requires_old: true,
+      }),
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.email.stepNew')).toBeTruthy()
+    })
+    expect(screen.getByText('profile.email.stepOld')).toBeTruthy()
+    expect(screen.getByText('profile.email.pendingHintBoth')).toBeTruthy()
+  })
+
+  it('marks off the side that has already approved', async () => {
+    mountWith({
+      '/api/public/instance-info': instanceInfo(true),
+      '/api/auth/account': account({
+        pending_email: 'new@example.com',
+        pending_requires_old: true,
+        pending_confirmed_new: true,
+      }),
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.email.stepNew')).toBeTruthy()
+    })
+    // Done reads as struck through; outstanding does not.
+    expect(screen.getByText('profile.email.stepNew').className).toContain('line-through')
+    expect(screen.getByText('profile.email.stepOld').className).not.toContain(
+      'line-through',
+    )
+  })
+
+  it('asks for no second approval on a first-time set', async () => {
+    // An invite account has no address to approve from, so promising two links
+    // would leave the user waiting for one that never arrives.
+    mountWith({
+      '/api/public/instance-info': instanceInfo(true),
+      '/api/auth/account': account({
+        email: null,
+        username: 'invited',
+        email_verified: false,
+        pending_email: 'new@example.com',
+        pending_requires_old: false,
+      }),
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.email.stepNew')).toBeTruthy()
+    })
+    expect(screen.queryByText('profile.email.stepOld')).toBeNull()
+    expect(screen.getByText('profile.email.pendingHint')).toBeTruthy()
   })
 })

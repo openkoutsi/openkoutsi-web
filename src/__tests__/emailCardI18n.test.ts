@@ -31,6 +31,10 @@ const EMAIL_KEYS = [
   'requestFailed',
   'pending',
   'pendingHint',
+  'pendingHintBoth',
+  'dialogDescBoth',
+  'stepNew',
+  'stepOld',
   'cancel',
   'cancelling',
   'cancelled',
@@ -43,6 +47,10 @@ const CONFIRM_KEYS = [
   'confirmingDesc',
   'successTitle',
   'successDesc',
+  'partialTitle',
+  'partialAwaitingNew',
+  'partialAwaitingOld',
+  'partialHelp',
   'errorTitle',
   'missingDesc',
   'errorHelp',
@@ -55,6 +63,8 @@ const CONFIRM_KEYS = [
 const PLACEHOLDERS: Record<string, string> = {
   usernameOnly: 'username',
   pending: 'email',
+  stepNew: 'email',
+  stepOld: 'email',
 }
 
 describe('email address i18n', () => {

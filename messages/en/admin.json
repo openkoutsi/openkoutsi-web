@@ -49,7 +49,16 @@
     "tokenRevoked": "Token revoked",
     "tokenRevokeFailed": "Could not revoke the token",
     "tokenRevokeConfirmTitle": "Revoke this token?",
-    "tokenRevokeConfirmDesc": "The token stops working immediately and the user is told in their inbox. This cannot be undone."
+    "tokenRevokeConfirmDesc": "The token stops working immediately and the user is told in their inbox. This cannot be undone.",
+    "email": "Email",
+    "emailTitle": "Set or clear the email address",
+    "emailDesc": "Use this when the address on the account can't be reached — a dead mailbox, a lapsed domain, or an address taken along with the account. Users change their own address from their profile, which needs approval from both addresses.",
+    "emailPlaceholder": "user@example.com",
+    "emailWarning": "The address is saved as verified, with no confirmation email. Saving also signs the user out of every device and revokes all their access tokens, and cancels any change they had in progress.",
+    "emailClear": "Clear address",
+    "emailSave": "Save address",
+    "emailSaving": "Saving…",
+    "emailUpdated": "Email address updated"
   },
   "invitations": {
     "pending": "Pending",

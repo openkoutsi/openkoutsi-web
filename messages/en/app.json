@@ -420,7 +420,7 @@
       "current": "Your account's email address",
       "none": "This account has no email address yet.",
       "usernameOnly": "You sign in as {username}.",
-      "changeDesc": "Move your account to a different address. We'll email a confirmation link to the new one — nothing changes until you open it.",
+      "changeDesc": "Move your account to a different address. Both addresses have to approve it — we'll email a link to each, and nothing changes until both are opened.",
       "setDesc": "Add an email address so you can reset your own password and sign in with it. We'll email a confirmation link to it.",
       "changeBtn": "Change email address",
       "setBtn": "Add email address",
@@ -434,14 +434,18 @@
       "passwordHint": "Confirming your password keeps someone using your signed-in browser from moving the account.",
       "submit": "Send confirmation link",
       "sending": "Sending…",
-      "requestedTitle": "Check the new inbox",
-      "requestedDesc": "If that address can be used, a confirmation link is on its way. It expires in an hour.",
+      "requestedTitle": "Check both inboxes",
+      "requestedDesc": "If that address can be used, a link is on its way to it — and another to your current address. Open both to finish. They expire in 24 hours.",
       "requestFailed": "Couldn't request the change",
       "pending": "Waiting for confirmation at {email}",
-      "pendingHint": "Open the link we sent there to finish. It expires an hour after it was sent.",
+      "pendingHint": "Open the link we sent there to finish. It expires 24 hours after it was sent.",
       "cancel": "Cancel this change",
       "cancelling": "Cancelling…",
-      "cancelled": "Pending change cancelled"
+      "cancelled": "Pending change cancelled",
+      "dialogDescBoth": "We'll send two links: one to the new address and one to your current one. Both have to be opened before anything moves — asking your current address to approve is what stops someone who knows your password from taking the account.",
+      "pendingHintBoth": "Both have to be opened before the change takes effect. The links expire 24 hours after they were sent.",
+      "stepNew": "Confirm at {email}",
+      "stepOld": "Approve from {email}"
     }
   },
   "settings": {

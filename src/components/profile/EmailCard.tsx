@@ -33,7 +33,27 @@ import { toast } from '@/components/ui/use-toast'
  * else's, so that a signed-in user can't use this form to ask who has an account
  * on the instance. The honest thing to show is what we actually know — that if
  * the address can be used, a link is on its way to it.
+ *
+ * A change needs approval from the address being *left* as well as the one being
+ * claimed, so the pending block is a two-line checklist rather than a single
+ * "waiting" line. The copy has to promise two emails up front: someone expecting
+ * one link reads the second as a duplicate and never opens it, and the change
+ * then sits there until it expires with both parties believing they are done.
  */
+function PendingStep({ done, label }: { done: boolean; label: string }) {
+  return (
+    <li className="flex items-start gap-2 text-sm">
+      <span
+        aria-hidden
+        className={done ? 'text-primary' : 'text-muted-foreground'}
+      >
+        {done ? '✓' : '○'}
+      </span>
+      <span className={done ? 'text-muted-foreground line-through' : ''}>{label}</span>
+    </li>
+  )
+}
+
 export function EmailCard() {
   const t = useTranslations('app')
   const tCommon = useTranslations('common')
@@ -57,6 +77,9 @@ export function EmailCard() {
 
   const hasEmail = Boolean(account?.email)
   const pending = account?.pending_email ?? null
+  const requiresOld = account?.pending_requires_old ?? false
+  const confirmedNew = account?.pending_confirmed_new ?? false
+  const confirmedOld = account?.pending_confirmed_old ?? false
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -124,7 +147,23 @@ export function EmailCard() {
             <p className="text-sm">
               {t('profile.email.pending', { email: pending })}
             </p>
-            <p className="text-xs text-muted-foreground">{t('profile.email.pendingHint')}</p>
+            <ul className="space-y-1">
+              <PendingStep
+                done={confirmedNew}
+                label={t('profile.email.stepNew', { email: pending })}
+              />
+              {requiresOld && (
+                <PendingStep
+                  done={confirmedOld}
+                  label={t('profile.email.stepOld', { email: account?.email ?? '' })}
+                />
+              )}
+            </ul>
+            <p className="text-xs text-muted-foreground">
+              {requiresOld
+                ? t('profile.email.pendingHintBoth')
+                : t('profile.email.pendingHint')}
+            </p>
             <Button
               variant="ghost"
               size="sm"
@@ -158,7 +197,9 @@ export function EmailCard() {
             <DialogTitle>
               {hasEmail ? t('profile.email.dialogTitle') : t('profile.email.dialogTitleSet')}
             </DialogTitle>
-            <DialogDescription>{t('profile.email.dialogDesc')}</DialogDescription>
+            <DialogDescription>
+              {hasEmail ? t('profile.email.dialogDescBoth') : t('profile.email.dialogDesc')}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">

@@ -420,7 +420,7 @@
       "current": "Tilisi sähköpostiosoite",
       "none": "Tällä tilillä ei ole vielä sähköpostiosoitetta.",
       "usernameOnly": "Kirjaudut sisään tunnuksella {username}.",
-      "changeDesc": "Vaihda tilisi toiseen osoitteeseen. Lähetämme vahvistuslinkin uuteen osoitteeseen — mikään ei muutu ennen kuin avaat sen.",
+      "changeDesc": "Vaihda tilisi toiseen osoitteeseen. Molempien osoitteiden on hyväksyttävä muutos — lähetämme linkin kumpaankin, eikä mikään muutu ennen kuin molemmat on avattu.",
       "setDesc": "Lisää sähköpostiosoite, jotta voit palauttaa salasanasi itse ja kirjautua sillä sisään. Lähetämme siihen vahvistuslinkin.",
       "changeBtn": "Vaihda sähköpostiosoite",
       "setBtn": "Lisää sähköpostiosoite",
@@ -434,14 +434,18 @@
       "passwordHint": "Salasanan vahvistaminen estää sitä, että joku selaimeesi päässyt voisi siirtää tilisi.",
       "submit": "Lähetä vahvistuslinkki",
       "sending": "Lähetetään…",
-      "requestedTitle": "Tarkista uusi postilaatikko",
-      "requestedDesc": "Jos osoitetta voi käyttää, vahvistuslinkki on matkalla. Se vanhenee tunnissa.",
+      "requestedTitle": "Tarkista molemmat postilaatikot",
+      "requestedDesc": "Jos osoitetta voi käyttää, linkki on matkalla siihen — ja toinen nykyiseen osoitteeseesi. Viimeistele avaamalla molemmat. Ne vanhenevat 24 tunnissa.",
       "requestFailed": "Muutosta ei voitu pyytää",
       "pending": "Odotetaan vahvistusta osoitteessa {email}",
-      "pendingHint": "Viimeistele avaamalla sinne lähetetty linkki. Se vanhenee tunnin kuluttua lähetyksestä.",
+      "pendingHint": "Viimeistele avaamalla sinne lähetetty linkki. Se vanhenee 24 tunnin kuluttua lähetyksestä.",
       "cancel": "Peruuta tämä muutos",
       "cancelling": "Peruutetaan…",
-      "cancelled": "Odottava muutos peruutettu"
+      "cancelled": "Odottava muutos peruutettu",
+      "dialogDescBoth": "Lähetämme kaksi linkkiä: yhden uuteen osoitteeseen ja yhden nykyiseen. Molemmat on avattava ennen kuin mikään muuttuu — nykyisen osoitteen hyväksyntä estää sen, että salasanasi tietävä voisi viedä tilin.",
+      "pendingHintBoth": "Molemmat on avattava ennen kuin muutos tulee voimaan. Linkit vanhenevat 24 tunnin kuluttua lähetyksestä.",
+      "stepNew": "Vahvista osoitteessa {email}",
+      "stepOld": "Hyväksy osoitteesta {email}"
     }
   },
   "settings": {

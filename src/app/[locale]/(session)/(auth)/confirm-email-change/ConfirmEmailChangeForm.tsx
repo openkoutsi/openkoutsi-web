@@ -5,19 +5,27 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/navigation'
 import { apiFetch } from '@/lib/api'
+import type { EmailChangeConfirmResponse } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
-type Status = 'confirming' | 'success' | 'error' | 'missing'
+type Status = 'confirming' | 'success' | 'partial' | 'error' | 'missing'
 
 /**
- * Finish an email-address change from the link mailed to the new address (issue #62).
+ * Approve one side of an email-address change (issue #62).
  *
- * Sits in the unauthenticated shell on purpose: this link is opened in the new
- * mailbox, which is routinely a different device from the one that asked for the
- * change. The token is the proof, so no session is needed — and unlike signup
- * verification, confirming here issues no tokens and logs nobody in. It changes
- * an identifier on an account that already exists; the next sign-in just uses
- * the new address.
+ * Serves both links a change sends: the one to the address being claimed and the
+ * one to the address being left. Which side this token is, the server works out.
+ *
+ * Sits in the unauthenticated shell on purpose — these links are opened in
+ * whichever mailbox they were sent to, routinely on a different device from the
+ * one that asked. The token is the proof, so no session is needed, and unlike
+ * signup verification this issues no tokens and logs nobody in.
+ *
+ * The half-done outcome needs saying out loud. A confirmation that lands
+ * correctly but still waits on the other mailbox is a success, and if the page
+ * doesn't say so the first person through reads "nothing happened" and either
+ * gives up or asks for the change again, which invalidates the link the other
+ * side is holding.
  */
 export function ConfirmEmailChangeForm() {
   const t = useTranslations('auth')
@@ -26,6 +34,8 @@ export function ConfirmEmailChangeForm() {
 
   const [status, setStatus] = useState<Status>(token ? 'confirming' : 'missing')
   const [error, setError] = useState<string | null>(null)
+  // Which mailbox is still outstanding, so the page can name it.
+  const [awaiting, setAwaiting] = useState<string | null>(null)
   // React 18 runs effects twice in development; the token is single-use, so a
   // second call would report the first one's success as a failure.
   const started = useRef(false)
@@ -33,11 +43,14 @@ export function ConfirmEmailChangeForm() {
   useEffect(() => {
     if (!token || started.current) return
     started.current = true
-    apiFetch('/api/auth/confirm-email-change', {
+    apiFetch<EmailChangeConfirmResponse>('/api/auth/confirm-email-change', {
       method: 'POST',
       body: JSON.stringify({ token }),
     })
-      .then(() => setStatus('success'))
+      .then((res) => {
+        setAwaiting(res.awaiting ?? null)
+        setStatus(res.complete ? 'success' : 'partial')
+      })
       .catch((err) => {
         setStatus('error')
         setError(err instanceof Error ? err.message : t('confirmEmailChange.failed'))
@@ -47,17 +60,23 @@ export function ConfirmEmailChangeForm() {
   const title =
     status === 'success'
       ? t('confirmEmailChange.successTitle')
-      : status === 'confirming'
-        ? t('confirmEmailChange.confirmingTitle')
-        : t('confirmEmailChange.errorTitle')
+      : status === 'partial'
+        ? t('confirmEmailChange.partialTitle')
+        : status === 'confirming'
+          ? t('confirmEmailChange.confirmingTitle')
+          : t('confirmEmailChange.errorTitle')
   const desc =
     status === 'success'
       ? t('confirmEmailChange.successDesc')
-      : status === 'confirming'
-        ? t('confirmEmailChange.confirmingDesc')
-        : status === 'missing'
-          ? t('confirmEmailChange.missingDesc')
-          : (error ?? t('confirmEmailChange.failed'))
+      : status === 'partial'
+        ? awaiting === 'new'
+          ? t('confirmEmailChange.partialAwaitingNew')
+          : t('confirmEmailChange.partialAwaitingOld')
+        : status === 'confirming'
+          ? t('confirmEmailChange.confirmingDesc')
+          : status === 'missing'
+            ? t('confirmEmailChange.missingDesc')
+            : (error ?? t('confirmEmailChange.failed'))
 
   return (
     <Card className="w-full max-w-sm">
@@ -68,6 +87,13 @@ export function ConfirmEmailChangeForm() {
       {(status === 'error' || status === 'missing') && (
         <CardContent>
           <p className="text-sm text-muted-foreground">{t('confirmEmailChange.errorHelp')}</p>
+        </CardContent>
+      )}
+      {status === 'partial' && (
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {t('confirmEmailChange.partialHelp')}
+          </p>
         </CardContent>
       )}
       {status !== 'confirming' && (
