@@ -168,6 +168,106 @@ describe('apiFetch 401 handling', () => {
   })
 })
 
+describe('apiFetch refresh when many requests 401 at once', () => {
+  // What a resume looks like: every mounted key refetches together, and after
+  // an hour in the background every one of them answers 401 at the same moment
+  // (issue #86).
+  it('mints one refresh for the whole burst, and retries them all', async () => {
+    setAccessToken('expired')
+
+    let refreshes = 0
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('/api/auth/refresh')) {
+        refreshes += 1
+        // Resolve on a later tick, so the burst really does overlap.
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        return mockResponse(200, { access_token: 'fresh', token_type: 'bearer' })
+      }
+      return getAccessToken() === 'fresh'
+        ? mockResponse(200, { data: url })
+        : mockResponse(401)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const paths = ['/api/a', '/api/b', '/api/c', '/api/d', '/api/e']
+    const results = await Promise.all(paths.map((path) => apiFetch<{ data: string }>(path)))
+
+    expect(refreshes).toBe(1)
+    expect(results.map((r) => r.data)).toEqual(paths.map((p) => `http://localhost:8000${p}`))
+  })
+
+  it('starts a new refresh for a later 401, once the first has settled', async () => {
+    setAccessToken('expired')
+
+    let refreshes = 0
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('/api/auth/refresh')) {
+        refreshes += 1
+        return mockResponse(200, { access_token: `fresh-${refreshes}`, token_type: 'bearer' })
+      }
+      return getAccessToken()?.startsWith('fresh')
+        ? mockResponse(200, { data: 'ok' })
+        : mockResponse(401)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await apiFetch('/api/one')
+    setAccessToken('expired')
+    await apiFetch('/api/two')
+
+    // The in-flight promise is shared, not cached — a token that expires again
+    // later must still be refreshable.
+    expect(refreshes).toBe(2)
+  })
+})
+
+describe('apiFetch when the refresh itself cannot be made', () => {
+  // A phone whose radio has only just come back with the app drops requests.
+  // Reading that as "your session is over" is how an athlete used to get logged
+  // out for one bad packet (issue #86).
+  const survives = async (refreshResult: unknown) => {
+    setAccessToken('still-good')
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('/api/auth/refresh')) {
+        if (refreshResult instanceof Error) throw refreshResult
+        return refreshResult as Response
+      }
+      return mockResponse(401)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(apiFetch('/api/protected')).rejects.toThrow('Unauthorized')
+    // The token survives, so the retry that SWR schedules can still use it.
+    expect(getAccessToken()).toBe('still-good')
+  }
+
+  it('keeps the session on a network error', async () => {
+    await survives(new TypeError('Failed to fetch'))
+  })
+
+  it('keeps the session when the refresh endpoint rate-limits', async () => {
+    await survives(mockResponse(429, { detail: 'Too many requests' }))
+  })
+
+  it('keeps the session when the backend is briefly broken', async () => {
+    await survives(mockResponse(503))
+  })
+
+  it('ends the session when the refresh is actually rejected', async () => {
+    // 401/403 is the backend saying the cookie is gone or superseded. That one
+    // really is the end of the session.
+    setAccessToken('old-access')
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(mockResponse(401))
+      .mockResolvedValueOnce(mockResponse(403))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(apiFetch('/api/protected')).rejects.toThrow('Unauthorized')
+    expect(getAccessToken()).toBeNull()
+  })
+})
+
 describe('apiFetch error handling', () => {
   it('extracts error message from detail field', async () => {
     vi.stubGlobal(

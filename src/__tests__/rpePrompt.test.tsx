@@ -116,6 +116,19 @@ function renderPrompt(props: { reloadSignal?: number } = {}) {
   )
 }
 
+/**
+ * A cache that outlives the component, which is what the browser actually has.
+ * Navigating off the dashboard and back unmounts and remounts the prompt, but
+ * SWR's cache is app-wide and survives — so a test that hands every render a
+ * new `Map` cannot see anything that goes wrong across a remount.
+ */
+function withSharedCache() {
+  const cache = new Map()
+  const value = { provider: () => cache, dedupingInterval: 0, revalidateOnFocus: false }
+  return (props: { reloadSignal?: number } = {}) =>
+    render(h(SWRConfig, { value }, h(RpePrompt, props)))
+}
+
 const dialog = () => screen.queryByRole('dialog')
 
 /**
@@ -267,6 +280,100 @@ describe('RpePrompt', () => {
     )
 
     expect(await prompted('Morning loop')).toBeInTheDocument()
+  })
+
+  describe('across a remount, the way navigating away and back does', () => {
+    /**
+     * Answer the first load and then go quiet.
+     *
+     * The remount has to be right from the cache alone. In the browser the
+     * refetch it kicks off lands a moment later, and the whole bug is what the
+     * athlete is shown in that moment — so here the refetch simply never
+     * settles, and what the prompt does is decided entirely by what rating the
+     * ride left behind in the cache.
+     */
+    function answerOnce(first: ReturnType<typeof queue>) {
+      mocks.fetcher.mockReset()
+      mocks.fetcher
+        .mockResolvedValueOnce(first)
+        .mockImplementation(() => new Promise(() => {}))
+    }
+
+    it('does not ask again about a ride that was just rated', async () => {
+      // The reported bug (issue #86): rating a ride left it sitting in the SWR
+      // cache, so remounting served that stale queue synchronously and put the
+      // prompt straight back up on a ride the athlete had already answered.
+      answerOnce(queue(ride('r1', 'Morning loop')))
+      const renderShared = withSharedCache()
+      const user = userEvent.setup()
+      const { unmount } = renderShared()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByRole('button', { name: '7' }))
+      await user.click(screen.getByText('rpePrompt.rate'))
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+
+      unmount()
+      renderShared()
+
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+    })
+
+    it('does not ask again about a ride that was skipped', async () => {
+      answerOnce(queue(ride('r1', 'Morning loop')))
+      const renderShared = withSharedCache()
+      const user = userEvent.setup()
+      const { unmount } = renderShared()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByText('rpePrompt.skip'))
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+
+      unmount()
+      renderShared()
+
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+    })
+
+    it('still asks again about a ride deferred with "Ask again later"', async () => {
+      // Deferring deliberately leaves the cursor alone, so the ride leads the
+      // queue on the next visit. Only rides actually answered stop asking.
+      answerOnce(queue(ride('r1', 'Morning loop')))
+      const renderShared = withSharedCache()
+      const user = userEvent.setup()
+      const { unmount } = renderShared()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByText('rpePrompt.askLater'))
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+
+      unmount()
+      renderShared()
+
+      expect(await prompted('Morning loop')).toBeInTheDocument()
+    })
+
+    it('asks about what is left when only some of the queue was answered', async () => {
+      answerOnce(queue(ride('r1', 'Morning loop'), ride('r2', 'Evening spin')))
+      const renderShared = withSharedCache()
+      const user = userEvent.setup()
+      const { unmount } = renderShared()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByRole('button', { name: '7' }))
+      await user.click(screen.getByText('rpePrompt.rate'))
+
+      // Moved on to the second ride; defer that one.
+      await prompted('Evening spin')
+      await user.click(screen.getByText('rpePrompt.askLater'))
+      await waitFor(() => expect(dialog()).not.toBeInTheDocument())
+
+      unmount()
+      renderShared()
+
+      expect(await prompted('Evening spin')).toBeInTheDocument()
+      expect(screen.queryByText(/Morning loop/)).not.toBeInTheDocument()
+    })
   })
 
   it('advances the server-side cursor and moves on when a ride is rated', async () => {

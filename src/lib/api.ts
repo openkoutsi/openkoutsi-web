@@ -119,19 +119,57 @@ export function clearSessionCookie() {
   }
 }
 
-async function attemptRefresh(): Promise<boolean> {
+/**
+ * What a refresh attempt settled as.
+ *
+ * The distinction that matters is between "the server told us this session is
+ * over" and "we could not ask". Treating the second as the first is what used
+ * to log an athlete out for one dropped packet — which is a routine event on a
+ * phone whose radio has just come back with the app (issue #86).
+ */
+type RefreshOutcome = 'refreshed' | 'rejected' | 'unavailable'
+
+/**
+ * The refresh in flight, if any, shared by every caller that wants one.
+ *
+ * A resume refetches every mounted key at once, and after an hour in the
+ * background every one of those requests answers 401 at the same moment. Each
+ * would otherwise mint its own refresh — nine or ten POSTs racing for the same
+ * cookie, ten round-trips deep before the first panel can render, and enough
+ * traffic to reach the endpoint's own rate limit. One shared attempt is both
+ * faster and the only version that cannot rate-limit itself.
+ */
+let _refreshInFlight: Promise<RefreshOutcome> | null = null
+
+async function requestRefresh(): Promise<RefreshOutcome> {
   try {
     const res = await fetch(`${getApiUrl()}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     })
-    if (!res.ok) return false
+    // 401/403 is the backend saying the refresh cookie is gone, expired, or
+    // superseded — the session really has ended. Anything else (429 from the
+    // endpoint's own limiter, a 5xx, a proxy hiccup) says nothing about the
+    // session, so the token is left alone and the original request's error is
+    // allowed to surface, where SWR retries it with backoff.
+    if (res.status === 401 || res.status === 403) return 'rejected'
+    if (!res.ok) return 'unavailable'
     const data: TokenPair = await res.json()
     setAccessToken(data.access_token)
-    return true
+    return 'refreshed'
   } catch {
-    return false
+    // Network error — we never reached the server, so we know nothing.
+    return 'unavailable'
   }
+}
+
+async function attemptRefresh(): Promise<RefreshOutcome> {
+  if (_refreshInFlight) return _refreshInFlight
+  const attempt = requestRefresh().finally(() => {
+    if (_refreshInFlight === attempt) _refreshInFlight = null
+  })
+  _refreshInFlight = attempt
+  return attempt
 }
 
 export async function apiFetch<T>(
@@ -159,9 +197,14 @@ export async function apiFetch<T>(
   })
 
   if (res.status === 401 && retry) {
-    const refreshed = await attemptRefresh()
-    if (refreshed) {
+    const outcome = await attemptRefresh()
+    if (outcome === 'refreshed') {
       return apiFetch<T>(path, options, false)
+    }
+    // Could not reach the refresh endpoint: the session may well still be
+    // good, so keep the token and let the caller's own error handling retry.
+    if (outcome === 'unavailable') {
+      throw new Error('Unauthorized')
     }
     clearTokens()
     if (typeof window !== 'undefined') {
@@ -236,9 +279,12 @@ export async function apiDownload(
   const res = await fetch(`${getApiUrl()}${path}`, { headers, credentials: 'include' })
 
   if (res.status === 401 && retry) {
-    const refreshed = await attemptRefresh()
-    if (refreshed) {
+    const outcome = await attemptRefresh()
+    if (outcome === 'refreshed') {
       return apiDownload(path, filename, false)
+    }
+    if (outcome === 'unavailable') {
+      throw new Error('Unauthorized')
     }
     clearTokens()
     if (typeof window !== 'undefined') {

@@ -9,6 +9,7 @@ import type { TargetMode } from '@/lib/courses'
 import { parseTargetPower, parseTargetTime } from '@/lib/courses'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
+import { useHoldPageReload } from '@/lib/resumeGuard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -51,6 +52,9 @@ export function CourseUploadDropzone({
   const t = useTranslations('courses')
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
+
+  // Reloading mid-upload abandons the transfer.
+  useHoldPageReload(uploading)
   const [file, setFile] = useState<File | null>(null)
   const [name, setName] = useState('')
   const [bikeId, setBikeId] = useState<string>(bikes[0]?.id ?? '')
