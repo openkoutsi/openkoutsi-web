@@ -25,6 +25,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
 import { ZoneEditor } from '@/components/profile/ZoneEditor'
 import { ProviderCard } from '@/components/profile/ProviderCard'
+import { EmailCard } from '@/components/profile/EmailCard'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -1203,6 +1204,8 @@ export default function ProfilePage() {
           </Button>
         </CardContent>
       </Card>
+
+      <EmailCard />
 
       {/* Delete account */}
       <Card className="border-destructive/40">

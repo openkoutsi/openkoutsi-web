@@ -49,7 +49,16 @@
     "tokenRevoked": "Tunniste peruttu",
     "tokenRevokeFailed": "Tunnisteen peruminen epäonnistui",
     "tokenRevokeConfirmTitle": "Perutaanko tämä tunniste?",
-    "tokenRevokeConfirmDesc": "Tunniste lakkaa toimimasta välittömästi ja käyttäjä saa siitä tiedon postilaatikkoonsa. Tätä ei voi peruuttaa."
+    "tokenRevokeConfirmDesc": "Tunniste lakkaa toimimasta välittömästi ja käyttäjä saa siitä tiedon postilaatikkoonsa. Tätä ei voi peruuttaa.",
+    "email": "Sähköposti",
+    "emailTitle": "Aseta tai poista sähköpostiosoite",
+    "emailDesc": "Käytä tätä, kun tilin osoitetta ei voi tavoittaa — kuollut postilaatikko, vanhentunut verkkotunnus tai tilin mukana viety osoite. Käyttäjät vaihtavat osoitteensa itse profiilistaan, mihin tarvitaan molempien osoitteiden hyväksyntä.",
+    "emailPlaceholder": "kayttaja@esimerkki.fi",
+    "emailWarning": "Osoite tallennetaan vahvistettuna ilman vahvistussähköpostia. Tallennus myös kirjaa käyttäjän ulos kaikilta laitteilta, mitätöi kaikki hänen käyttötunnisteensa ja peruu hänen kesken olevan muutoksensa.",
+    "emailClear": "Poista osoite",
+    "emailSave": "Tallenna osoite",
+    "emailSaving": "Tallennetaan…",
+    "emailUpdated": "Sähköpostiosoite päivitetty"
   },
   "invitations": {
     "pending": "Odottavat",

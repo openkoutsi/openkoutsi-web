@@ -118,6 +118,35 @@ export interface InstanceInfoResponse {
   allow_personal_access_tokens: boolean
 }
 
+// ── Account identifiers (issue #62) ────────────────────────────────────────
+
+/** The caller's own login identifiers, as served by GET /api/auth/account. */
+export interface AccountResponse {
+  /** Set on invite-created accounts; null on ones that signed up by email. */
+  username: string | null
+  email: string | null
+  email_verified: boolean
+  /** An address awaiting confirmation, or null when no change is pending. */
+  pending_email: string | null
+  /**
+   * Whether the pending change also needs the address being *left* to approve
+   * it. False only for a first-time set on an account that had no address —
+   * there is nothing to approve against then.
+   */
+  pending_requires_old: boolean
+  pending_confirmed_new: boolean
+  pending_confirmed_old: boolean
+}
+
+/** The outcome of opening one of the two links a change sends. */
+export interface EmailChangeConfirmResponse {
+  /** False when this side landed but the other mailbox has yet to approve. */
+  complete: boolean
+  /** Which side is still outstanding ("old" / "new"); null once complete. */
+  awaiting: string | null
+  new_email: string | null
+}
+
 // ── Personal access tokens (issue #46) ─────────────────────────────────────
 
 /** One entry of the scope vocabulary, as served by GET /api/tokens/scopes. */
