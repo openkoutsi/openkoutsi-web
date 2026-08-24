@@ -414,7 +414,35 @@
       },
       "fixedCount": "openkoutsi käyttää kiinteää {count} vyöhykkeen mallia, joten voit muuttaa vain rajoja."
     },
-    "syncZonesSkipped": "Jäi ennalleen: {kinds} — palvelu palautti eri määrän vyöhykkeitä kuin openkoutsi käyttää."
+    "syncZonesSkipped": "Jäi ennalleen: {kinds} — palvelu palautti eri määrän vyöhykkeitä kuin openkoutsi käyttää.",
+    "email": {
+      "title": "Sähköpostiosoite",
+      "current": "Tilisi sähköpostiosoite",
+      "none": "Tällä tilillä ei ole vielä sähköpostiosoitetta.",
+      "usernameOnly": "Kirjaudut sisään tunnuksella {username}.",
+      "changeDesc": "Vaihda tilisi toiseen osoitteeseen. Lähetämme vahvistuslinkin uuteen osoitteeseen — mikään ei muutu ennen kuin avaat sen.",
+      "setDesc": "Lisää sähköpostiosoite, jotta voit palauttaa salasanasi itse ja kirjautua sillä sisään. Lähetämme siihen vahvistuslinkin.",
+      "changeBtn": "Vaihda sähköpostiosoite",
+      "setBtn": "Lisää sähköpostiosoite",
+      "dialogTitle": "Vaihda sähköpostiosoitteesi",
+      "dialogTitleSet": "Lisää sähköpostiosoite",
+      "dialogDesc": "Lähetämme vahvistuslinkin uuteen osoitteeseen. Nykyinen osoitteesi toimii, kunnes avaat sen.",
+      "newLabel": "Uusi sähköpostiosoite",
+      "newPlaceholder": "sinä@esimerkki.fi",
+      "passwordLabel": "Nykyinen salasana",
+      "passwordPlaceholder": "Salasanasi",
+      "passwordHint": "Salasanan vahvistaminen estää sitä, että joku selaimeesi päässyt voisi siirtää tilisi.",
+      "submit": "Lähetä vahvistuslinkki",
+      "sending": "Lähetetään…",
+      "requestedTitle": "Tarkista uusi postilaatikko",
+      "requestedDesc": "Jos osoitetta voi käyttää, vahvistuslinkki on matkalla. Se vanhenee tunnissa.",
+      "requestFailed": "Muutosta ei voitu pyytää",
+      "pending": "Odotetaan vahvistusta osoitteessa {email}",
+      "pendingHint": "Viimeistele avaamalla sinne lähetetty linkki. Se vanhenee tunnin kuluttua lähetyksestä.",
+      "cancel": "Peruuta tämä muutos",
+      "cancelling": "Peruutetaan…",
+      "cancelled": "Odottava muutos peruutettu"
+    }
   },
   "settings": {
     "title": "Asetukset",

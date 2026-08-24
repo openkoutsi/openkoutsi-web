@@ -118,6 +118,18 @@ export interface InstanceInfoResponse {
   allow_personal_access_tokens: boolean
 }
 
+// ── Account identifiers (issue #62) ────────────────────────────────────────
+
+/** The caller's own login identifiers, as served by GET /api/auth/account. */
+export interface AccountResponse {
+  /** Set on invite-created accounts; null on ones that signed up by email. */
+  username: string | null
+  email: string | null
+  email_verified: boolean
+  /** An address awaiting confirmation, or null when no change is pending. */
+  pending_email: string | null
+}
+
 // ── Personal access tokens (issue #46) ─────────────────────────────────────
 
 /** One entry of the scope vocabulary, as served by GET /api/tokens/scopes. */
