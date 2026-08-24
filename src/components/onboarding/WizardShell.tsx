@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ReactNode } from 'react'
+import { useHoldPageReload } from '@/lib/resumeGuard'
 
 const TOTAL_STEPS = 7 // steps 0–6; step 0 is consent (no skip/back)
 
@@ -35,6 +36,10 @@ export function WizardShell({
   hideNav,
 }: WizardShellProps) {
   const t = useTranslations('onboarding')
+
+  // The step survives a reload — it is in the URL — but the fields inside it do
+  // not, and being made to re-enter zones or an FTP is a poor welcome.
+  useHoldPageReload(true)
 
   const displayStep = step + 1 // step 0 shown as "Step 1"
   const displayTotal = TOTAL_STEPS

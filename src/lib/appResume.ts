@@ -17,6 +17,21 @@ export interface AppResumeOptions {
   throttleMs?: number
 }
 
+/** What the resume handler is told about the absence that just ended. */
+export interface AppResumeInfo {
+  /**
+   * How long the app spent in the background, in milliseconds, or `null` when
+   * that is not knowable — a `pageshow` restoring a page instance that never
+   * saw the matching `pagehide`. Callers that care should read `null` as "we
+   * do not know, assume it was a long time".
+   *
+   * Measured on the wall clock, which is the right one here: it keeps running
+   * while the page is suspended, and suspension is exactly what is being
+   * measured.
+   */
+  awayMs: number | null
+}
+
 /**
  * Run `callback` whenever the app comes back to the foreground.
  *
@@ -41,11 +56,15 @@ export interface AppResumeOptions {
  * caller has just mounted and fetched, and a resume callback there would only
  * duplicate that work.
  *
+ * The callback is told how long the app was away (see {@link AppResumeInfo}),
+ * because a two-second glance at another app and a night on the bedside table
+ * do not deserve the same response.
+ *
  * Returns an unsubscribe function. Safe to call during SSR, where it does
  * nothing.
  */
 export function onAppResume(
-  callback: () => void,
+  callback: (info: AppResumeInfo) => void,
   options: AppResumeOptions = {},
 ): () => void {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -55,17 +74,33 @@ export function onAppResume(
   const throttleMs = options.throttleMs ?? RESUME_THROTTLE_MS
   let lastFiredAt = 0
   let wasHidden = false
+  let hiddenAt: number | null = null
 
   const fire = () => {
     const now = Date.now()
     if (now - lastFiredAt < throttleMs) return
     lastFiredAt = now
-    callback()
+    const awayMs = hiddenAt === null ? null : now - hiddenAt
+    hiddenAt = null
+    callback({ awayMs })
+  }
+
+  /**
+   * Leaving the foreground. The throttle is reset here rather than only being
+   * measured from the last fire: the window exists to collapse the burst of
+   * events that *one* resume delivers, and going away and coming back is by
+   * definition a new resume however quickly it happens. Without the reset, an
+   * athlete who flicks to another app and straight back gets nothing.
+   */
+  const markHidden = () => {
+    wasHidden = true
+    if (hiddenAt === null) hiddenAt = Date.now()
+    lastFiredAt = 0
   }
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
-      wasHidden = true
+      markHidden()
       return
     }
     wasHidden = false
@@ -80,7 +115,7 @@ export function onAppResume(
   }
 
   const handlePageHide = () => {
-    wasHidden = true
+    markHidden()
   }
 
   document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -100,7 +135,10 @@ export function onAppResume(
  * The callback is held in a ref, so it may be redefined on every render
  * without re-subscribing.
  */
-export function useAppResume(callback: () => void, options: AppResumeOptions = {}) {
+export function useAppResume(
+  callback: (info: AppResumeInfo) => void,
+  options: AppResumeOptions = {},
+) {
   const callbackRef = useRef(callback)
   const throttleMs = options.throttleMs
 
@@ -109,7 +147,7 @@ export function useAppResume(callback: () => void, options: AppResumeOptions = {
   })
 
   useEffect(
-    () => onAppResume(() => callbackRef.current(), { throttleMs }),
+    () => onAppResume((info) => callbackRef.current(info), { throttleMs }),
     [throttleMs],
   )
 }

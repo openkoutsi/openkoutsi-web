@@ -102,6 +102,71 @@ describe('onAppResume', () => {
     stop()
   })
 
+  it('fires on a second resume inside the throttle window', () => {
+    // The throttle is there to collapse the burst of events one resume
+    // delivers, not to ignore a second resume. Flicking to another app and
+    // straight back is a new resume however fast it happens (issue #86).
+    const callback = vi.fn()
+    const stop = onAppResume(callback, { throttleMs: 5_000 })
+
+    setVisibility('hidden')
+    setVisibility('visible')
+    expect(callback).toHaveBeenCalledTimes(1)
+
+    setVisibility('hidden')
+    setVisibility('visible')
+    expect(callback).toHaveBeenCalledTimes(2)
+
+    stop()
+  })
+
+  describe('the absence it reports', () => {
+    it('measures how long the app was away', () => {
+      vi.useFakeTimers()
+      const callback = vi.fn()
+      const stop = onAppResume(callback)
+
+      setVisibility('hidden')
+      vi.advanceTimersByTime(90_000)
+      setVisibility('visible')
+
+      expect(callback).toHaveBeenCalledWith({ awayMs: 90_000 })
+
+      stop()
+    })
+
+    it('measures from the pagehide when one came first', () => {
+      vi.useFakeTimers()
+      const callback = vi.fn()
+      const stop = onAppResume(callback)
+
+      pageHide()
+      vi.advanceTimersByTime(1_000)
+      setVisibility('hidden')
+      vi.advanceTimersByTime(29_000)
+      pageShow(true)
+
+      // The app left the foreground at the `pagehide`, not at the visibility
+      // change that trailed it.
+      expect(callback).toHaveBeenCalledWith({ awayMs: 30_000 })
+
+      stop()
+    })
+
+    it('reports an unknown absence for a bare persisted pageshow', () => {
+      // Restored from the back/forward cache on a page instance that never saw
+      // the matching `pagehide` — the age of the document is not knowable here.
+      const callback = vi.fn()
+      const stop = onAppResume(callback)
+
+      pageShow(true)
+
+      expect(callback).toHaveBeenCalledWith({ awayMs: null })
+
+      stop()
+    })
+  })
+
   it('stops listening after unsubscribing', () => {
     const callback = vi.fn()
     const stop = onAppResume(callback)

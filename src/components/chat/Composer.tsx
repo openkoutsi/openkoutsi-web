@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { AiDisclosure } from '@/components/AiDisclosure'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { useHoldPageReload } from '@/lib/resumeGuard'
 import { CoachBoundaryNotice } from './CoachBoundaryNotice'
 
 /**
@@ -40,6 +41,10 @@ export function Composer({
   const trimmed = value.trim()
   const tooLong = trimmed.length > maxChars
   const canSend = trimmed.length > 0 && !tooLong && !disabled && !busy
+
+  // A question typed but not yet sent is the athlete's own words, and a resume
+  // that reloaded the page would take them away.
+  useHoldPageReload(trimmed.length > 0)
 
   function submit() {
     if (!canSend) return

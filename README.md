@@ -61,12 +61,38 @@ as a failed import.
 Screens that show live data poll with SWR's `refreshInterval`, but a timer alone
 cannot keep a mobile app current: iOS suspends JavaScript while the app is
 backgrounded — most aggressively when the site is launched from a Home Screen
-icon — and the ticks that were missed are never replayed. `ResumeRevalidator`
-(`src/components/ResumeRevalidator.tsx`, mounted once in the root providers)
-therefore refetches every mounted SWR key whenever the app returns to the
-foreground, using the resume signal from `src/lib/appResume.ts`
-(`visibilitychange` + `pageshow`/`pagehide`, de-duplicated so one resume means
-one pass).
+icon — and the ticks that were missed are never replayed. `ResumeRefresher`
+(`src/components/ResumeRefresher.tsx`, mounted once in the root providers)
+therefore acts whenever the app returns to the foreground, on the resume signal
+from `src/lib/appResume.ts` (`visibilitychange` + `pageshow`/`pagehide`,
+de-duplicated so one resume means one pass, and re-armed on every `pagehide` so
+that leaving and coming straight back still counts).
+
+**What it does depends on how long the app was away**, which the resume signal
+reports as `awayMs`. Under a minute it refetches every mounted SWR key in place.
+A minute or more — or an absence it cannot measure, which is the
+restored-from-bfcache case — and it reloads the page instead.
+
+Reloading looks like the heavier option and is the lighter one. The access token
+lives in memory and expires after an hour, so a phone picked up the next morning
+resumes with a dead token and *every* mounted key answers 401 at the same moment;
+refetching in place means the athlete waits out a fan-out of refresh-and-retry
+round-trips on a radio that has only just woken up. A reload asks once — the
+fresh document's `AuthProvider` restores one token and fetches once — and picks
+up any new deploy on the way. Both halves of that matter: `apiFetch` also
+single-flights the token refresh, so a burst of simultaneous 401s mints one
+`POST /api/auth/refresh` rather than ten racing for the same cookie, and it now
+distinguishes a refusal (401/403 — the session really has ended) from a refresh
+it could not make at all (network error, 429, 5xx), which leaves the session
+alone instead of logging the athlete out over one dropped packet.
+
+A reload throws away everything held in component state, so it is skipped — and
+the in-place refetch used instead — when the app is offline, when any modal is
+open (one `[role="dialog"]` query covers every Radix dialog in the app), within
+`MIN_UPTIME_MS` of the page loading (a loop guard), or when something has taken a
+claim via `holdPageReload` (`src/lib/resumeGuard.ts`). The claim is what protects
+the athlete's own typing: an unsent chat message, an upload in flight, the middle
+of the onboarding wizard.
 
 SWR's own `revalidateOnFocus` stays off: it fires on every window focus and does
 not see the `pageshow` that an iOS standalone app resumes with. The dashboard
@@ -74,12 +100,12 @@ additionally re-runs the daily metrics catch-up on resume and shows when it last
 received data, next to a manual refresh button — a Home Screen web app has no
 address bar to reload from.
 
-Because the mechanism keys on SWR, anything that fetches outside it is invisible
-to `ResumeRevalidator`. The RPE prompt (`src/components/activities/RpePrompt.tsx`)
-used to be exactly that, and so never asked about rides that synced while the app
-was backgrounded; it now holds the pending queue as an SWR key and additionally
-takes the resume signal itself, so a resume re-prompts even when the queue came
-back unchanged (a deep-equal refetch leaves the cached object — and therefore the
+Because the in-place path keys on SWR, anything that fetches outside it is
+invisible to it. The RPE prompt (`src/components/activities/RpePrompt.tsx`) used
+to be exactly that, and so never asked about rides that synced while the app was
+backgrounded; it now holds the pending queue as an SWR key and additionally takes
+the resume signal itself, so a resume re-prompts even when the queue came back
+unchanged (a deep-equal refetch leaves the cached object — and therefore the
 effects watching it — untouched).
 
 ## Prerequisites

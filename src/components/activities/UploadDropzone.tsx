@@ -7,6 +7,7 @@ import { apiFetch, fetcher } from '@/lib/api'
 import { toast } from '@/components/ui/use-toast'
 import { Upload, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useHoldPageReload } from '@/lib/resumeGuard'
 import {
   chooseUploadRoute,
   importableFiles,
@@ -36,6 +37,9 @@ export function UploadDropzone({ onUploaded, variant = 'compact' }: Props) {
   const t = useTranslations('activities')
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
+
+  // Reloading mid-upload abandons the transfer.
+  useHoldPageReload(uploading)
   const [jobId, setJobId] = useState<string | null>(null)
   const dropRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
