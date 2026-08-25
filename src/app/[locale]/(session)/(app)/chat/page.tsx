@@ -286,7 +286,7 @@ export default function ChatPage() {
         {/* The marker `ChatThread` looks for; see `SCROLLER_ATTR`. */}
         <div className="flex-1 overflow-y-auto px-4 py-4" {...{ [SCROLLER_ATTR]: true }}>
           {messages.length === 0 ? (
-            <EmptyThread onPick={send} />
+            <EmptyThread />
           ) : (
             <ChatThread messages={messages} onRetry={retry} />
           )}

@@ -60,12 +60,17 @@ describe('chat i18n', () => {
     expect(commonFi.nav).toHaveProperty('chat')
   })
 
-  it('offers the same number of starter questions in both locales', () => {
-    // The empty state carries the whole burden of teaching what Koutsi will
-    // answer, since a bare text box tells the athlete nothing about where the
-    // scope boundary is. A locale short of starters teaches less.
-    expect(chatEn.empty.starters.length).toBeGreaterThanOrEqual(4)
-    expect(chatFi.empty.starters.length).toBe(chatEn.empty.starters.length)
+  it('greets and explains what Koutsi can reach, in both locales', () => {
+    // What is left of the empty state after the tappable example questions were
+    // removed. The structural-parity test above would not catch a locale that
+    // kept the keys and emptied the strings.
+    for (const chat of [chatEn, chatFi]) {
+      expect(chat.empty.greeting.trim()).not.toBe('')
+      expect(chat.empty.hint.trim()).not.toBe('')
+    }
+    // The starters are gone; nothing should reintroduce them on one side only.
+    expect(chatEn.empty).not.toHaveProperty('starters')
+    expect(chatFi.empty).not.toHaveProperty('starters')
   })
 
   it('states the medical boundary in both locales', () => {
