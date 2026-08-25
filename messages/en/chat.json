@@ -19,14 +19,7 @@
   "boundary": "Koutsi is a coach, not a clinician. For anything about symptoms, injury, illness or medication, talk to a doctor.",
   "empty": {
     "greeting": "What would you like to ask?",
-    "hint": "Koutsi can look at your activities, plan, goals and fitness numbers to answer. Here are some things to start with.",
-    "starters": [
-      "I'm three weeks out from my event and my form is still negative — should I be worried?",
-      "Work is going to eat next week. What should I cut?",
-      "My threshold intervals keep falling apart in the last rep. What do I do about that?",
-      "Should I be doing more Z2 or more intensity right now?",
-      "What should I eat on a four hour ride?"
-    ]
+    "hint": "Koutsi can look at your activities, plan, goals and fitness numbers to answer."
   },
   "status": {
     "queued": "Koutsi is finishing something else — your question is next…",

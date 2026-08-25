@@ -19,14 +19,7 @@
   "boundary": "Koutsi on valmentaja, ei lääkäri. Oireisiin, vammoihin, sairauksiin ja lääkitykseen liittyvissä asioissa ota yhteyttä lääkäriin.",
   "empty": {
     "greeting": "Mitä haluaisit kysyä?",
-    "hint": "Koutsi voi katsoa aktiviteettejasi, ohjelmaasi, tavoitteitasi ja kuntolukujasi vastatakseen. Tässä muutama aloitus.",
-    "starters": [
-      "Tapahtumaani on kolme viikkoa ja kuntoni on yhä miinuksella — pitäisikö olla huolissaan?",
-      "Ensi viikko menee töihin. Mistä harjoituksista kannattaa tinkiä?",
-      "Kynnysvetoni hajoavat aina viimeisellä toistolla. Mitä sille voi tehdä?",
-      "Pitäisikö minun tehdä nyt enemmän Z2:ta vai enemmän kovaa?",
-      "Mitä kannattaa syödä neljän tunnin lenkillä?"
-    ]
+    "hint": "Koutsi voi katsoa aktiviteettejasi, ohjelmaasi, tavoitteitasi ja kuntolukujasi vastatakseen."
   },
   "status": {
     "queued": "Koutsi viimeistelee muuta — kysymyksesi on seuraavana…",
