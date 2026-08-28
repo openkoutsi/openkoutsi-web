@@ -63,12 +63,24 @@ function ride(id: string, name = `Ride ${id}`): Activity {
     decoupling_reason: null,
     workout_category: null,
     labels: [],
+    label_suggestions: {},
     notes: null,
     rpe: null,
     has_fit_file: true,
     original_format: null,
     status: 'processed',
     created_at: `2026-08-01T07:00:00Z`,
+  }
+}
+
+/** A ride the commute rules picked out but nobody has answered yet (#63). */
+function suggestedCommute(id: string, name = `Ride ${id}`): Activity {
+  return {
+    ...ride(id, name),
+    distance_m: 5400,
+    label_suggestions: {
+      commute: { state: 'pending', source: 'rule:to-work', at: '2026-08-01T07:00:00Z' },
+    },
   }
 }
 
@@ -394,5 +406,134 @@ describe('RpePrompt', () => {
       '/api/athlete',
       expect.objectContaining({ method: 'PATCH' }),
     )
+  })
+
+  describe('commute suggestions (issue #63)', () => {
+    const commuteBox = () => screen.getByRole('checkbox')
+
+    it('arrives pre-ticked when the rules picked the ride out', async () => {
+      mocks.fetcher.mockResolvedValue(queue(suggestedCommute('r1', 'Morning loop')))
+      renderPrompt()
+
+      await prompted('Morning loop')
+      expect(commuteBox()).toBeChecked()
+    })
+
+    it('says why it is ticked', async () => {
+      mocks.fetcher.mockResolvedValue(queue(suggestedCommute('r1', 'Morning loop')))
+      renderPrompt()
+
+      await prompted('Morning loop')
+      expect(screen.getByText('rpePrompt.commuteSuggested')).toBeInTheDocument()
+    })
+
+    it('is not ticked on a ride nothing suggested', async () => {
+      mocks.fetcher.mockResolvedValue(queue(ride('r1', 'Morning loop')))
+      renderPrompt()
+
+      await prompted('Morning loop')
+      expect(commuteBox()).not.toBeChecked()
+    })
+
+    it('leaving it ticked accepts the suggestion', async () => {
+      mocks.fetcher.mockResolvedValue(queue(suggestedCommute('r1', 'Morning loop')))
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByRole('button', { name: '7' }))
+      await user.click(screen.getByText('rpePrompt.rate'))
+
+      expect(mocks.apiFetch).toHaveBeenCalledWith(
+        '/api/activities/r1',
+        expect.objectContaining({
+          body: JSON.stringify({ rpe: 7, label_answers: { commute: 'accepted' } }),
+        }),
+      )
+    })
+
+    it('unticking it dismisses the suggestion rather than doing nothing', async () => {
+      // The half that is easy to miss and matters most: without it the same
+      // ride is proposed again after every reprocess.
+      mocks.fetcher.mockResolvedValue(queue(suggestedCommute('r1', 'Morning loop')))
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      await user.click(commuteBox())
+      await user.click(screen.getByRole('button', { name: '7' }))
+      await user.click(screen.getByText('rpePrompt.rate'))
+
+      expect(mocks.apiFetch).toHaveBeenCalledWith(
+        '/api/activities/r1',
+        expect.objectContaining({
+          body: JSON.stringify({ rpe: 7, label_answers: { commute: 'dismissed' } }),
+        }),
+      )
+    })
+
+    it('answers the suggestion even when the ride is skipped unrated', async () => {
+      mocks.fetcher.mockResolvedValue(queue(suggestedCommute('r1', 'Morning loop')))
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByText('rpePrompt.skip'))
+
+      expect(mocks.apiFetch).toHaveBeenCalledWith(
+        '/api/activities/r1',
+        expect.objectContaining({
+          body: JSON.stringify({ label_answers: { commute: 'accepted' } }),
+        }),
+      )
+    })
+
+    it('ticking it by hand on an unsuggested ride still labels the old way', async () => {
+      mocks.fetcher.mockResolvedValue(queue(ride('r1', 'Morning loop')))
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      await user.click(commuteBox())
+      await user.click(screen.getByText('rpePrompt.skip'))
+
+      expect(mocks.apiFetch).toHaveBeenCalledWith(
+        '/api/activities/r1',
+        expect.objectContaining({ body: JSON.stringify({ labels: ['commute'] }) }),
+      )
+    })
+
+    it('skipping an unsuggested, unticked ride writes nothing to the activity', async () => {
+      mocks.fetcher.mockResolvedValue(queue(ride('r1', 'Morning loop')))
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      await user.click(screen.getByText('rpePrompt.skip'))
+
+      expect(mocks.apiFetch).not.toHaveBeenCalledWith(
+        '/api/activities/r1',
+        expect.anything(),
+      )
+    })
+
+    it('re-seeds the box from the next ride in the queue', async () => {
+      // Per-ride state: carrying the previous ride's tick forward would label
+      // rides the athlete never confirmed.
+      mocks.fetcher.mockResolvedValue(
+        queue(suggestedCommute('r1', 'Morning loop'), ride('r2', 'Evening spin')),
+      )
+      const user = userEvent.setup()
+      renderPrompt()
+
+      await prompted('Morning loop')
+      expect(commuteBox()).toBeChecked()
+
+      await user.click(screen.getByRole('button', { name: '7' }))
+      await user.click(screen.getByText('rpePrompt.rate'))
+
+      await prompted('Evening spin')
+      expect(commuteBox()).not.toBeChecked()
+    })
   })
 })

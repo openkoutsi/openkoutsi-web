@@ -1,4 +1,4 @@
-import { Activity } from '@/lib/types'
+import { Activity, LabelSuggestion } from '@/lib/types'
 
 /**
  * Sport types that count as cycling.
@@ -30,4 +30,27 @@ export function isCyclingSport(sportType: string | null | undefined): boolean {
 
 export function isCommute(activity: Pick<Activity, 'labels'>): boolean {
   return activity.labels?.includes(COMMUTE_LABEL) ?? false
+}
+
+/**
+ * The unanswered commute suggestion on this ride, if there is one (issue #63).
+ *
+ * Deliberately *not* folded into `isCommute`: a suggestion is what openkoutsi
+ * thinks, and everything that reads `isCommute` — the aerobic-metrics card, the
+ * badge count — is asking what the athlete has confirmed. The two must not blur.
+ */
+export function pendingCommuteSuggestion(
+  activity: Pick<Activity, 'label_suggestions'>,
+): LabelSuggestion | null {
+  const entry = activity.label_suggestions?.[COMMUTE_LABEL]
+  return entry?.state === 'pending' ? entry : null
+}
+
+/**
+ * The rule id behind a suggestion, or null when it came from somewhere else.
+ * Lets a surface link the athlete to the rule that needs fixing.
+ */
+export function suggestionRuleId(suggestion: LabelSuggestion | null): string | null {
+  const source = suggestion?.source
+  return source?.startsWith('rule:') ? source.slice('rule:'.length) : null
 }
