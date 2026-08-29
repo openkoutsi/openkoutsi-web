@@ -28,6 +28,12 @@ export interface UserResponse {
   // Null for self-serve signup accounts, which are keyed by email.
   username: string | null
   email?: string | null
+  /**
+   * When `email` was confirmed; null while it is unconfirmed. Only meaningful
+   * alongside `email` — null on an account that has no address means "nothing
+   * to confirm", not "unconfirmed".
+   */
+  email_verified_at?: string | null
   roles: string[]
   created_at: string
   consented_at?: string | null

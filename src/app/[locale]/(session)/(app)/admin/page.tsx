@@ -46,6 +46,42 @@ import { toast } from '@/components/ui/use-toast'
 // Roles available in the single-instance model. The `coach` role no longer exists.
 const ALL_ROLES = ['administrator', 'user'] as const
 
+/**
+ * Whether the account's email address has been confirmed, shown in the users
+ * table under the identifier it is about.
+ *
+ * A self-serve signup writes the account row before the address is confirmed,
+ * so one nobody finished leaves a row that can never sign in — login by email
+ * requires the stamp — while listing exactly like a working account. This is
+ * the only place an admin can tell the two apart, and it changes what they do:
+ * an unconfirmed row wants a fresh signup or a delete, not a password reset.
+ *
+ * Renders nothing when there is no address, because then there is nothing to
+ * confirm: an invite-created account is reached by username, and labelling it
+ * "not confirmed" would invent a problem it does not have.
+ */
+function EmailConfirmationBadge({ user }: { user: UserResponse }) {
+  const t = useTranslations('admin')
+  if (!user.email) return null
+  if (!user.email_verified_at) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-500">
+        {t('users.emailUnconfirmed')}
+      </span>
+    )
+  }
+  return (
+    <span
+      className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400"
+      title={t('users.emailConfirmedOn', {
+        date: new Date(user.email_verified_at).toLocaleDateString(),
+      })}
+    >
+      {t('users.emailConfirmed')}
+    </span>
+  )
+}
+
 function RoleBadge({ role }: { role: string }) {
   const color =
     role === 'administrator'
@@ -388,7 +424,12 @@ function UsersTab() {
         <tbody>
           {users.map((u) => (
             <tr key={u.id} className="border-b last:border-0">
-              <td className="py-3 pr-4 font-mono">{u.email ?? u.username ?? u.id}</td>
+              <td className="py-3 pr-4">
+                <div className="space-y-1">
+                  <p className="font-mono">{u.email ?? u.username ?? u.id}</p>
+                  <EmailConfirmationBadge user={u} />
+                </div>
+              </td>
               <td className="py-3 pr-4">
                 {editingId === u.id ? (
                   <div className="flex flex-wrap gap-1">
