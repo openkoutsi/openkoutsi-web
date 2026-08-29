@@ -58,7 +58,10 @@
     "emailClear": "Clear address",
     "emailSave": "Save address",
     "emailSaving": "Saving…",
-    "emailUpdated": "Email address updated"
+    "emailUpdated": "Email address updated",
+    "emailConfirmed": "Confirmed",
+    "emailConfirmedOn": "Address confirmed {date}",
+    "emailUnconfirmed": "Not confirmed"
   },
   "invitations": {
     "pending": "Pending",

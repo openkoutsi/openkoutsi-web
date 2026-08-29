@@ -58,7 +58,10 @@
     "emailClear": "Poista osoite",
     "emailSave": "Tallenna osoite",
     "emailSaving": "Tallennetaan…",
-    "emailUpdated": "Sähköpostiosoite päivitetty"
+    "emailUpdated": "Sähköpostiosoite päivitetty",
+    "emailConfirmed": "Vahvistettu",
+    "emailConfirmedOn": "Osoite vahvistettu {date}",
+    "emailUnconfirmed": "Ei vahvistettu"
   },
   "invitations": {
     "pending": "Odottavat",

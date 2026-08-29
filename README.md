@@ -180,6 +180,25 @@ The admin console gains the matching instance toggle beside `allow_self_signup`,
 and a per-user token dialog that lists and revokes — never issues, and never
 shows a token's name.
 
+## Confirmed addresses in the admin user list
+
+Each row in **Admin → Users** carries a badge under the account identifier
+saying whether that address has been confirmed, from `email_verified_at` on
+`GET /api/admin/users`.
+
+It exists because self-serve signup writes the account row *before* the address
+is confirmed, and login by email requires the stamp. A signup nobody finished is
+therefore a row that can never sign in, listed identically to a working account
+— and the console is the only place the difference is visible. It also changes
+what the admin does with the row: an unconfirmed one wants a fresh signup or a
+delete, not the password reset sitting in the same row's actions.
+
+`EmailConfirmationBadge` renders **nothing** when the account has no address,
+which is the case the field alone gets wrong. `email_verified_at` is null both
+for an unconfirmed address and for an account that never had one, so a badge
+driven by that field by itself would label every invite-created account "not
+confirmed" — an account reached by username has nothing to confirm.
+
 ## The MCP server switch
 
 **Admin → Settings → Allow the MCP server** drives `allow_mcp_server` on
