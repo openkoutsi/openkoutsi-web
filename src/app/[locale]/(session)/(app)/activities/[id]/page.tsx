@@ -54,6 +54,8 @@ import { AiDisclosure } from '@/components/AiDisclosure'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
 
+import { suggestionRuleId } from '@/lib/sports'
+
 const ACTIVITY_LABELS = ['race', 'commute'] as const
 
 interface Props {
@@ -127,6 +129,25 @@ export default function ActivityDetailPage({ params }: Props) {
       await mutate()
     } catch {
       // silently ignore; labels revert on next render
+    }
+  }
+
+  /**
+   * Answer a suggested label (issue #63). Distinct from `handleLabelToggle`
+   * above: accepting applies the label *and* settles the suggestion in one
+   * write, and dismissing records a refusal that outlives reprocessing — a
+   * plain label edit would leave the suggestion pending and the ride would be
+   * proposed all over again.
+   */
+  async function handleSuggestionAnswer(label: string, answer: 'accepted' | 'dismissed') {
+    try {
+      await apiFetch(`/api/activities/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ label_answers: { [label]: answer } }),
+      })
+      await mutate()
+    } catch {
+      toast({ title: t('detail.labels.answerFailed'), variant: 'destructive' })
     }
   }
 
@@ -425,6 +446,49 @@ export default function ActivityDetailPage({ params }: Props) {
               )
             })}
           </div>
+          {/* An unanswered suggestion, shown as its own row rather than as a
+              third state of the buttons above (issue #63): what openkoutsi
+              guessed and what the athlete confirmed are different kinds of
+              thing, and a chip that looked half-applied would blur them. */}
+          {ACTIVITY_LABELS.map((label) => {
+            const suggestion = activity.label_suggestions?.[label]
+            if (suggestion?.state !== 'pending') return null
+            const ruleId = suggestionRuleId(suggestion)
+            return (
+              <div
+                key={`suggestion-${label}`}
+                className="flex flex-wrap items-center gap-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-2"
+              >
+                <span className="text-sm">
+                  {t('detail.labels.suggested', { label: t(`detail.labels.${label}`) })}
+                </span>
+                {ruleId && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('detail.labels.suggestedByRule', { rule: ruleId })}
+                  </span>
+                )}
+                {suggestion.source === 'strava' && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('detail.labels.suggestedByStrava')}
+                  </span>
+                )}
+                <div className="ml-auto flex gap-2">
+                  <button
+                    onClick={() => handleSuggestionAnswer(label, 'accepted')}
+                    className="px-3 py-1 rounded-full text-sm font-medium border border-primary bg-primary text-primary-foreground"
+                  >
+                    {t('detail.labels.accept')}
+                  </button>
+                  <button
+                    onClick={() => handleSuggestionAnswer(label, 'dismissed')}
+                    className="px-3 py-1 rounded-full text-sm font-medium border border-border bg-background text-muted-foreground hover:border-primary/50"
+                  >
+                    {t('detail.labels.dismiss')}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
           <div>
             <p className="text-sm text-muted-foreground mb-1.5">{t('detail.rpe.title')}</p>
             <div className="flex flex-wrap items-center gap-1">

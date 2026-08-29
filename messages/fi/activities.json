@@ -73,7 +73,8 @@
     "skip": "Ohita",
     "askLater": "Kysy myöhemmin",
     "remaining": "{count} arvioitavaa jäljellä",
-    "saveFailed": "Arvion tallentaminen epäonnistui"
+    "saveFailed": "Arvion tallentaminen epäonnistui",
+    "commuteSuggested": "{distance} km klo {time} — näyttää tavalliselta työmatkaltasi."
   },
   "processing": "Käsitellään…",
   "detail": {
@@ -198,7 +199,13 @@
     "labels": {
       "title": "Tunnisteet",
       "race": "Kilpailu",
-      "commute": "Työmatkaliikunta"
+      "commute": "Työmatkaliikunta",
+      "suggested": "Näyttää siltä että tämä on {label}",
+      "suggestedByRule": "osui sääntöön ”{rule}”",
+      "suggestedByStrava": "Stravasta",
+      "accept": "Kyllä",
+      "dismiss": "Ei",
+      "answerFailed": "Vastauksen tallennus epäonnistui"
     },
     "notes": {
       "title": "Muistiinpanot",
@@ -246,5 +253,17 @@
       "failed": "Epäonnistui"
     },
     "noPowerNote": "Tämä harjoitus tuotiin GPX-tiedostosta, joka ei tallenna tehoa. Kuormitus on laskettu sykkeestä."
+  },
+  "commuteReview": {
+    "title": "Ehdotetut työmatkat",
+    "desc": "Lenkit jotka työmatkasääntösi poimivat. Mitään ei merkitä ennen kuin vahvistat, ja hylkäämäsi pysyvät hylättyinä.",
+    "pending": "{count} odottaa vastausta",
+    "acceptAll": "Merkitse kaikki {count} työmatkoiksi",
+    "dismissAll": "Näistä {count} ei ole työmatkoja",
+    "bulkHint": "Tämä vastaa alla näkyviin lenkkeihin. Jos sääntö osuu toistuvasti väärin, korjaa ensin sääntö asetuksista.",
+    "byRule": "sääntö ”{rule}”",
+    "empty": "Mikään ei odota vastausta.",
+    "editRules": "Muokkaa työmatkasääntöjä",
+    "answerFailed": "Vastauksen tallennus epäonnistui"
   }
 }

@@ -40,6 +40,7 @@ function activity(overrides: Partial<ActivityDetail> = {}): ActivityDetail {
     decoupling_reason: null,
     workout_category: 'endurance',
     labels: [],
+    label_suggestions: {},
     notes: null,
     rpe: null,
     has_fit_file: true,

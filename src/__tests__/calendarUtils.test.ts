@@ -34,6 +34,7 @@ function makeActivity(id: string, start_time: string): Activity {
     decoupling_reason: null,
     workout_category: null,
     labels: [],
+    label_suggestions: {},
     notes: null,
     rpe: null,
     has_fit_file: false,

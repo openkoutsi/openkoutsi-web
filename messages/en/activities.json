@@ -73,7 +73,8 @@
     "skip": "Skip",
     "askLater": "Ask again later",
     "remaining": "{count} more to rate",
-    "saveFailed": "Failed to save your rating"
+    "saveFailed": "Failed to save your rating",
+    "commuteSuggested": "{distance} km at {time} — looks like one of your usual commutes."
   },
   "processing": "Processing…",
   "detail": {
@@ -198,7 +199,13 @@
     "labels": {
       "title": "Labels",
       "race": "Race",
-      "commute": "Commute"
+      "commute": "Commute",
+      "suggested": "Looks like a {label}",
+      "suggestedByRule": "matched your rule “{rule}”",
+      "suggestedByStrava": "from Strava",
+      "accept": "Yes",
+      "dismiss": "No",
+      "answerFailed": "Could not save your answer"
     },
     "notes": {
       "title": "Notes",
@@ -246,5 +253,17 @@
       "failed": "Failed"
     },
     "noPowerNote": "This activity came from a GPX file, which records no power. Its Load is derived from heart rate instead."
+  },
+  "commuteReview": {
+    "title": "Suggested commutes",
+    "desc": "Rides your commute rules picked out. Nothing here is labelled until you say so, and anything you turn down stays turned down.",
+    "pending": "{count} waiting for an answer",
+    "acceptAll": "Mark all {count} as commutes",
+    "dismissAll": "None of these {count} are commutes",
+    "bulkHint": "This answers the rides shown below. If a rule keeps getting it wrong, fix the rule in settings first.",
+    "byRule": "rule “{rule}”",
+    "empty": "Nothing is waiting for an answer.",
+    "editRules": "Edit your commute rules",
+    "answerFailed": "Could not save your answer"
   }
 }

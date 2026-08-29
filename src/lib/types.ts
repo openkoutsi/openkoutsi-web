@@ -273,6 +273,10 @@ export interface Activity {
   decoupling_reason: DecouplingReason | null
   workout_category: string | null
   labels: string[]
+  // Labels openkoutsi thinks apply, kept strictly apart from `labels` above
+  // (issue #63). `labels` is only ever what the athlete has confirmed; this is
+  // what a commute rule — or Strava's own flag — proposed. Keyed by label name.
+  label_suggestions: Record<string, LabelSuggestion>
   notes: string | null
   rpe: number | null
   has_fit_file: boolean
@@ -287,6 +291,60 @@ export interface Activity {
 
 /** Formats openkoutsi can ingest and store an original of (issue #36). */
 export type ActivityFileFormat = 'fit' | 'gpx' | 'tcx'
+
+/** Where a suggested label came from, and what the athlete said about it. */
+export interface LabelSuggestion {
+  /**
+   * `pending` is awaiting an answer; `accepted` and `dismissed` are the
+   * athlete's, and are permanent — a dismissed ride is never suggested again.
+   */
+  state: 'pending' | 'accepted' | 'dismissed'
+  /**
+   * `rule:<id>` for one of the athlete's own commute rules, `strava` for the
+   * provider's own flag. What lets the UI say *why* a ride was picked out, and
+   * point the athlete at the rule to fix rather than at the same wrong
+   * suggestion over and over.
+   */
+  source?: string
+  at?: string
+}
+
+/** One athlete-defined description of what their commute looks like (issue #63). */
+export interface CommuteRule {
+  id: string
+  name?: string
+  /** Exact sport types, lower-cased — `ride`, `ebikeride`. Empty means any. */
+  sport_types?: string[]
+  min_distance_m?: number
+  max_distance_m?: number
+  min_duration_s?: number
+  max_duration_s?: number
+  /** Local-clock spans as `HH:MM`. A start after its end wraps midnight. */
+  windows?: { start: string; end: string }[]
+  /** 0 = Monday. Empty means any day. */
+  weekdays?: number[]
+  /** Skip the confirmation step. Off unless the athlete asks for it. */
+  auto_apply?: boolean
+  enabled?: boolean
+}
+
+export interface CommuteRuleProposal {
+  rule: CommuteRule | null
+  sample_count: number
+  min_samples: number
+}
+
+export interface CommuteScanResult {
+  scanned: number
+  suggested: number
+  applied: number
+}
+
+export interface CommuteFeedback {
+  unmatched_manual_labels: number
+  widen: { rule_id: string; criteria: Record<string, number> }[]
+  review: { rule_id: string; dismissed: number }[]
+}
 
 /** What became of one file in a bulk import. */
 export type ImportOutcome = 'imported' | 'skipped_duplicate' | 'failed'

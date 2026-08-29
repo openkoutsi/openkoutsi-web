@@ -236,6 +236,44 @@ Three things about that field are worth knowing before touching this code:
 The field is null for the whole non-agentic path and null once the answer starts,
 so a finished card looks exactly as it always did.
 
+## Suggested commutes
+
+The backend can propose the `commute` label on rides that match rules the athlete
+wrote (issue #63). The frontend's job is to make answering those proposals cheap,
+and one distinction runs through all of it: **a suggestion is not a label.**
+`activity.labels` is only ever what the athlete confirmed; `label_suggestions` is
+what openkoutsi thinks. `isCommute()` in `src/lib/sports.ts` reads the first,
+`pendingCommuteSuggestion()` the second, and nothing blurs them — the
+aerobic-metrics card and the badge count are asking what the athlete confirmed.
+
+Three surfaces, in the order an athlete meets them:
+
+- **The after-ride prompt** (`RpePrompt.tsx`) arrives with its "This was a
+  commute" box **already ticked** when the ride has a pending suggestion, plus a
+  line saying why. This is the main surface, and the reason a suggested ride is
+  deliberately *not* filtered out of the RPE queue server-side.
+- **The activity page** shows an unanswered suggestion as its own dashed row with
+  Yes/No, below the label buttons rather than as a third state of them.
+- **`/activities/commutes`** works through a backlog in one sitting, which is what
+  makes the backend's history scan worth running.
+
+The subtlety worth knowing before touching any of them: **unticking is an answer,
+not an undo.** When a suggestion is pending, both a tick and an untick send
+`label_answers` — `accepted` or `dismissed`. Sending nothing on an untick leaves
+the suggestion pending, and the same ride is proposed again after every
+reprocess, which reads to the athlete as the app ignoring them. `commuteBody()`
+in `RpePrompt.tsx` is where that decision lives; with no suggestion in play it
+falls back to a plain `labels` write.
+
+Rules themselves are edited in **Settings → Commute detection**
+(`CommuteRulesCard.tsx`), which stores them on `app_settings.commute_rules`. It
+opens prefilled from `GET /api/activities/commute/proposal` — a rule clustered
+out of the athlete's own labelled commutes, because nobody hand-types "between
+4.2 and 6.8 km, 06:41–08:12" — and shows how many rides are currently awaiting an
+answer, because a rule whose effect you cannot see is a rule you will set wrong.
+The match count is read from the server rather than recomputed here: the matcher
+is the backend's, and a second implementation in TypeScript would drift.
+
 ## Ask Koutsi
 
 `/chat` (issue #44) is where the athlete puts their own questions to Koutsi

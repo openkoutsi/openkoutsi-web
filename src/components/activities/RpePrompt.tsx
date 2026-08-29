@@ -8,6 +8,7 @@ import { useAppResume } from '@/lib/appResume'
 import { scheduleReanalyze } from '@/lib/reanalyze'
 import { useAuth } from '@/lib/auth'
 import type { Activity } from '@/lib/types'
+import { pendingCommuteSuggestion } from '@/lib/sports'
 import {
   Dialog,
   DialogContent,
@@ -73,10 +74,13 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
   const [commute, setCommute] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const resetForm = useCallback(() => {
+  // Reset for the *next* ride in the queue. The commute box is seeded from that
+  // ride's own suggestion rather than cleared (issue #63): the whole point of
+  // detection is that the athlete confirms rather than remembers to tick.
+  const resetForm = useCallback((next?: Activity) => {
     setRpe(null)
     setNotes('')
-    setCommute(false)
+    setCommute(next ? pendingCommuteSuggestion(next) !== null : false)
   }, [])
 
   const { data, mutate } = useSWR<RpeQueueResponse>(
@@ -117,7 +121,7 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
 
       setQueue(items)
       setIndex(0)
-      resetForm()
+      resetForm(items[0])
       setOpen(true)
     },
     [resetForm],
@@ -168,11 +172,11 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
   const advance = useCallback(() => {
     if (index + 1 < queue.length) {
       setIndex(index + 1)
-      resetForm()
+      resetForm(queue[index + 1])
     } else {
       finish()
     }
-  }, [index, queue.length, resetForm, finish])
+  }, [index, queue, resetForm, finish])
 
   // Advance the server-side cursor past this ride. The backend merges
   // app_settings, so sending just `rpe_head` preserves the other keys.
@@ -197,18 +201,34 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
     ).catch(() => {})
   }
 
-  function withCommute(activity: Activity): string[] {
-    return Array.from(new Set([...(activity.labels ?? []), 'commute']))
+  /**
+   * What to send for the commute box, given what the athlete left it on.
+   *
+   * When a suggestion is pending, both answers matter and both are sent: a tick
+   * accepts it, an untick *dismisses* it. Dismissing is the half that is easy to
+   * miss and the half that matters most — without it the same ride is proposed
+   * again after every reprocess, and the athlete's "no" means nothing.
+   *
+   * With no suggestion in play, ticking is an ordinary hand-labelling and
+   * unticking is a no-op, so nothing is sent unless the box is on.
+   */
+  function commuteBody(activity: Activity): Record<string, unknown> {
+    const suggested = pendingCommuteSuggestion(activity) !== null
+    if (commute) {
+      return suggested
+        ? { label_answers: { commute: 'accepted' } }
+        : { labels: Array.from(new Set([...(activity.labels ?? []), 'commute'])) }
+    }
+    return suggested ? { label_answers: { commute: 'dismissed' } } : {}
   }
 
   async function handleRate() {
     if (!current || rpe == null) return
     setSaving(true)
     try {
-      const body: Record<string, unknown> = { rpe }
+      const body: Record<string, unknown> = { rpe, ...commuteBody(current) }
       const trimmed = notes.trim()
       if (trimmed) body.notes = trimmed
-      if (commute) body.labels = withCommute(current)
       await apiFetch(`/api/activities/${current.id}`, {
         method: 'PATCH',
         body: JSON.stringify(body),
@@ -232,10 +252,11 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
     if (!current) return
     setSaving(true)
     try {
-      if (commute) {
+      const body = commuteBody(current)
+      if (Object.keys(body).length > 0) {
         await apiFetch(`/api/activities/${current.id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ labels: withCommute(current) }),
+          body: JSON.stringify(body),
         })
       }
       await advanceHead(current)
@@ -299,15 +320,34 @@ export function RpePrompt({ reloadSignal = 0 }: { reloadSignal?: number }) {
             rows={2}
             onChange={(e) => setNotes(e.target.value)}
           />
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={commute}
-              onChange={(e) => setCommute(e.target.checked)}
-              className="h-4 w-4 rounded border-border"
-            />
-            {t('rpePrompt.markCommute')}
-          </label>
+          <div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={commute}
+                onChange={(e) => setCommute(e.target.checked)}
+                className="h-4 w-4 rounded border-border"
+              />
+              {t('rpePrompt.markCommute')}
+            </label>
+            {/* Why the box arrived ticked (issue #63). A pre-ticked box with no
+                explanation reads as a bug; with one it reads as the app having
+                noticed something. Unticking is a real answer, not just undoing
+                a default — see `commuteBody`. */}
+            {pendingCommuteSuggestion(current) && (
+              <p className="text-xs text-muted-foreground mt-1 ml-6">
+                {t('rpePrompt.commuteSuggested', {
+                  distance: current.distance_m
+                    ? (current.distance_m / 1000).toFixed(1)
+                    : '?',
+                  time: new Date(current.start_time).toLocaleTimeString(locale, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
+                })}
+              </p>
+            )}
+          </div>
         </div>
         <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
           <Button variant="ghost" onClick={handleAskLater} disabled={saving}>
