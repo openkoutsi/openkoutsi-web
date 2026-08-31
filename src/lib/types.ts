@@ -84,6 +84,10 @@ export interface InstanceSettingsResponse {
   // is told the server is not there rather than connecting and then failing
   // every useful call.
   allow_mcp_server: boolean
+  // Issue #56: offer course recon at all. Defaults **off**, unlike the two
+  // above — the half that distinguishes it needs a routing sidecar the
+  // self-hoster builds tiles for themselves.
+  allow_course_recon: boolean
 }
 
 export interface InstanceSettingsPatch {
@@ -94,6 +98,7 @@ export interface InstanceSettingsPatch {
   allow_self_signup?: boolean
   allow_personal_access_tokens?: boolean
   allow_mcp_server?: boolean
+  allow_course_recon?: boolean
 }
 
 // One aggregation row of the admin LLM-usage summary (issue #9).
@@ -122,6 +127,8 @@ export interface InstanceInfoResponse {
   allow_self_signup: boolean
   // Issue #46: whether the settings card offers personal access tokens at all.
   allow_personal_access_tokens: boolean
+  // Issue #56: whether the Courses page is offered at all on this instance.
+  allow_course_recon: boolean
 }
 
 // ── Account identifiers (issue #62) ────────────────────────────────────────
@@ -988,7 +995,46 @@ export interface CourseSegment {
   start_offset_s: number | null
   /** The descent was bounded by the speed cap rather than by power. */
   speed_capped: boolean
+  /** Null on every course until an instance with a surface matcher runs one. */
+  surface: SurfaceClass | null
+  surface_confidence: SurfaceConfidence | null
+  /** Exactly what the matcher said, preserved rather than discarded. */
+  surface_raw: string | null
+  crr_used: number | null
 }
+
+/** The road surface classes, smoothest first — the order Crr induces. */
+export type SurfaceClass =
+  | 'asphalt'
+  | 'paved'
+  | 'compacted'
+  | 'cobbles'
+  | 'gravel'
+  | 'dirt'
+  | 'grass'
+  | 'unknown'
+
+/**
+ * How much a surface class should be trusted.
+ *
+ * `confirmed` means only an explicit OpenStreetMap tag could have produced this
+ * class. `inferred` means openkoutsi **could not confirm a tag** — which is not
+ * the same as "this road is untagged", and the UI must not shorten it to that.
+ */
+export type SurfaceConfidence = 'confirmed' | 'inferred'
+
+/** `[start_m, end_m, class, confidence, severityStep]`, run-length encoded. */
+export type SurfaceRibbonEntry = [number, number, SurfaceClass, SurfaceConfidence, number]
+
+/** `[start_m, length_m, class, confidence, severityStep]`. */
+export type RoughSectorEntry = [number, number, SurfaceClass, SurfaceConfidence, number]
+
+/**
+ * Where the background surface match got to. `null` is "never attempted",
+ * which is every course on an instance with no matcher — an absence, not a
+ * failure, and never rendered as an error.
+ */
+export type SurfaceStatus = 'pending' | 'done' | 'unavailable' 
 
 /** Why a requested target time could not be met. Both are results, not errors. */
 export type RefusalReason = 'target_faster_than_physics' | 'exceeds_sustainable_power'
@@ -1028,6 +1074,18 @@ export interface CourseDetail extends CourseSummary {
   /** `[distance_m, elevation_m, gradient]` per point, ≤400 of them. */
   profile: [number, number, number][] | null
   segments: CourseSegment[]
+  surface_status: SurfaceStatus | null
+  surface_updated_at: string | null
+  /** Whether this instance could match this course if asked. */
+  surface_matching_available: boolean
+  /**
+   * The surface at full run resolution. Separate from `segments` because the
+   * segment table has a minimum row length and this does not — a 130 m sector
+   * of mud stays drawable even where the pacing rows fold it into a longer one.
+   */
+  surface_ribbon: SurfaceRibbonEntry[] | null
+  /** Stretches worth naming, including ones too short for their own row. */
+  rough_sectors: RoughSectorEntry[] | null
 }
 
 export interface CoursePlan {

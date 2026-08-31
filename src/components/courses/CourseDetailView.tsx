@@ -9,8 +9,15 @@ import type { Bike, CourseDetail } from '@/lib/types'
 import type { TargetMode } from '@/lib/courses'
 import {
   formatKm,
+  formatSectorLength,
   formatTargetTime,
+  hasSurfaceData,
+  isSurfacePending,
   profileSeries,
+  ribbonBands,
+  roughSectors,
+  surfaceColor,
+  surfaceCoverage,
   targetModeOf,
   targetReanalyzeBody,
 } from '@/lib/courses'
@@ -28,7 +35,7 @@ import { CourseProfileChart } from '@/components/charts/CourseProfileChart'
 import { SegmentTable } from './SegmentTable'
 import { CoursePlanCard } from './CoursePlanCard'
 import { CourseTargetPicker, targetHelpKey } from './CourseTargetPicker'
-import { AlertTriangle, Wind } from 'lucide-react'
+import { AlertTriangle, Loader2, Mountain, Wind } from 'lucide-react'
 
 interface Props {
   courseId: string
@@ -119,14 +126,119 @@ function CourseTargetEditor({
   )
 }
 
+
+/**
+ * What is under the road, and how much of it is a guess (issue #56).
+ *
+ * Two things are deliberately said in words rather than left to the chart: how
+ * much of the course is unconfirmed, and every sharp surface change with its
+ * distance. A colour on a profile is missable; "mud and loose surface, 130 m
+ * from km 41.2" is not, and a rider who expected 40 km of tarmac needs that
+ * before the day rather than during it.
+ */
+function SurfacePanel({
+  course,
+  onMatch,
+  matching,
+}: {
+  course: CourseDetail
+  onMatch: () => void
+  matching: boolean
+}) {
+  const t = useTranslations('courses.surface')
+  const matched = hasSurfaceData(course)
+  const pending = isSurfacePending(course.surface_status)
+  const sectors = roughSectors(course.rough_sectors)
+
+  if (pending) {
+    return (
+      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {t('pending')}
+      </p>
+    )
+  }
+
+  // Absent rather than broken: an instance with no matcher, or a course
+  // uploaded before there was one, simply has no surface — the Stage 1 plan
+  // below it is complete and is not missing anything it promised.
+  if (!matched) {
+    if (!course.surface_matching_available) return null
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" disabled={matching} onClick={onMatch}>
+          {matching ? t('matching') : t('add')}
+        </Button>
+        <span className="text-xs text-muted-foreground">{t('addHelp')}</span>
+      </div>
+    )
+  }
+
+  const coverage = surfaceCoverage(course.segments)
+  return (
+    <div className="space-y-2 rounded-lg border border-border p-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {coverage.byClass.map(({ surface, metres }) => (
+          <span key={surface} className="flex items-center gap-1.5 text-sm">
+            <span
+              aria-hidden
+              className="inline-block h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: surfaceColor(surface) }}
+            />
+            {t(`class.${surface}`)}
+            <span className="tabular-nums text-muted-foreground">
+              {formatKm(metres)}
+            </span>
+          </span>
+        ))}
+      </div>
+
+      {coverage.inferredM > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {t('unconfirmed', { distance: formatKm(coverage.inferredM) })}
+        </p>
+      )}
+
+      {sectors.length > 0 && (
+        <ul className="space-y-1 border-t border-border pt-2">
+          {sectors.map((sector, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm">
+              <Mountain className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-500" />
+              <span>
+                {t('sector', {
+                  surface: t(`class.${sector.surface}`),
+                  length: formatSectorLength(sector.lengthM),
+                  km: sector.startKm.toFixed(1),
+                })}
+                {sector.confidence === 'inferred' && (
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    {t('sectorInferred')}
+                  </span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export function CourseDetailView({ courseId, bikes, onChanged }: Props) {
   const t = useTranslations('courses')
   const [selected, setSelected] = useState<number | null>(null)
   const [reanalysing, setReanalysing] = useState(false)
+  const [matching, setMatching] = useState(false)
 
   const { data: course, mutate } = useSWR<CourseDetail>(
     `/api/courses/${courseId}`,
     fetcher,
+    {
+      // The surface match runs in the background, so poll while it does —
+      // and stop the moment it settles, however it settled.
+      refreshInterval: (latest) =>
+        isSurfacePending(latest?.surface_status) ? 3000 : 0,
+    },
   )
 
   if (!course) {
@@ -150,6 +262,22 @@ export function CourseDetailView({ courseId, bikes, onChanged }: Props) {
       })
     } finally {
       setReanalysing(false)
+    }
+  }
+
+  async function requestSurface() {
+    setMatching(true)
+    try {
+      await apiFetch(`/api/courses/${courseId}/surface`, { method: 'POST' })
+      await mutate()
+    } catch (err) {
+      toast({
+        title: t('surface.failed'),
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      })
+    } finally {
+      setMatching(false)
     }
   }
 
@@ -220,9 +348,12 @@ export function CourseDetailView({ courseId, bikes, onChanged }: Props) {
       <CourseProfileChart
         points={points}
         segments={course.segments}
+        surfaceBands={ribbonBands(course.surface_ribbon)}
         selectedIndex={selected}
         onSelect={setSelected}
       />
+
+      <SurfacePanel course={course} onMatch={requestSurface} matching={matching} />
 
       <SegmentTable
         segments={course.segments}
@@ -236,7 +367,7 @@ export function CourseDetailView({ courseId, bikes, onChanged }: Props) {
           output this project avoids elsewhere. */}
       <p className="flex items-start gap-2 text-xs text-muted-foreground">
         <Wind className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        {t('stillAir')}
+        {hasSurfaceData(course) ? t('stillAirMatched') : t('stillAir')}
       </p>
 
       <div className="flex flex-wrap items-center gap-2">

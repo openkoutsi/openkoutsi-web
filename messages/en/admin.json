@@ -169,7 +169,11 @@
     "allowMcp": "Allow the MCP server",
     "allowMcpDesc": "Publish the Model Context Protocol endpoint (POST /mcp), where an AI client — Claude Desktop, an IDE, a CLI — can call read-only coaching tools over the training data of whoever's credential it holds. Every tool declares the read scopes it needs, so a token reaches exactly what it was granted and nothing else.",
     "allowMcpWarning": "The endpoint is refused outright, the handshake included, so a client is told the server is not there rather than connecting and then failing every call. This withdraws an interface, not an exposure: a token reaches the same data through the ordinary API either way — what limits a credential is its scopes.",
-    "allowMcpNeedsTokens": "Personal access tokens are off, so no external client has a credential to connect with. The endpoint is published but unreachable in practice."
+    "allowMcpNeedsTokens": "Personal access tokens are off, so no external client has a credential to connect with. The endpoint is published but unreachable in practice.",
+    "allowCourseRecon": "Allow course recon",
+    "allowCourseReconDesc": "Upload a GPX course and get a segment table and a written pacing plan. Off by default, because classifying the road surface under a course needs a routing sidecar you run and build map tiles for yourself.",
+    "allowCourseReconWarning": "Off withdraws the whole feature — courses, the segment table, the pacing plan and bikes all become unavailable. Nothing is deleted: stored courses stay exactly where they are, remain in every data export, and come back untouched when you turn this on.",
+    "allowCourseReconSidecar": "Road surfaces are a separate, optional step: without a routing sidecar configured, every course is solved as dry pavement — which the written plan says out loud."
   },
   "usage": {
     "title": "LLM usage",

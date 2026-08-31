@@ -33,6 +33,12 @@ function seg(over: Partial<CourseSegment> = {}): CourseSegment {
     duration_s: 111,
     start_offset_s: 0,
     speed_capped: false,
+    // Unmatched by default: the shape a course has on any instance without a
+    // surface matcher, and the one every existing test is written against.
+    surface: null,
+    surface_confidence: null,
+    surface_raw: null,
+    crr_used: null,
     ...over,
   }
 }

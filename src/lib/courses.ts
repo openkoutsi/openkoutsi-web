@@ -8,7 +8,16 @@
  * shared, because the upload form and the detail editor have to agree on what
  * "4:30" and "210" mean.
  */
-import type { CourseDetail, CourseSegment, CourseSummary, SegmentType } from './types'
+import type {
+  CourseDetail,
+  CourseSegment,
+  CourseSummary,
+  RoughSectorEntry,
+  SegmentType,
+  SurfaceClass,
+  SurfaceConfidence,
+  SurfaceRibbonEntry,
+} from './types'
 
 /**
  * What a course is being paced to. The two targets are alternatives — the
@@ -211,4 +220,140 @@ export function segmentAtKm(
   return segments.find(
     (s) => metres >= s.start_distance_m && metres <= s.end_distance_m,
   )
+}
+
+
+// ── Road surface (issue #56) ────────────────────────────────────────────────
+
+/**
+ * Surface colours, smooth through loose — the same ordering the rolling
+ * resistance table induces, so "rougher" and "slower" read the same way.
+ *
+ * Deliberately a different hue family from `GRADIENT_BANDS`: the two are drawn
+ * on the same chart, and a rider should never have to work out which of them a
+ * given colour belongs to.
+ */
+export const SURFACE_COLORS: Record<SurfaceClass, string> = {
+  asphalt: '#475569',   // slate — the road you assumed
+  paved: '#78716c',     // stone
+  compacted: '#a8a29e', // warm grey
+  cobbles: '#a16207',   // dark amber
+  gravel: '#ca8a04',    // amber
+  dirt: '#92400e',      // brown
+  grass: '#4d7c0f',     // olive
+  unknown: '#cbd5e1',   // pale — no claim being made
+}
+
+export function surfaceColor(surface: SurfaceClass | null | undefined): string {
+  return SURFACE_COLORS[surface ?? 'unknown']
+}
+
+/** Which classes are rough enough to warn about. Mirrors the backend. */
+const ROUGH: SurfaceClass[] = ['compacted', 'cobbles', 'gravel', 'dirt', 'grass']
+
+export function isRoughSurface(surface: SurfaceClass | null | undefined): boolean {
+  return surface != null && ROUGH.includes(surface)
+}
+
+export interface SurfaceCoverage {
+  /** Metres per class, biggest first. Only classes actually present appear. */
+  byClass: { surface: SurfaceClass; metres: number }[]
+  confirmedM: number
+  inferredM: number
+  totalM: number
+}
+
+/**
+ * How much of the course is what, and how much of that is a guess.
+ *
+ * The confirmed/inferred split is computed here rather than shown per row only,
+ * because "38 km of gravel, 12 km of it unconfirmed" is the sentence that tells
+ * an athlete how much to trust the plan — and it is exactly the figure that
+ * would be lost by rendering confidence as a subtle colour and nothing else.
+ */
+export function surfaceCoverage(segments: CourseSegment[]): SurfaceCoverage {
+  const metres = new Map<SurfaceClass, number>()
+  let confirmedM = 0
+  let inferredM = 0
+  let totalM = 0
+  for (const seg of segments) {
+    if (!seg.surface) continue
+    metres.set(seg.surface, (metres.get(seg.surface) ?? 0) + seg.length_m)
+    totalM += seg.length_m
+    if (seg.surface_confidence === 'confirmed') confirmedM += seg.length_m
+    else inferredM += seg.length_m
+  }
+  return {
+    byClass: [...metres.entries()]
+      .map(([surface, m]) => ({ surface, metres: m }))
+      .sort((a, b) => b.metres - a.metres),
+    confirmedM,
+    inferredM,
+    totalM,
+  }
+}
+
+/** Has this course been matched at all? Drives every surface affordance. */
+export function hasSurfaceData(
+  course: Pick<CourseDetail, 'segments'>,
+): boolean {
+  return course.segments.some((s) => s.surface != null)
+}
+
+/** Is the background match still running? Polling can stop once it isn't. */
+export function isSurfacePending(status: string | null | undefined): boolean {
+  return status === 'pending'
+}
+
+export interface RibbonBand {
+  startKm: number
+  endKm: number
+  surface: SurfaceClass
+  confidence: SurfaceConfidence
+}
+
+/**
+ * The stored ribbon as bands for the profile chart.
+ *
+ * Drawn from the ribbon rather than from the segments on purpose: the segment
+ * table has a minimum row length and this has none, so a 130 m sector of mud
+ * gets a visible stripe at its true extent even where the pacing rows quite
+ * reasonably fold it into a longer one.
+ */
+export function ribbonBands(
+  ribbon: SurfaceRibbonEntry[] | null | undefined,
+): RibbonBand[] {
+  if (!ribbon) return []
+  return ribbon.map(([startM, endM, surface, confidence]) => ({
+    startKm: startM / 1000,
+    endKm: endM / 1000,
+    surface,
+    confidence,
+  }))
+}
+
+export interface RoughSector {
+  startKm: number
+  lengthM: number
+  surface: SurfaceClass
+  confidence: SurfaceConfidence
+}
+
+export function roughSectors(
+  sectors: RoughSectorEntry[] | null | undefined,
+): RoughSector[] {
+  if (!sectors) return []
+  return sectors
+    .map(([startM, lengthM, surface, confidence]) => ({
+      startKm: startM / 1000,
+      lengthM,
+      surface,
+      confidence,
+    }))
+    .sort((a, b) => a.startKm - b.startKm)
+}
+
+/** A sector length in the unit that reads best: "130 m", "2.4 km". */
+export function formatSectorLength(metres: number): string {
+  return metres < 1000 ? `${Math.round(metres)} m` : `${(metres / 1000).toFixed(1)} km`
 }
