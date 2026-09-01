@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth'
 import { fetcher } from '@/lib/api'
 import type { InstanceInfoResponse, UnreadCount } from '@/lib/types'
 import { Button } from './ui/button'
-import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy, Map } from 'lucide-react'
+import { Activity, BarChart2, Bike, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy, Map } from 'lucide-react'
 import { gamificationEnabled } from '@/lib/gamification'
 import { cn } from '@/lib/utils'
 import { LocaleSwitcher } from './LocaleSwitcher'
@@ -60,6 +60,12 @@ function NavInner({ onClose }: NavInnerProps) {
     ...(instanceInfo?.allow_course_recon
       ? [{ href: `/courses`, labelKey: 'nav.courses' as const, icon: Map }]
       : []),
+    // The garage (issue #64) is *not* behind the course-recon switch, unlike
+    // the courses entry above. A bike used to exist only as a pacing input and
+    // rode that switch with it; it is now where an athlete's own kilometres and
+    // maintenance history live, which does not depend on whether this instance
+    // offers GPX course analysis.
+    { href: `/garage`, labelKey: 'nav.garage' as const, icon: Bike },
     { href: `/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
     { href: `/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
     { href: `/profile`, labelKey: 'nav.profile' as const, icon: User },

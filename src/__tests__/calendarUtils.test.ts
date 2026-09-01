@@ -17,6 +17,8 @@ function makeActivity(id: string, start_time: string): Activity {
     sources: [],
     name: 'Test',
     sport_type: 'Ride',
+    bike_id: null,
+    bike_source: null,
     start_time,
     duration_s: 3600,
     distance_m: null,

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { fetcher } from '@/lib/api'
-import type { PaginatedActivities } from '@/lib/types'
+import type { Bike, PaginatedActivities } from '@/lib/types'
 import { ActivityCard } from '@/components/activities/ActivityCard'
 import { UploadDropzone } from '@/components/activities/UploadDropzone'
 import { ManualActivityForm } from '@/components/activities/ManualActivityForm'
@@ -75,6 +75,12 @@ export default function ActivitiesPage() {
   const apiParams = filtersToParams(filters, page)
   const apiUrl = `/api/activities?${apiParams.toString()}`
   const { data, mutate, isLoading } = useSWR<PaginatedActivities>(apiUrl, fetcher)
+  // One request for the whole garage, shared with every card on the page.
+  // An activity carries `bike_id` but not the bike's name, and a per-card
+  // lookup would be one request per row for a handful of rows the page can
+  // fetch once (issue #64).
+  const { data: bikes } = useSWR<Bike[]>('/api/bikes', fetcher)
+  const bikeNames = Object.fromEntries((bikes ?? []).map((b) => [b.id, b.name]))
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 1
 
@@ -129,7 +135,7 @@ export default function ActivitiesPage() {
           <p className="text-sm text-muted-foreground">{t('loading')}</p>
         )}
         {data?.items.map((a) => (
-          <ActivityCard key={a.id} activity={a} />
+          <ActivityCard key={a.id} activity={a} bikeNames={bikeNames} />
         ))}
         {!isLoading && data?.items.length === 0 && (
           <p className="text-sm text-muted-foreground">{t('noActivities')}</p>

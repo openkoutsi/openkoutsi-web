@@ -73,7 +73,18 @@ export function isSubscriptionRequiredDetail(
  * `message` is the English fallback for a code this build predates.
  */
 export class ApiCodeError extends Error {
-  constructor(readonly code: string, message?: string, readonly status?: number) {
+  constructor(
+    readonly code: string,
+    message?: string,
+    readonly status?: number,
+    /**
+     * The whole detail object, for the codes that carry more than a key. The
+     * garage's `sport_already_claimed` names the bike already holding the
+     * sport, and a refusal that cannot say *which* bike leaves the athlete
+     * hunting for it (issue #64).
+     */
+    readonly detail?: Record<string, unknown>,
+  ) {
     super(message || code)
     this.name = 'ApiCodeError'
   }
@@ -231,7 +242,12 @@ export async function apiFetch<T>(
         // Any other structured `{code, message}` refusal (issue #44). Checked
         // after the subscription case so that keeps its own typed error and the
         // `LlmUpsell` handling every AI surface already has.
-        coded = new ApiCodeError(err.detail.code, err.detail.message, res.status)
+        coded = new ApiCodeError(
+          err.detail.code,
+          err.detail.message,
+          res.status,
+          err.detail,
+        )
       } else if (typeof err.detail === 'string') {
         message = err.detail
       } else if (Array.isArray(err.detail) && err.detail.length > 0) {

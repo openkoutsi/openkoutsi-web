@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
-import { apiFetch } from '@/lib/api'
-import type { Bike, RidingPosition } from '@/lib/types'
+import { Link } from '@/navigation'
+import type { Bike } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -15,80 +14,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { toast } from '@/components/ui/use-toast'
-import { Bike as BikeIcon, Trash2 } from 'lucide-react'
-
-const POSITIONS: RidingPosition[] = ['tops', 'hoods', 'drops', 'aero']
+import { Bike as BikeIcon, ArrowRight } from 'lucide-react'
 
 interface Props {
   bikes: Bike[]
-  onChanged: () => void
 }
 
 /**
- * Bikes, kept where they are used (issue #55).
+ * What bikes the pacing model has to choose from (issues #55, #64).
  *
- * The physics needs tyre width and riding position and nothing else about the
- * bike, so this is deliberately four fields in a dialog on the courses page
- * rather than a settings section: it is a course input, and it belongs beside
- * the thing that consumes it.
+ * This used to be the only place a bike could be created, edited or deleted —
+ * four fields in a dialog beside the thing that consumed them. The garage
+ * (issue #64) owns that now, and this shrank to a read-only summary that links
+ * out to it: a second editing surface for the same rows is how the two drift,
+ * and it would have to grow every garage field or quietly refuse to show them.
+ *
+ * It lists what the course picker will actually offer, which is why retired
+ * bikes are shown as retired rather than hidden: an athlete who cannot find
+ * their bike in the picker above should be able to see *why* here.
  */
-export function BikeManager({ bikes, onChanged }: Props) {
+export function BikeManager({ bikes }: Props) {
   const t = useTranslations('courses.bikes')
   const [open, setOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [width, setWidth] = useState('')
-  const [position, setPosition] = useState<RidingPosition>('hoods')
-  const [saving, setSaving] = useState(false)
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    if (!name.trim()) return
-    const parsed = Number(width)
-    setSaving(true)
-    try {
-      await apiFetch('/api/bikes', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: name.trim(),
-          tyre_width_mm: width && Number.isFinite(parsed) ? parsed : null,
-          riding_position: position,
-        }),
-      })
-      setName('')
-      setWidth('')
-      setPosition('hoods')
-      onChanged()
-    } catch (err) {
-      toast({
-        title: t('saveFailed'),
-        description: err instanceof Error ? err.message : undefined,
-        variant: 'destructive',
-      })
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleDelete(bike: Bike) {
-    try {
-      await apiFetch(`/api/bikes/${bike.id}`, { method: 'DELETE' })
-      onChanged()
-    } catch (err) {
-      toast({
-        title: t('deleteFailed'),
-        description: err instanceof Error ? err.message : undefined,
-        variant: 'destructive',
-      })
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -105,76 +52,37 @@ export function BikeManager({ bikes, onChanged }: Props) {
 
         <p className="text-sm text-muted-foreground">{t('why')}</p>
 
-        {bikes.length > 0 && (
+        {bikes.length > 0 ? (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {bikes.map((bike) => (
               <li key={bike.id} className="flex items-center justify-between px-3 py-2">
                 <div>
-                  <div className="text-sm font-medium">{bike.name}</div>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    {bike.name}
+                    {bike.retired_at && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        {t('retired')}
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {t(`position.${bike.riding_position}` as never)}
                     {bike.tyre_width_mm ? ` · ${bike.tyre_width_mm} mm` : ''}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={t('delete')}
-                  onClick={() => handleDelete(bike)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t('empty')}</p>
         )}
 
-        <form onSubmit={handleCreate} className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="bike-name">{t('name')}</Label>
-            <Input
-              id="bike-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('namePlaceholder')}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="bike-width">{t('tyreWidth')}</Label>
-              <Input
-                id="bike-width"
-                type="number"
-                min={10}
-                max={80}
-                value={width}
-                onChange={(e) => setWidth(e.target.value)}
-                placeholder="28"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bike-position">{t('ridingPosition')}</Label>
-              <Select
-                value={position}
-                onValueChange={(v) => setPosition(v as RidingPosition)}
-              >
-                <SelectTrigger id="bike-position">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {POSITIONS.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {t(`position.${p}` as never)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Button type="submit" size="sm" disabled={saving || !name.trim()}>
-            {saving ? t('saving') : t('add')}
-          </Button>
-        </form>
+        <Button asChild size="sm" className="w-full">
+          <Link href="/garage" onClick={() => setOpen(false)}>
+            {t('openGarage')}
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
       </DialogContent>
     </Dialog>
   )

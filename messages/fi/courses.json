@@ -62,22 +62,16 @@
   "bikes": {
     "manage": "Pyörät",
     "title": "Pyöräsi",
-    "why": "Tahditusmalli lukee pyörästä kaksi asiaa: renkaan leveyden, joka määrää vierintävastuksen, ja ajoasennon, joka määrää kuinka paljon ilmaa työnnät. Muulla ei ole tässä merkitystä.",
-    "name": "Nimi",
-    "namePlaceholder": "Maantiepyörä",
-    "tyreWidth": "Renkaan leveys (mm)",
-    "ridingPosition": "Ajoasento",
-    "add": "Lisää pyörä",
-    "saving": "Tallennetaan…",
-    "delete": "Poista pyörä",
-    "saveFailed": "Pyörän tallennus ei onnistunut",
-    "deleteFailed": "Pyörän poistaminen ei onnistunut",
+    "why": "Tahditusmalli lukee pyörästä kaksi asiaa: renkaan leveyden, joka määrää vierintävastuksen, ja ajoasennon, joka määrää kuinka paljon ilmaa työnnät. Lisää ja muokkaa pyöriä tallissa.",
     "position": {
       "tops": "Ylätangolla",
       "hoods": "Jarrukahvoilla",
       "drops": "Alatangolla",
       "aero": "Aerotangoilla"
-    }
+    },
+    "openGarage": "Avaa talli",
+    "empty": "Ei vielä pyöriä — lisää yksi tallissa.",
+    "retired": "Poistettu käytöstä"
   },
   "profile": {
     "km": "km",

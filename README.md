@@ -293,6 +293,48 @@ answer, because a rule whose effect you cannot see is a rule you will set wrong.
 The match count is read from the server rather than recomputed here: the matcher
 is the backend's, and a second implementation in TypeScript would drift.
 
+## The garage
+
+`/garage` (issue #64) is where the athlete's bikes live: what they own, how far
+each has been ridden, what has been done to it and what is bolted on. It reads
+and writes `/api/bikes` — **the same rows** the route-analysis bike picker
+lists, which is the whole reason "bikes in the garage are entries in the course
+picker" needs no code to make true.
+
+`BikeManager.tsx` on the courses page **shrank to a picker** as part of this. It
+used to be the only place a bike could be created or deleted; keeping a second
+editing surface for the same rows guarantees the two drift, and it would have to
+grow every garage field or quietly refuse to show them. It now lists what the
+picker will offer and links out.
+
+Two figures are drawn side by side and never merged: `tracked_km` is what
+openkoutsi has actually recorded against the bike, and `lifetime_km` adds the
+starting odometer the athlete typed in. The second is only shown when a baseline
+exists to make them differ — a garage that blurred them could not answer "where
+did that number come from?".
+
+The maintenance log is grouped **by component** rather than shown as one
+chronological list, because the question it exists to answer — "how long did
+these tyres last?" — is about consecutive entries of the same component, and a
+single stream interleaves them with every chain and bleed in between. Both
+spans (`previous_component_km`, and `km_since` for the part currently fitted)
+are computed server-side; `lib/garage.ts` only regroups.
+
+**The bike card on the activity page** (`ActivityBikeCard.tsx`) shows the source,
+not just the bike. `bike_source` is `auto` when the ride matched a bike's claimed
+sports and `manual` once the athlete has picked one, and a `PATCH` of `bike_id`
+stamps `manual` server-side so no reprocess or re-sync puts the guess back.
+Showing which it is, is what lets the athlete see that their correction stuck.
+Its picker offers **every** bike, retired ones included — unlike the course
+picker, which offers only bikes still ridden — because correcting an old ride
+onto the bike it was actually done on is the point of the override, and that
+bike is often exactly the one since sold.
+
+The nav entry is **not** behind the course-recon instance switch, unlike
+`/courses`. A bike used to be nothing but a pacing input and rode that switch
+with it; it now carries the athlete's own kilometres and history, which do not
+depend on whether the instance offers GPX course analysis.
+
 ## Ask Koutsi
 
 `/chat` (issue #44) is where the athlete puts their own questions to Koutsi
