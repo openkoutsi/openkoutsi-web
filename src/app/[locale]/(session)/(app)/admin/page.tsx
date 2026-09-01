@@ -971,6 +971,9 @@ function SettingsTab() {
   const [allowTokens, setAllowTokens] = useState(true)
   // Issue #42 — on by default for the same reason, and read the same way.
   const [allowMcp, setAllowMcp] = useState(true)
+  // Issue #56: unlike the two above this ships off, so an admin who has
+  // never opened this page has not accidentally offered the feature.
+  const [allowCourseRecon, setAllowCourseRecon] = useState(false)
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -985,6 +988,7 @@ function SettingsTab() {
       setAllowSelfSignup(Boolean(settings.allow_self_signup))
       setAllowTokens(Boolean(settings.allow_personal_access_tokens))
       setAllowMcp(Boolean(settings.allow_mcp_server))
+      setAllowCourseRecon(Boolean(settings.allow_course_recon))
       setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
@@ -1027,6 +1031,7 @@ function SettingsTab() {
         allow_self_signup: allowSelfSignup,
         allow_personal_access_tokens: allowTokens,
         allow_mcp_server: allowMcp,
+        allow_course_recon: allowCourseRecon,
         llm_models: models,
         llm_requires_subscription: requiresSubscription,
       }
@@ -1142,6 +1147,33 @@ function SettingsTab() {
               id="allow-mcp"
               checked={allowMcp}
               onCheckedChange={setAllowMcp}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
+            <div className="space-y-1">
+              <Label htmlFor="allow-course-recon">{t('settings.allowCourseRecon')}</Label>
+              <p className="text-xs text-muted-foreground">
+                {t('settings.allowCourseReconDesc')}
+              </p>
+              {!allowCourseRecon && (
+                // Off withdraws the whole feature, courses included — worth
+                // saying where the decision is made, along with the two things
+                // that make it safe to flip back: nothing is deleted, and the
+                // data export never depended on the switch.
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  {t('settings.allowCourseReconWarning')}
+                </p>
+              )}
+              {allowCourseRecon && (
+                <p className="text-xs text-muted-foreground">
+                  {t('settings.allowCourseReconSidecar')}
+                </p>
+              )}
+            </div>
+            <Switch
+              id="allow-course-recon"
+              checked={allowCourseRecon}
+              onCheckedChange={setAllowCourseRecon}
             />
           </div>
         </CardContent>

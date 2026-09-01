@@ -91,7 +91,20 @@
     "speed": "Speed",
     "split": "Split",
     "elapsed": "Elapsed",
-    "coast": "coast"
+    "coast": "coast",
+    "surface": "Surface",
+    "inferred": "inferred",
+    "inferredLegend": "Marked “inferred” means openkoutsi could not confirm a surface tag for that stretch — the class comes from the road type instead. It is a guess, not a reading.",
+    "class": {
+      "asphalt": "Asphalt",
+      "paved": "Paved",
+      "compacted": "Hardpack",
+      "cobbles": "Cobbles",
+      "gravel": "Gravel",
+      "dirt": "Dirt",
+      "grass": "Grass",
+      "unknown": "Unknown"
+    }
   },
   "detail": {
     "loading": "Loading…",
@@ -118,5 +131,26 @@
     "refresh": "Rewrite",
     "retry": "Try again",
     "error": "Something went wrong writing your plan. Give it another go."
-  }
+  },
+  "surface": {
+    "pending": "Working out the road surface…",
+    "add": "Add surface data",
+    "addHelp": "Match this course against OpenStreetMap to classify the road under it.",
+    "matching": "Matching…",
+    "failed": "Could not classify the surface",
+    "unconfirmed": "{distance} of that is unconfirmed — openkoutsi could not find a surface tag for it, so the class comes from the road type.",
+    "sector": "{surface}, {length} from km {km}",
+    "sectorInferred": "(unconfirmed)",
+    "class": {
+      "asphalt": "Asphalt",
+      "paved": "Paved",
+      "compacted": "Hardpack",
+      "cobbles": "Cobbles",
+      "gravel": "Gravel",
+      "dirt": "Dirt",
+      "grass": "Grass",
+      "unknown": "Unknown"
+    }
+  },
+  "stillAirMatched": "Every speed and split assumes still air. A headwind will move them, and it can move them a lot. Surfaces come from OpenStreetMap, and the ones marked inferred are a guess."
 }

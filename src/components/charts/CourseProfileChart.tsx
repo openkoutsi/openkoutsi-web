@@ -16,12 +16,22 @@ import type { CourseSegment } from '@/lib/types'
 import {
   elevationFloor,
   formatGradient,
+  surfaceColor,
   type ProfilePoint,
+  type RibbonBand,
 } from '@/lib/courses'
 
 interface Props {
   points: ProfilePoint[]
   segments: CourseSegment[]
+  /**
+   * The road surface at full run resolution (issue #56), drawn as a ribbon
+   * under the profile. Taken from the stored ribbon rather than derived from
+   * the segments on purpose: the segment table has a minimum row length and
+   * this does not, so a 130 m sector of mud gets a visible stripe at its true
+   * extent even where the pacing rows fold it into a longer one.
+   */
+  surfaceBands?: RibbonBand[]
   selectedIndex: number | null
   onSelect: (index: number | null) => void
 }
@@ -38,12 +48,22 @@ interface Props {
  * Dumb by design, like every chart here: the bucketing, the colours and the
  * axis floor are computed in `lib/courses.ts`, which is what the tests cover.
  */
-export function CourseProfileChart({ points, segments, selectedIndex, onSelect }: Props) {
+export function CourseProfileChart({
+  points,
+  segments,
+  surfaceBands = [],
+  selectedIndex,
+  onSelect,
+}: Props) {
   const t = useTranslations('courses.profile')
 
   if (points.length === 0) return null
 
   const floor = elevationFloor(points)
+  // The ribbon occupies the bottom sliver of the y range, below every bar,
+  // so it reads as ground under the profile rather than as another series.
+  const _RIBBON_HEIGHT =
+    Math.max(...points.map((p) => p.elevation - floor)) * 0.06 || 1
   const selected = segments.find((s) => s.segment_index === selectedIndex)
   const data = points.map((p) => ({ ...p, height: p.elevation - floor }))
 
@@ -97,6 +117,51 @@ export function CourseProfileChart({ points, segments, selectedIndex, onSelect }
               return [`${Math.round(p.elevation)} m · ${formatGradient(p.gradient)}`, '']
             }}
           />
+          {/* One hatch pattern per class: an inferred stripe is drawn striped
+              rather than merely paler, so the distinction survives a glance,
+              a projector and a colour-blind reader. */}
+          <defs>
+            {surfaceBands
+              .filter((b) => b.confidence === 'inferred')
+              .map((b) => b.surface)
+              .filter((s, i, all) => all.indexOf(s) === i)
+              .map((surface) => (
+                <pattern
+                  key={surface}
+                  id={`surface-hatch-${surface}`}
+                  width={6}
+                  height={6}
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width={6} height={6} fill={surfaceColor(surface)} opacity={0.35} />
+                  <line
+                    x1={0}
+                    y1={0}
+                    x2={0}
+                    y2={6}
+                    stroke={surfaceColor(surface)}
+                    strokeWidth={3}
+                  />
+                </pattern>
+              ))}
+          </defs>
+          {surfaceBands.map((band, i) => (
+            <ReferenceArea
+              key={`surface-${i}`}
+              x1={band.startKm}
+              x2={band.endKm}
+              y1={0}
+              y2={_RIBBON_HEIGHT}
+              fill={
+                band.confidence === 'inferred'
+                  ? `url(#surface-hatch-${band.surface})`
+                  : surfaceColor(band.surface)
+              }
+              fillOpacity={1}
+              ifOverflow="extendDomain"
+            />
+          ))}
           {selected && (
             <ReferenceArea
               x1={selected.start_distance_m / 1000}

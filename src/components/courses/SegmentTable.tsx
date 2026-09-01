@@ -9,6 +9,7 @@ import {
   formatPercentFtp,
   formatSpeedFromMs,
   gradientColor,
+  surfaceColor,
 } from '@/lib/courses'
 import { formatTime } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -26,7 +27,11 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
 
   if (segments.length === 0) return null
 
+  const hasSurface = segments.some((s) => s.surface != null)
+  const anyInferred = segments.some((s) => s.surface_confidence === 'inferred')
+
   return (
+    <div className="space-y-2">
     <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full text-sm">
         <thead>
@@ -37,6 +42,11 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
             <th className="px-3 py-2 text-right font-medium text-muted-foreground">{t('gradient')}</th>
             <th className="hidden sm:table-cell px-3 py-2 text-right font-medium text-muted-foreground">{t('power')}</th>
             <th className="hidden sm:table-cell px-3 py-2 text-right font-medium text-muted-foreground">{t('speed')}</th>
+            {hasSurface && (
+              <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                {t('surface')}
+              </th>
+            )}
             <th className="px-3 py-2 text-right font-medium text-muted-foreground">{t('split')}</th>
             <th className="hidden md:table-cell px-3 py-2 text-right font-medium text-muted-foreground">{t('elapsed')}</th>
           </tr>
@@ -93,6 +103,26 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
                 <td className="hidden sm:table-cell px-3 py-2 text-right tabular-nums">
                   {formatSpeedFromMs(seg.speed_ms)}
                 </td>
+                {hasSurface && (
+                  <td className="px-3 py-2">
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        aria-hidden
+                        className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: surfaceColor(seg.surface) }}
+                      />
+                      <span>{t(`class.${seg.surface ?? 'unknown'}`)}</span>
+                      {/* Confidence is a visible word, not a shade or a
+                          tooltip: a guess shown beside a fact at equal weight
+                          is worse than showing neither. */}
+                      {seg.surface_confidence === 'inferred' && (
+                        <span className="rounded-sm border border-amber-500/50 px-1 py-px text-[10px] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-500">
+                          {t('inferred')}
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                )}
                 <td className="px-3 py-2 text-right tabular-nums">
                   {seg.duration_s == null ? '—' : formatTime(Math.round(seg.duration_s))}
                 </td>
@@ -106,6 +136,13 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
           })}
         </tbody>
       </table>
+    </div>
+    {/* Said once, plainly, rather than left to be inferred from a badge —
+        "inferred" means openkoutsi could not confirm a tag, which is not the
+        same claim as "this road is untagged". */}
+    {anyInferred && (
+      <p className="text-xs text-muted-foreground">{t('inferredLegend')}</p>
+    )}
     </div>
   )
 }

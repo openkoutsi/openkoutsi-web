@@ -6,7 +6,7 @@ import useSWR from 'swr'
 import { Link, usePathname, useRouter } from '@/navigation'
 import { useAuth } from '@/lib/auth'
 import { fetcher } from '@/lib/api'
-import type { UnreadCount } from '@/lib/types'
+import type { InstanceInfoResponse, UnreadCount } from '@/lib/types'
 import { Button } from './ui/button'
 import { Activity, BarChart2, Target, Calendar, User, LogOut, Settings, Zap, Timer, X, Shield, Dumbbell, Inbox, MessagesSquare, Trophy, Map } from 'lucide-react'
 import { gamificationEnabled } from '@/lib/gamification'
@@ -30,6 +30,15 @@ function NavInner({ onClose }: NavInnerProps) {
     { refreshInterval: 60000 },
   )
   const unreadCount = unread?.count ?? 0
+  // Issue #56: course recon ships off, and an instance that has not enabled it
+  // 404s every course route. Leaving the entry in the nav would send someone to
+  // a dead page rather than showing them the feature is simply not offered
+  // here — the same discipline as hiding a badge the athlete's data can never
+  // earn instead of showing it permanently locked.
+  const { data: instanceInfo } = useSWR<InstanceInfoResponse>(
+    '/api/public/instance-info',
+    fetcher,
+  )
 
   const navItems = [
     { href: `/dashboard`, labelKey: 'nav.dashboard' as const, icon: BarChart2 },
@@ -48,7 +57,9 @@ function NavInner({ onClose }: NavInnerProps) {
       ? [{ href: `/achievements`, labelKey: 'nav.achievements' as const, icon: Trophy }]
       : []),
     { href: `/goals`, labelKey: 'nav.goals' as const, icon: Target },
-    { href: `/courses`, labelKey: 'nav.courses' as const, icon: Map },
+    ...(instanceInfo?.allow_course_recon
+      ? [{ href: `/courses`, labelKey: 'nav.courses' as const, icon: Map }]
+      : []),
     { href: `/plan`, labelKey: 'nav.plan' as const, icon: Calendar },
     { href: `/workouts`, labelKey: 'nav.workouts' as const, icon: Dumbbell },
     { href: `/profile`, labelKey: 'nav.profile' as const, icon: User },

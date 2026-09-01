@@ -69,6 +69,7 @@ function instanceInfo(enabled: boolean): InstanceInfoResponse {
     email_enabled: false,
     allow_self_signup: false,
     allow_personal_access_tokens: enabled,
+    allow_course_recon: false,
   }
 }
 

@@ -91,7 +91,20 @@
     "speed": "Nopeus",
     "split": "Väliaika",
     "elapsed": "Kokonaisaika",
-    "coast": "vapaalla"
+    "coast": "vapaalla",
+    "surface": "Pinta",
+    "inferred": "arvio",
+    "inferredLegend": "”arvio” tarkoittaa, ettei openkoutsi löytänyt kyseiselle osuudelle pintamerkintää — luokka tulee tien tyypistä. Se on arvaus, ei havainto.",
+    "class": {
+      "asphalt": "Asfaltti",
+      "paved": "Päällystetty",
+      "compacted": "Kova sora",
+      "cobbles": "Mukulakivi",
+      "gravel": "Sora",
+      "dirt": "Maa",
+      "grass": "Nurmi",
+      "unknown": "Tuntematon"
+    }
   },
   "detail": {
     "loading": "Ladataan…",
@@ -118,5 +131,26 @@
     "refresh": "Kirjoita uudelleen",
     "retry": "Yritä uudelleen",
     "error": "Suunnitelman kirjoittamisessa meni jokin pieleen. Kokeile uudestaan."
-  }
+  },
+  "surface": {
+    "pending": "Selvitetään tien pintaa…",
+    "add": "Lisää pintatiedot",
+    "addHelp": "Sovita reitti OpenStreetMapiin ja luokittele sen alla oleva tie.",
+    "matching": "Sovitetaan…",
+    "failed": "Pintaa ei voitu luokitella",
+    "unconfirmed": "Tästä {distance} on vahvistamatta — openkoutsi ei löytänyt pintamerkintää, joten luokka tulee tien tyypistä.",
+    "sector": "{surface}, {length} kilometristä {km}",
+    "sectorInferred": "(vahvistamaton)",
+    "class": {
+      "asphalt": "Asfaltti",
+      "paved": "Päällystetty",
+      "compacted": "Kova sora",
+      "cobbles": "Mukulakivi",
+      "gravel": "Sora",
+      "dirt": "Maa",
+      "grass": "Nurmi",
+      "unknown": "Tuntematon"
+    }
+  },
+  "stillAirMatched": "Kaikki nopeudet ja väliajat olettavat tyynen sään. Vastatuuli siirtää niitä, ja usein paljon. Pinnat tulevat OpenStreetMapista, ja arvioiksi merkityt ovat arvauksia."
 }

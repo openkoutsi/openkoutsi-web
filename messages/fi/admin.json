@@ -169,7 +169,11 @@
     "allowMcp": "Salli MCP-palvelin",
     "allowMcpDesc": "Julkaise Model Context Protocol -päätepiste (POST /mcp), jonka kautta tekoälysovellus — Claude Desktop, kehitysympäristö tai komentorivityökalu — voi kutsua vain lukevia valmennustyökaluja sen käyttäjän harjoitusdataan, jonka tunnistetta se käyttää. Jokainen työkalu ilmoittaa tarvitsemansa lukuoikeudet, joten tunniste yltää täsmälleen siihen mihin sille on myönnetty oikeus, ei muuhun.",
     "allowMcpWarning": "Päätepiste kieltäytyy kokonaan, kättely mukaan lukien, joten asiakasohjelmalle kerrotaan ettei palvelinta ole — se ei yhdistä ensin ja epäonnistu sitten jokaisessa kutsussa. Tämä poistaa rajapinnan, ei pääsyä: tunniste yltää samaan dataan tavallisen ohjelmointirajapinnan kautta joka tapauksessa, ja tunnistetta rajaavat sille myönnetyt oikeudet.",
-    "allowMcpNeedsTokens": "Henkilökohtaiset käyttöoikeustunnisteet ovat pois päältä, joten ulkoisella asiakasohjelmalla ei ole tunnistetta jolla yhdistää. Päätepiste on julkaistu mutta käytännössä saavuttamaton."
+    "allowMcpNeedsTokens": "Henkilökohtaiset käyttöoikeustunnisteet ovat pois päältä, joten ulkoisella asiakasohjelmalla ei ole tunnistetta jolla yhdistää. Päätepiste on julkaistu mutta käytännössä saavuttamaton.",
+    "allowCourseReconDesc": "Lataa GPX-reitti ja saa osuustaulukko sekä kirjoitettu vauhditussuunnitelma. Oletuksena pois päältä, koska reitin alla olevan tienpinnan luokittelu vaatii reitityspalvelun, jonka ylläpidät ja jonka karttadatan rakennat itse.",
+    "allowCourseRecon": "Salli reittitiedustelu",
+    "allowCourseReconWarning": "Pois päältä poistaa koko ominaisuuden — reitit, osuustaulukko, vauhditussuunnitelma ja pyörät eivät ole käytettävissä. Mitään ei poisteta: tallennetut reitit säilyvät ennallaan, ovat mukana jokaisessa tietojen viennissä ja palaavat koskemattomina, kun kytket tämän päälle.",
+    "allowCourseReconSidecar": "Tienpinnat ovat erillinen, valinnainen vaihe: ilman reitityspalvelua jokainen reitti ratkaistaan kuivana päällysteenä — minkä kirjoitettu suunnitelma sanoo ääneen."
   },
   "usage": {
     "title": "LLM-käyttö",

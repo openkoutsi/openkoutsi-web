@@ -84,6 +84,13 @@ function course(overrides: Partial<CourseDetail> = {}): CourseDetail {
     required_intensity: 0.8,
     profile: null,
     segments: [],
+    // Unmatched, which is what a course looks like on any instance without a
+    // surface matcher — including every course that predates issue #56.
+    surface_status: null,
+    surface_updated_at: null,
+    surface_matching_available: false,
+    surface_ribbon: null,
+    rough_sectors: null,
     ...overrides,
   }
 }
