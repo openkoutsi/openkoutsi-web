@@ -135,6 +135,10 @@ describe('surface translations (issue #56)', () => {
       // openkoutsi is actually making.
       expect(messages.segments.inferredLegend).toBeTruthy()
       expect(messages.surface.unconfirmed).toContain('{distance}')
+      // Asphalt can never be confirmed — the matcher answers the same way for
+      // smooth tarmac and for a way carrying no surface tag — so the caveat is
+      // made once here, about the class, instead of on every asphalt row.
+      expect(messages.surface.asphaltNote).toBeTruthy()
     }
   })
 

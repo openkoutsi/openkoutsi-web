@@ -9,6 +9,7 @@ import {
   formatPercentFtp,
   formatSpeedFromMs,
   gradientColor,
+  marksInferred,
   surfaceColor,
 } from '@/lib/courses'
 import { formatTime } from '@/lib/utils'
@@ -28,7 +29,9 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
   if (segments.length === 0) return null
 
   const hasSurface = segments.some((s) => s.surface != null)
-  const anyInferred = segments.some((s) => s.surface_confidence === 'inferred')
+  const anyInferred = segments.some((s) =>
+    marksInferred(s.surface, s.surface_confidence),
+  )
 
   return (
     <div className="space-y-2">
@@ -114,8 +117,12 @@ export function SegmentTable({ segments, ftp, selectedIndex, onSelect }: Props) 
                       <span>{t(`class.${seg.surface ?? 'unknown'}`)}</span>
                       {/* Confidence is a visible word, not a shade or a
                           tooltip: a guess shown beside a fact at equal weight
-                          is worse than showing neither. */}
-                      {seg.surface_confidence === 'inferred' && (
+                          is worse than showing neither. Shown only where it
+                          could have read otherwise — on asphalt it never can,
+                          so the mark there would be a constant wearing the
+                          costume of a warning. That caveat is made once, above
+                          this table, where the coverage claim is made. */}
+                      {marksInferred(seg.surface, seg.surface_confidence) && (
                         <span className="rounded-sm border border-amber-500/50 px-1 py-px text-[10px] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-500">
                           {t('inferred')}
                         </span>

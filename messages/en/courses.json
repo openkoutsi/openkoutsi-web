@@ -139,6 +139,7 @@
     "matching": "Matching…",
     "failed": "Could not classify the surface",
     "unconfirmed": "{distance} of that is unconfirmed — openkoutsi could not find a surface tag for it, so the class comes from the road type.",
+    "asphaltNote": "Asphalt is never confirmed: a road nobody has tagged looks exactly like smooth tarmac to openkoutsi, so those stretches could be either.",
     "sector": "{surface}, {length} from km {km}",
     "sectorInferred": "(unconfirmed)",
     "class": {
