@@ -255,11 +255,56 @@ export function isRoughSurface(surface: SurfaceClass | null | undefined): boolea
   return surface != null && ROUGH.includes(surface)
 }
 
+/**
+ * The classes for which `confirmed` is not reachable at all.
+ *
+ * The matcher returns `paved_smooth` both for smooth tarmac and for a way
+ * carrying no surface information whatsoever — it is the zero value of the
+ * routing engine's three-bit surface field — and that is the only value that
+ * becomes `asphalt`. `unknown` is the same story from the other end: a point
+ * the matcher could not classify is unconfirmed by definition.
+ *
+ * So `inferred` on either of these is a constant, and a constant is not a
+ * signal. It repeats what the class name already says, and it crowds out the
+ * rows where confidence genuinely varies — which is the whole reason the mark
+ * exists. The caveat itself is real and is not dropped: it moves to the
+ * coverage panel, said once, as the statement about the class that it is.
+ */
+const NEVER_CONFIRMED: SurfaceClass[] = ['asphalt', 'unknown']
+
+/**
+ * Does `inferred` here say something the class name did not already say?
+ *
+ * This is the test for showing the mark, not `confidence === 'inferred'`. A
+ * `gravel` segment reading `inferred` means the match was mixed or two
+ * overlapping chunks disagreed — a real fact about *that stretch*. An
+ * `asphalt` one means nothing at all, because it could not have read anything
+ * else.
+ */
+export function marksInferred(
+  surface: SurfaceClass | null | undefined,
+  confidence: SurfaceConfidence | null | undefined,
+): boolean {
+  return (
+    confidence === 'inferred' && !NEVER_CONFIRMED.includes(surface ?? 'unknown')
+  )
+}
+
 export interface SurfaceCoverage {
   /** Metres per class, biggest first. Only classes actually present appear. */
   byClass: { surface: SurfaceClass; metres: number }[]
   confirmedM: number
   inferredM: number
+  /**
+   * The inferred distance that is about the *match* rather than about the
+   * class — the stretches `marksInferred` marks.
+   *
+   * This, not `inferredM`, is the figure worth putting in a sentence. On an
+   * all-asphalt course `inferredM` is the entire course and could never have
+   * been anything else, so reporting it tells a rider nothing while sounding
+   * like a warning.
+   */
+  markedInferredM: number
   totalM: number
 }
 
@@ -275,6 +320,7 @@ export function surfaceCoverage(segments: CourseSegment[]): SurfaceCoverage {
   const metres = new Map<SurfaceClass, number>()
   let confirmedM = 0
   let inferredM = 0
+  let markedInferredM = 0
   let totalM = 0
   for (const seg of segments) {
     if (!seg.surface) continue
@@ -282,6 +328,9 @@ export function surfaceCoverage(segments: CourseSegment[]): SurfaceCoverage {
     totalM += seg.length_m
     if (seg.surface_confidence === 'confirmed') confirmedM += seg.length_m
     else inferredM += seg.length_m
+    if (marksInferred(seg.surface, seg.surface_confidence)) {
+      markedInferredM += seg.length_m
+    }
   }
   return {
     byClass: [...metres.entries()]
@@ -289,6 +338,7 @@ export function surfaceCoverage(segments: CourseSegment[]): SurfaceCoverage {
       .sort((a, b) => b.metres - a.metres),
     confirmedM,
     inferredM,
+    markedInferredM,
     totalM,
   }
 }

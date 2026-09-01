@@ -139,6 +139,7 @@
     "matching": "Sovitetaan…",
     "failed": "Pintaa ei voitu luokitella",
     "unconfirmed": "Tästä {distance} on vahvistamatta — openkoutsi ei löytänyt pintamerkintää, joten luokka tulee tien tyypistä.",
+    "asphaltNote": "Asfalttia ei koskaan vahvisteta: tie, jolle ei ole merkitty pintaa, näyttää openkoutsille samalta kuin sileä asfaltti, joten osuus voi olla kumpi tahansa.",
     "sector": "{surface}, {length} kilometristä {km}",
     "sectorInferred": "(vahvistamaton)",
     "class": {

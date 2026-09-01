@@ -193,10 +193,21 @@ function SurfacePanel({
         ))}
       </div>
 
-      {coverage.inferredM > 0 && (
+      {/* The distance worth naming is the one the match is unsure about, not
+          every metre that happens to read `inferred`: see `markedInferredM`. */}
+      {coverage.markedInferredM > 0 && (
         <p className="text-xs text-muted-foreground">
-          {t('unconfirmed', { distance: formatKm(coverage.inferredM) })}
+          {t('unconfirmed', { distance: formatKm(coverage.markedInferredM) })}
         </p>
+      )}
+
+      {/* The asphalt caveat, made once and as a statement about the class,
+          because that is what it is: openkoutsi cannot tell smooth tarmac from
+          a road nobody has tagged, so no asphalt anywhere is ever confirmed.
+          Repeating it per row said the same thing N times and drowned the
+          rows where confidence actually varies. */}
+      {coverage.byClass.some(({ surface }) => surface === 'asphalt') && (
+        <p className="text-xs text-muted-foreground">{t('asphaltNote')}</p>
       )}
 
       {sectors.length > 0 && (

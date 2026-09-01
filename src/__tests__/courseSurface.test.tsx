@@ -7,6 +7,7 @@ import {
   hasSurfaceData,
   isRoughSurface,
   isSurfacePending,
+  marksInferred,
   ribbonBands,
   roughSectors,
   surfaceColor,
@@ -87,6 +88,35 @@ describe('isRoughSurface', () => {
   })
 })
 
+describe('marksInferred', () => {
+  it('marks a class that could have read confirmed', () => {
+    // Gravel comes from an explicit OSM tag, so `inferred` on it means the
+    // match itself was mixed or disputed — a fact about this stretch.
+    for (const klass of ['paved', 'compacted', 'cobbles', 'gravel', 'dirt', 'grass'] as const) {
+      expect(marksInferred(klass, 'inferred')).toBe(true)
+    }
+  })
+
+  it('does not mark asphalt, which can never read anything else', () => {
+    // The matcher returns the same value for smooth tarmac and for a way with
+    // no surface information at all, and that value is the only one that
+    // becomes asphalt. A mark here is a constant, not a signal.
+    expect(marksInferred('asphalt', 'inferred')).toBe(false)
+  })
+
+  it('does not mark unknown, where the class name already says it', () => {
+    expect(marksInferred('unknown', 'inferred')).toBe(false)
+    expect(marksInferred(null, 'inferred')).toBe(false)
+  })
+
+  it('never marks a confirmed segment', () => {
+    for (const klass of ALL_CLASSES) {
+      expect(marksInferred(klass, 'confirmed')).toBe(false)
+    }
+    expect(marksInferred('gravel', null)).toBe(false)
+  })
+})
+
 describe('surfaceCoverage', () => {
   it('adds up the distance per class, biggest first', () => {
     const coverage = surfaceCoverage([
@@ -108,6 +138,26 @@ describe('surfaceCoverage', () => {
     ])
     expect(coverage.confirmedM).toBe(3000)
     expect(coverage.inferredM).toBe(1000)
+  })
+
+  it('counts only the inferred distance the match is actually unsure of', () => {
+    // The sentence this drives has to be worth reading. On a course that is
+    // all asphalt, `inferredM` is every metre of it and could never have been
+    // anything else, so it is `markedInferredM` that gets reported.
+    const coverage = surfaceCoverage([
+      seg({ surface: 'asphalt', surface_confidence: 'inferred', length_m: 38000 }),
+      seg({ surface: 'gravel', surface_confidence: 'inferred', length_m: 2000 }),
+      seg({ surface: 'dirt', surface_confidence: 'confirmed', length_m: 130 }),
+    ])
+    expect(coverage.inferredM).toBe(40000)
+    expect(coverage.markedInferredM).toBe(2000)
+  })
+
+  it('has nothing to report on an all-asphalt course', () => {
+    const coverage = surfaceCoverage([
+      seg({ surface: 'asphalt', surface_confidence: 'inferred', length_m: 40000 }),
+    ])
+    expect(coverage.markedInferredM).toBe(0)
   })
 
   it('ignores unmatched segments entirely', () => {
@@ -210,13 +260,26 @@ describe('SegmentTable surface column', () => {
     renderTable([
       seg({
         segment_index: 0,
-        surface: 'asphalt',
+        surface: 'gravel',
         surface_confidence: 'inferred',
       }),
     ])
     expect(screen.getByText('Surface')).toBeTruthy()
-    expect(screen.getByText('Asphalt')).toBeTruthy()
+    expect(screen.getByText('Gravel')).toBeTruthy()
     expect(screen.getByText('inferred')).toBeTruthy()
+  })
+
+  it('leaves asphalt unmarked, because the mark there is a constant', () => {
+    // Asphalt cannot read `confirmed` — the matcher gives the same answer for
+    // smooth tarmac and for a way nobody has tagged. Marking every row said
+    // the same thing on every row and buried the ones that meant something.
+    // The caveat is not lost: the coverage panel above the table states it.
+    renderTable([
+      seg({ segment_index: 0, surface: 'asphalt', surface_confidence: 'inferred' }),
+    ])
+    expect(screen.getByText('Asphalt')).toBeTruthy()
+    expect(screen.queryByText('inferred')).toBeNull()
+    expect(screen.queryByText(/could not confirm a surface tag/i)).toBeNull()
   })
 
   it('leaves a confirmed segment unqualified', () => {
@@ -233,7 +296,7 @@ describe('SegmentTable surface column', () => {
 
   it('explains what inferred means once, under the table', () => {
     renderTable([
-      seg({ segment_index: 0, surface: 'asphalt', surface_confidence: 'inferred' }),
+      seg({ segment_index: 0, surface: 'gravel', surface_confidence: 'inferred' }),
     ])
     expect(screen.getByText(/could not confirm a surface tag/i)).toBeTruthy()
   })
@@ -249,14 +312,14 @@ describe('SegmentTable surface column', () => {
       }),
       seg({
         segment_index: 1,
-        surface: 'asphalt',
+        surface: 'dirt',
         surface_confidence: 'inferred',
         start_distance_m: 1000,
         end_distance_m: 2000,
       }),
     ])
     expect(screen.getByText('Gravel')).toBeTruthy()
-    expect(screen.getByText('Asphalt')).toBeTruthy()
+    expect(screen.getByText('Dirt')).toBeTruthy()
     // Exactly one of the two rows carries the qualifier.
     expect(screen.getAllByText('inferred')).toHaveLength(1)
   })
