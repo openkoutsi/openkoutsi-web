@@ -12,6 +12,14 @@ import { Bike, Heart, Zap } from 'lucide-react'
 
 interface Props {
   activity: Activity
+  /**
+   * `{bike_id: name}` for the athlete's bikes (issue #64). Passed in rather
+   * than fetched here: the list draws a page of these at a time, and the
+   * garage is a handful of rows the page already has. Omitted where the caller
+   * has no bike list, in which case no bike is shown — the card degrades to
+   * exactly what it was.
+   */
+  bikeNames?: Record<string, string>
 }
 
 const SPORT_ICONS: Record<string, React.ElementType> = {
@@ -20,9 +28,10 @@ const SPORT_ICONS: Record<string, React.ElementType> = {
   default: Zap,
 }
 
-export function ActivityCard({ activity }: Props) {
+export function ActivityCard({ activity, bikeNames }: Props) {
   const t = useTranslations('activities')
   const Icon = SPORT_ICONS[activity.sport_type?.toLowerCase()] ?? SPORT_ICONS.default
+  const bikeName = activity.bike_id ? bikeNames?.[activity.bike_id] : undefined
 
   return (
     <Link href={`/activities/${activity.id}`}>
@@ -52,6 +61,12 @@ export function ActivityCard({ activity }: Props) {
             )}
             {activity.load != null && (
               <span className="font-medium text-primary">{Math.round(activity.load)} Load</span>
+            )}
+            {bikeName && (
+              <span className="flex min-w-0 items-center gap-1 text-muted-foreground">
+                <Bike className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="truncate">{bikeName}</span>
+              </span>
             )}
           </div>
         </CardContent>

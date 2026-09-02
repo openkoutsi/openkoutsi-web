@@ -23,6 +23,8 @@ function activity(overrides: Partial<ActivityDetail> = {}): ActivityDetail {
     sources: ['strava'],
     name: 'Morning Ride',
     sport_type: 'Ride',
+    bike_id: null,
+    bike_source: null,
     start_time: '2026-08-01T06:00:00Z',
     duration_s: 5400,
     distance_m: 40000,

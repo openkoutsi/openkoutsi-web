@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { CombinedStreamChart, OverlayStream } from '@/components/charts/CombinedStreamChart'
 import { FullscreenStreamDialog } from '@/components/charts/FullscreenStreamDialog'
 import { AerobicMetricsCard } from '@/components/activities/AerobicMetricsCard'
+import { ActivityBikeCard } from '@/components/garage/ActivityBikeCard'
 import { SignalProcessingPanel } from '@/components/activities/SignalProcessingPanel'
 import { ZoneBar, toZoneEntries } from '@/components/charts/ZoneBar'
 import {
@@ -421,6 +422,17 @@ export default function ActivityDetailPage({ params }: Props) {
 
       {/* Aerobic response metrics */}
       <AerobicMetricsCard activity={activity} />
+
+      {/* Which bike this was ridden on (issue #64). Beside Labels & Notes
+          rather than inside it: a bike is a fact about the ride, not something
+          the athlete is being asked to confirm. */}
+      <ActivityBikeCard
+        activityId={id}
+        sportType={activity.sport_type}
+        bikeId={activity.bike_id}
+        bikeSource={activity.bike_source}
+        onChanged={() => mutate()}
+      />
 
       {/* Labels & Notes */}
       <Card>

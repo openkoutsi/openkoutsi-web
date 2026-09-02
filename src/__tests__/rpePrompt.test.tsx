@@ -46,6 +46,8 @@ function ride(id: string, name = `Ride ${id}`): Activity {
     sources: ['strava'],
     name,
     sport_type: 'cycling',
+    bike_id: null,
+    bike_source: null,
     start_time: '2026-08-01T06:00:00Z',
     duration_s: 5400,
     distance_m: 40000,

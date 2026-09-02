@@ -285,6 +285,14 @@ export interface Activity {
   decoupling_pct: number | null
   decoupling_reason: DecouplingReason | null
   workout_category: string | null
+  /**
+   * Which bike the ride was done on, and who decided (issue #64). `auto` is a
+   * match on the bike's claimed sports, `manual` the athlete's own correction,
+   * and null means nothing is assigned. Showing the source is what tells the
+   * athlete whether their correction actually stuck.
+   */
+  bike_id: string | null
+  bike_source: BikeSource | null
   labels: string[]
   // Labels openkoutsi thinks apply, kept strictly apart from `labels` above
   // (issue #63). `labels` is only ever what the athlete has confirmed; this is
@@ -301,6 +309,8 @@ export interface Activity {
   status: string
   created_at: string
 }
+
+export type BikeSource = 'auto' | 'manual'
 
 /** Formats openkoutsi can ingest and store an original of (issue #36). */
 export type ActivityFileFormat = 'fit' | 'gpx' | 'tcx'
@@ -964,19 +974,120 @@ export interface ChatAvailability {
   max_message_chars: number
 }
 
-// ── Course recon (issue #55) ────────────────────────────────────────────────
+// ── The garage (issues #55, #64) ────────────────────────────────────────────
 
-/** A bike, described only as much as the pacing physics reads. */
+/**
+ * A bike the athlete owns, rides and maintains.
+ *
+ * One record with two readers. `tyre_width_mm` and `riding_position` are what
+ * the course pacing physics consumes; everything else is the garage. They are
+ * the same rows, deliberately — which is what makes the bikes in the garage and
+ * the bikes in the route-analysis picker the same list, with nothing to keep in
+ * sync.
+ */
 export interface Bike {
   id: string
   name: string
   tyre_width_mm: number | null
   riding_position: RidingPosition
+  /** Kilometres ridden before openkoutsi ever saw the bike. */
+  odometer_base_km: number | null
+  /** Canonical cycling `sport_type` values this bike claims, for automapping. */
+  default_sports: string[]
+  /** Sold or scrapped: out of the pickers, but it keeps its rides and its log. */
+  retired_at: string | null
+  /** What openkoutsi actually observed — the sum of the rides assigned to it. */
+  tracked_km: number
+  /** `tracked_km` plus the athlete's own baseline. Reported apart on purpose. */
+  lifetime_km: number
   created_at: string
   updated_at: string
 }
 
+/** A bike with everything hanging off it — what `/garage` reads. */
+export interface BikeDetail extends Bike {
+  maintenance: MaintenanceEntry[]
+  accessories: BikeAccessory[]
+}
+
+/** One thing done to a bike, on a date, at an odometer reading. */
+export interface MaintenanceEntry {
+  id: string
+  bike_id: string
+  performed_on: string
+  /** Free-form. `MAINTENANCE_COMPONENTS` is what the UI offers, not a limit. */
+  component: string
+  /** An absolute reading, never an offset — it does not move when history does. */
+  odometer_km: number | null
+  note: string | null
+  /**
+   * How far the part replaced *at this entry* had run: the gap to the previous
+   * entry for the same component. Null when that span is genuinely unknown,
+   * which is not the same as zero.
+   */
+  previous_component_km: number | null
+  /** How far the bike has run since this entry. */
+  km_since: number | null
+  /** The newest entry for its component — the part currently fitted. */
+  is_current: boolean
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Something bolted to a bike. A plain record: noting that the trailer exists is
+ * the feature; making it move the pacing physics is a separate piece of work.
+ */
+export interface BikeAccessory {
+  id: string
+  bike_id: string
+  name: string
+  note: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** What `POST /api/bikes/assign-history` did. */
+export interface AssignHistoryResult {
+  scanned: number
+  assigned: number
+}
+
+/**
+ * The suggested component vocabulary. Advisory — the server stores whatever it
+ * is given, so this is what the picker offers rather than what it permits.
+ */
+export const MAINTENANCE_COMPONENTS = [
+  'tyres',
+  'chain',
+  'cassette',
+  'chainrings',
+  'brake_pads',
+  'bottom_bracket',
+  'bearings',
+  'cables',
+  'bar_tape',
+  'service',
+  'other',
+] as const
+
+/**
+ * Sports a bike can claim. The cycling half of the server's `sport_type`
+ * vocabulary — the road / gravel / e-bike split automapping runs on.
+ */
+export const CLAIMABLE_SPORTS = [
+  'Ride',
+  'GravelRide',
+  'MountainBikeRide',
+  'EBikeRide',
+  'EBikeSport',
+  'VirtualRide',
+  'Handcycle',
+] as const
+
 export type RidingPosition = 'tops' | 'hoods' | 'drops' | 'aero'
+
+// ── Course recon (issue #55) ────────────────────────────────────────────────
 
 export type SegmentType = 'climb' | 'flat' | 'descent'
 

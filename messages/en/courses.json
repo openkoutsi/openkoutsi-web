@@ -62,22 +62,16 @@
   "bikes": {
     "manage": "Bikes",
     "title": "Your bikes",
-    "why": "The pacing model reads two things off a bike: tyre width, which sets rolling resistance, and riding position, which sets how much air you push. Nothing else about it matters here.",
-    "name": "Name",
-    "namePlaceholder": "Road bike",
-    "tyreWidth": "Tyre width (mm)",
-    "ridingPosition": "Riding position",
-    "add": "Add bike",
-    "saving": "Saving…",
-    "delete": "Delete bike",
-    "saveFailed": "Could not save the bike",
-    "deleteFailed": "Could not delete the bike",
+    "why": "The pacing model reads two things off a bike: tyre width, which sets rolling resistance, and riding position, which sets how much air you push. Add and edit bikes in the garage.",
     "position": {
       "tops": "On the tops",
       "hoods": "On the hoods",
       "drops": "In the drops",
       "aero": "Aero bars"
-    }
+    },
+    "openGarage": "Open the garage",
+    "empty": "No bikes yet — add one in the garage.",
+    "retired": "Retired"
   },
   "profile": {
     "km": "km",

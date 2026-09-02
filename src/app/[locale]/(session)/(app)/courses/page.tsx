@@ -37,11 +37,15 @@ export default function CoursesPage() {
     '/api/courses',
     fetcher,
   )
-  const { data: bikes, mutate: mutateBikes } = useSWR<Bike[]>('/api/bikes', fetcher)
+  const { data: bikes } = useSWR<Bike[]>('/api/bikes', fetcher)
   const { data: goals } = useSWR<Page<Goal>>('/api/goals', fetcher)
 
   const items = courses?.items ?? []
   const bikeList = bikes ?? []
+  // Retired bikes stay in the garage, and in the per-activity override, but not
+  // here: pacing a course you are going to ride on a bike you have sold is not
+  // something anyone means to ask for (issue #64).
+  const activeBikes = bikeList.filter((b) => !b.retired_at)
   const activeGoals = (goals?.items ?? []).filter((g) => g.status === 'active')
 
   function handleCreated(course: CourseDetail) {
@@ -75,7 +79,7 @@ export default function CoursesPage() {
           <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <BikeManager bikes={bikeList} onChanged={() => mutateBikes()} />
+          <BikeManager bikes={bikeList} />
           {!showFirstRun && !adding && (
             <Button size="sm" onClick={() => setAdding(true)}>
               <Plus className="mr-1 h-4 w-4" />
@@ -89,7 +93,7 @@ export default function CoursesPage() {
         <Card>
           <CardContent className="pt-6">
             <CourseUploadDropzone
-              bikes={bikeList}
+              bikes={activeBikes}
               goals={activeGoals}
               onCreated={handleCreated}
               variant={showFirstRun ? 'firstRun' : 'compact'}
@@ -170,6 +174,10 @@ export default function CoursesPage() {
               <CardContent>
                 <CourseDetailView
                   courseId={course.id}
+                  // Every bike, retired included: this picker shows what the
+                  // course was *already* solved for, and hiding a retired bike
+                  // here would make a course solved on a since-sold bike look
+                  // as though it had none.
                   bikes={bikeList}
                   onChanged={() => mutateCourses()}
                 />

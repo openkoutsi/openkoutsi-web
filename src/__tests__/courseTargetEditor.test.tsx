@@ -53,6 +53,11 @@ const BIKE: Bike = {
   name: 'Road bike',
   tyre_width_mm: 28,
   riding_position: 'hoods',
+  odometer_base_km: null,
+  default_sports: [],
+  retired_at: null,
+  tracked_km: 0,
+  lifetime_km: 0,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }

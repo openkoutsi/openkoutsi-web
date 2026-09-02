@@ -23,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       messages:   (await import(`../../messages/${locale}/messages.json`)).default,
       chat:       (await import(`../../messages/${locale}/chat.json`)).default,
       courses:    (await import(`../../messages/${locale}/courses.json`)).default,
+      garage:     (await import(`../../messages/${locale}/garage.json`)).default,
     },
   }
 })
