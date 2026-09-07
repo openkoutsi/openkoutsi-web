@@ -113,9 +113,11 @@
       "decoupling": "Aerobic decoupling",
       "decouplingHint": "How far your power-to-heart-rate ratio drifted from the first half of the ride to the second. Under 5% is generally considered good durability.",
       "decouplingCaveat": "Heart-rate drift is also pushed up by heat, dehydration and caffeine, so read a single ride's figure in context rather than as a pure fitness score.",
+      "decouplingWindow": "Measured over the longest continuous block of this ride — {window} of {total}. A stop long enough to recover from divides a ride into efforts that can't be compared across, so the longest one is used.",
       "wBalBasis": "W′ balance computed against CP {cp} W and W′ {wPrime}, fitted from your power bests as of this ride.",
       "decouplingReasons": {
         "too_short": "Not measured: the ride was too short. Decoupling needs about an hour of steady riding to mean anything.",
+        "fragmented": "Not measured: stops broke this ride up, and no single continuous stretch of it lasted the hour the measurement needs.",
         "no_power": "Not measured: this ride has no power data.",
         "no_hr": "Not measured: this ride has no heart-rate data.",
         "degenerate_hr": "Not measured: the heart-rate data from this ride is unusable.",
