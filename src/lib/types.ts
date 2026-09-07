@@ -250,6 +250,7 @@ export interface AthleteProfile {
 /** Why `Activity.decoupling_pct` is absent — see the backend's decoupling gate. */
 export type DecouplingReason =
   | 'too_short'
+  | 'fragmented'
   | 'no_power'
   | 'no_hr'
   | 'degenerate_hr'
@@ -282,13 +283,20 @@ export interface Activity {
   // Aerobic response metrics (issue #37). `efficiency_factor` (weighted power
   // per heartbeat) and `variability_index` (weighted / average power) are
   // derived server-side on read, so they are present on activities processed
-  // long before the feature existed. `decoupling_pct` is the power:HR drift
-  // over the ride; when it is null, `decoupling_reason` says why a figure would
-  // be misleading rather than leaving the athlete to guess.
+  // long before the feature existed. `decoupling_pct` is the power:HR drift;
+  // when it is null, `decoupling_reason` says why a figure would be misleading
+  // rather than leaving the athlete to guess.
+  //
+  // The drift is measured over the ride's longest continuous block rather than
+  // across a stop long enough to recover from, and `decoupling_window_s` is how
+  // many seconds that block covers. Shorter than `duration_s` on a ride that
+  // was broken up, which is when the card says so. Null on rides processed
+  // before this existed, and on any ride with no figure.
   efficiency_factor: number | null
   variability_index: number | null
   decoupling_pct: number | null
   decoupling_reason: DecouplingReason | null
+  decoupling_window_s: number | null
   workout_category: string | null
   /**
    * Which bike the ride was done on, and who decided (issue #64). `auto` is a

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   formatDecoupling,
   formatEfficiencyFactor,
+  formatHoursMinutes,
   formatVariabilityIndex,
   formatWPrime,
 } from '@/lib/utils'
@@ -32,6 +33,15 @@ export function AerobicMetricsCard({ activity }: { activity: ActivityDetail }) {
   const applies = isCyclingSport(activity.sport_type) && !isCommute(activity)
 
   const hasDecoupling = activity.decoupling_pct != null
+  // Decoupling is measured over the ride's longest continuous block, so a ride
+  // broken up by a long stop gets a figure for part of it. Saying which part is
+  // the difference between an honest number and one the athlete reads as their
+  // whole day. The tenth is slack, not a threshold: the block spans the stops
+  // bridged inside it while `duration_s` is moving time, so the two never match
+  // to the second on a ride with any stopping in it at all.
+  const windowS = activity.decoupling_window_s
+  const partialWindow =
+    hasDecoupling && windowS != null && windowS < activity.duration_s * 0.9
   // The backend sends a reason code whenever it withheld a figure; fall back to
   // the generic line if it ever sends one this build doesn't know about.
   const reasonKey = activity.decoupling_reason
@@ -78,6 +88,15 @@ export function AerobicMetricsCard({ activity }: { activity: ActivityDetail }) {
             hint={hasDecoupling ? t('detail.aerobic.decouplingHint') : reasonText}
           />
         </div>
+
+        {partialWindow && (
+          <p className="text-xs text-muted-foreground">
+            {t('detail.aerobic.decouplingWindow', {
+              window: formatHoursMinutes(windowS!),
+              total: formatHoursMinutes(activity.duration_s),
+            })}
+          </p>
+        )}
 
         {hasDecoupling && (
           <p className="text-xs text-muted-foreground">

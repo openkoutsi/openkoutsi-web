@@ -113,9 +113,11 @@
       "decoupling": "Aerobinen erkaantuma",
       "decouplingHint": "Kuinka paljon teho–syke-suhteesi ajautui lenkin ensimmäisestä puoliskosta toiseen. Alle 5 %:a pidetään yleisesti hyvänä kestävyytenä.",
       "decouplingCaveat": "Sykkeen nousua lisäävät myös kuumuus, nestehukka ja kofeiini, joten lue yksittäisen lenkin lukema asiayhteydessä eikä puhtaana kuntoarvosanana.",
+      "decouplingWindow": "Mitattu tämän lenkin pisimmästä yhtenäisestä jaksosta — {window} / {total}. Riittävän pitkä tauko jakaa lenkin osiin, joita ei voi verrata toisiinsa, joten mittaukseen otetaan pisin niistä.",
       "wBalBasis": "W′-tase laskettu arvoilla CP {cp} W ja W′ {wPrime}, jotka on sovitettu tehoennätyksistäsi tämän lenkin ajankohtana.",
       "decouplingReasons": {
         "too_short": "Ei mitattu: lenkki oli liian lyhyt. Erkaantuma vaatii noin tunnin tasaista ajoa ollakseen merkityksellinen.",
+        "fragmented": "Ei mitattu: tauot pilkkoivat tämän lenkin, eikä yksikään yhtenäinen jakso kestänyt mittaukseen tarvittavaa tuntia.",
         "no_power": "Ei mitattu: tässä lenkissä ei ole tehodataa.",
         "no_hr": "Ei mitattu: tässä lenkissä ei ole sykedataa.",
         "degenerate_hr": "Ei mitattu: tämän lenkin sykedata ei ole käyttökelpoista.",

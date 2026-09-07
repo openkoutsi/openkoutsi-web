@@ -41,6 +41,7 @@ function activity(overrides: Partial<ActivityDetail> = {}): ActivityDetail {
     variability_index: 1.07,
     decoupling_pct: 3.4,
     decoupling_reason: null,
+    decoupling_window_s: 5400,
     workout_category: 'endurance',
     labels: [],
     label_suggestions: {},
@@ -96,6 +97,34 @@ describe('AerobicMetricsCard', () => {
     expect(screen.getByText('detail.aerobic.title')).toBeInTheDocument()
   })
 
+  it('says so when the figure covers only part of the ride', () => {
+    // Seven hours ridden, four measured: the block either side of a long stop.
+    render(
+      h(AerobicMetricsCard, {
+        activity: activity({ duration_s: 25200, decoupling_window_s: 14400 }),
+      }),
+    )
+    expect(screen.getByText('detail.aerobic.decouplingWindow')).toBeInTheDocument()
+  })
+
+  it('stays quiet when the figure covers the whole ride', () => {
+    render(h(AerobicMetricsCard, { activity: activity() }))
+    expect(screen.queryByText('detail.aerobic.decouplingWindow')).not.toBeInTheDocument()
+  })
+
+  it('stays quiet about the window on a ride with no figure', () => {
+    render(
+      h(AerobicMetricsCard, {
+        activity: activity({
+          decoupling_pct: null,
+          decoupling_reason: 'fragmented',
+          decoupling_window_s: null,
+        }),
+      }),
+    )
+    expect(screen.queryByText('detail.aerobic.decouplingWindow')).not.toBeInTheDocument()
+  })
+
   it('hides itself when the ride has no aerobic data at all', () => {
     const { container } = render(
       h(AerobicMetricsCard, {
@@ -104,6 +133,7 @@ describe('AerobicMetricsCard', () => {
           variability_index: null,
           decoupling_pct: null,
           decoupling_reason: null,
+          decoupling_window_s: null,
         }),
       }),
     )
