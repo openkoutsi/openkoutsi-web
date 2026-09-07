@@ -271,6 +271,11 @@ export interface Activity {
   weighted_power: number | null
   avg_hr: number | null
   max_hr: number | null
+  // Average speed in metres per second, as recorded — the mean of the speed
+  // samples the device or provider carried, not distance over elapsed time.
+  // Null when the ride had no speed channel at all (a hand-logged entry, a file
+  // with no speed in it); `avgSpeedMs` in `lib/utils` derives one in that case.
+  avg_speed_ms: number | null
   avg_cadence: number | null
   load: number | null
   intensity: number | null

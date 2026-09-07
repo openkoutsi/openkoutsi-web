@@ -3,15 +3,10 @@
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { Interval } from '@/lib/types'
-import { formatDuration, formatHR, formatPower } from '@/lib/utils'
+import { formatDuration, formatHR, formatPower, formatSpeed } from '@/lib/utils'
 
 interface Props {
   intervals: Interval[]
-}
-
-function formatSpeed(speedMs: number | null): string {
-  if (speedMs == null) return '—'
-  return `${(speedMs * 3.6).toFixed(1)} km/h`
 }
 
 export function IntervalsTable({ intervals }: Props) {
