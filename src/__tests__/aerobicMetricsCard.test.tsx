@@ -33,6 +33,7 @@ function activity(overrides: Partial<ActivityDetail> = {}): ActivityDetail {
     weighted_power: 225,
     avg_hr: 141,
     max_hr: 172,
+    avg_speed_ms: 8.2,
     avg_cadence: 88,
     load: 95,
     intensity: 0.78,

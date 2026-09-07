@@ -95,6 +95,7 @@
       "date": "Päivämäärä",
       "duration": "Kesto",
       "distance": "Matka",
+      "avgSpeed": "Keskim. nopeus",
       "avgPower": "Keskim. teho",
       "weightedPower": "Painotettu teho",
       "intensity": "Intensiteetti",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  avgSpeedMs,
   cn,
   formatDate,
   formatDecoupling,
@@ -9,6 +10,8 @@ import {
   formatHoursMinutes,
   formatHR,
   formatPower,
+  formatSpeed,
+  formatSpeedKmh,
   formatVariabilityIndex,
   formatWPrime,
   relativeAge,
@@ -117,6 +120,58 @@ describe('formatHR', () => {
     expect(formatHR(148)).toBe('148 bpm')
     expect(formatHR(148.6)).toBe('149 bpm')
     expect(formatHR(0)).toBe('0 bpm')
+  })
+})
+
+// ── Average speed ─────────────────────────────────────────────────────────────
+
+describe('formatSpeed', () => {
+  it('returns dash when missing', () => {
+    expect(formatSpeed(null)).toBe('—')
+    expect(formatSpeed(undefined)).toBe('—')
+  })
+
+  it('converts metres per second to km/h with one decimal', () => {
+    expect(formatSpeed(9.5)).toBe('34.2 km/h')
+    expect(formatSpeed(0)).toBe('0.0 km/h')
+  })
+})
+
+describe('formatSpeedKmh', () => {
+  it('derives km/h from distance and time', () => {
+    expect(formatSpeedKmh(30000, 3600)).toBe('30.0 km/h')
+    expect(formatSpeedKmh(1000, 150)).toBe('24.0 km/h')
+  })
+})
+
+describe('avgSpeedMs', () => {
+  it('prefers the recorded average over distance ÷ duration', () => {
+    // A ride with stops in it: the device averaged 9.5 m/s while moving, while
+    // elapsed time gives 8.33. The recorded figure is the one to show.
+    expect(
+      avgSpeedMs({ avg_speed_ms: 9.5, distance_m: 30000, duration_s: 3600 }),
+    ).toBe(9.5)
+  })
+
+  it('derives one when the ride carried no speed channel', () => {
+    expect(
+      avgSpeedMs({ avg_speed_ms: null, distance_m: 30000, duration_s: 3600 }),
+    ).toBeCloseTo(30000 / 3600, 10)
+  })
+
+  it('returns null when there is nothing to derive from', () => {
+    expect(avgSpeedMs({ avg_speed_ms: null, distance_m: null, duration_s: 3600 })).toBeNull()
+    expect(avgSpeedMs({ avg_speed_ms: null, distance_m: 30000, duration_s: null })).toBeNull()
+    expect(avgSpeedMs({})).toBeNull()
+  })
+
+  it('never divides by a zero duration', () => {
+    // A duration of zero would give Infinity, which formats as "Infinity km/h".
+    expect(avgSpeedMs({ avg_speed_ms: null, distance_m: 30000, duration_s: 0 })).toBeNull()
+  })
+
+  it('keeps a recorded zero, which is a measurement rather than a gap', () => {
+    expect(avgSpeedMs({ avg_speed_ms: 0, distance_m: 30000, duration_s: 3600 })).toBe(0)
   })
 })
 

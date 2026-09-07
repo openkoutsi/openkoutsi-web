@@ -99,10 +99,38 @@ export function formatChartTime(minutes: number): string {
   return rem === 0 ? `${h}h` : `${h}h ${rem}m`
 }
 
+/** Format a speed in metres per second as km/h: 9.5 → "34.2 km/h" */
+export function formatSpeed(speedMs: number | null | undefined): string {
+  if (speedMs == null) return '—'
+  return `${(speedMs * 3.6).toFixed(1)} km/h`
+}
+
 /** Format average speed in km/h derived from distance (m) and time (s) */
 export function formatSpeedKmh(distance_m: number, time_s: number): string {
-  const kmh = (distance_m / time_s) * 3.6
-  return `${kmh.toFixed(1)} km/h`
+  return formatSpeed(distance_m / time_s)
+}
+
+/**
+ * A ride's average speed in metres per second.
+ *
+ * `avg_speed_ms` is what the recording carried — the mean of the device's own
+ * speed samples, which is what the head unit and the provider both show. Only
+ * when a ride has no speed channel at all (a hand-logged entry, a file with no
+ * speed in it) is it derived from distance over elapsed time; the two disagree
+ * on any ride with stops in it, so the recorded figure is always preferred
+ * rather than recomputed. Null when neither is available.
+ */
+export function avgSpeedMs(
+  activity: {
+    avg_speed_ms?: number | null
+    distance_m?: number | null
+    duration_s?: number | null
+  },
+): number | null {
+  if (activity.avg_speed_ms != null) return activity.avg_speed_ms
+  const { distance_m, duration_s } = activity
+  if (distance_m == null || duration_s == null || duration_s <= 0) return null
+  return distance_m / duration_s
 }
 
 /** How long ago something happened, at the coarsest unit that still says it. */

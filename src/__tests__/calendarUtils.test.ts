@@ -27,6 +27,7 @@ function makeActivity(id: string, start_time: string): Activity {
     weighted_power: null,
     avg_hr: null,
     max_hr: null,
+    avg_speed_ms: null,
     avg_cadence: null,
     load: null,
     intensity: null,

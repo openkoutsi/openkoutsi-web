@@ -56,6 +56,14 @@ uses to name the download and to explain that a GPX-sourced ride has no power
 data because the file never had any — rather than letting three empty tiles read
 as a failed import.
 
+The detail page's summary tiles include **average speed**. It comes from the
+ride's recorded `avg_speed_ms` — the mean of the device's own speed samples,
+which is the figure the head unit and the provider both show — and falls back to
+distance over elapsed time only when the recording carried no speed channel at
+all, as a hand-logged entry does. The two disagree on any ride with stops in it,
+so `avgSpeedMs` in `src/lib/utils.ts` never recomputes a figure the recording
+already has.
+
 ## Data freshness
 
 Screens that show live data poll with SWR's `refreshInterval`, but a timer alone

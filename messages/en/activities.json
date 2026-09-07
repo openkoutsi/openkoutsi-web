@@ -95,6 +95,7 @@
       "date": "Date",
       "duration": "Duration",
       "distance": "Distance",
+      "avgSpeed": "Avg speed",
       "avgPower": "Avg power",
       "weightedPower": "Weighted power",
       "intensity": "Intensity",

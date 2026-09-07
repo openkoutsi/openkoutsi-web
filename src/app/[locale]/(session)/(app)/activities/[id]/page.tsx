@@ -31,7 +31,7 @@ import {
 import { IntervalsTable } from '@/components/activities/IntervalsTable'
 import { SourceBadge } from '@/components/activities/SourceBadge'
 import { WorkoutCategoryBadge } from '@/components/activities/WorkoutCategoryBadge'
-import { formatDate, formatDuration, formatDistance, formatPower, formatHR, formatDistanceLabel, formatTime, formatSpeedKmh } from '@/lib/utils'
+import { formatDate, formatDuration, formatDistance, formatPower, formatHR, formatDistanceLabel, formatTime, formatSpeed, formatSpeedKmh, avgSpeedMs } from '@/lib/utils'
 import { PowerCurveChart, formatDuration as formatPeriod } from '@/components/charts/PowerCurveChart'
 import { ArrowLeft, ChevronDown, Download, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 
@@ -303,6 +303,10 @@ export default function ActivityDetailPage({ params }: Props) {
     { label: t('detail.stats.date'), value: formatDate(activity.start_time) },
     { label: t('detail.stats.duration'), value: formatDuration(activity.duration_s) },
     { label: t('detail.stats.distance'), value: activity.distance_m != null ? formatDistance(activity.distance_m) : '—' },
+    // Beside distance, since the two answer the same question. `avgSpeedMs`
+    // prefers the recorded average and only falls back to distance over elapsed
+    // time, so a ride with stops in it reads as the head unit showed it.
+    { label: t('detail.stats.avgSpeed'), value: formatSpeed(avgSpeedMs(activity)) },
     { label: t('detail.stats.avgPower'), value: formatPower(activity.avg_power) },
     { label: t('detail.stats.weightedPower'), value: formatPower(activity.weighted_power) },
     { label: t('detail.stats.intensity'), value: activity.intensity != null ? activity.intensity.toFixed(2) : '—' },
