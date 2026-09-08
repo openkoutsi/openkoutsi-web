@@ -8,19 +8,33 @@ export function workoutDate(planStartDate: string, weekNumber: number, dayOfWeek
   return addDays(base, (weekNumber - 1) * 7 + (dayOfWeek - 1))
 }
 
+/** Whether a plan is one the athlete still has: being followed, or finished.
+ *
+ * An allow-list rather than "not archived", matching the backend's own
+ * LIVE_STATUSES: a status neither side recognises should stay out of the
+ * numbers instead of quietly counting towards them. */
+export function isLivePlan(plan: TrainingPlan): boolean {
+  return plan.status === 'active' || plan.status === 'completed'
+}
+
 /** Returns 'yyyy-MM-dd' of the Monday of the ISO week containing `date`. */
 export function weekKey(date: Date): string {
   return format(startOfWeek(date, { weekStartsOn: 1 }), 'yyyy-MM-dd')
 }
 
 /**
- * Aggregates target_load from active plans into a Map of weekKey → total planned Load.
- * Plans with status !== 'active' and workouts with null target_load are skipped.
+ * Aggregates target_load into a Map of weekKey → total planned Load.
+ *
+ * Archived and unrecognised plans, and workouts with null target_load, are
+ * skipped. A plan that
+ * has run its course still counts: every week it covers is a week the athlete
+ * was given that Load, and the chart it feeds shows past weeks as well as the
+ * one in progress.
  */
 export function aggregatePlannedLoadByWeek(plans: TrainingPlan[]): Map<string, number> {
   const map = new Map<string, number>()
   for (const plan of plans) {
-    if (plan.status !== 'active') continue
+    if (!isLivePlan(plan)) continue
     for (const workout of plan.workouts) {
       if (workout.target_load == null) continue
       const date = workoutDate(plan.start_date, workout.week_number, workout.day_of_week)
@@ -131,6 +145,8 @@ export function checkProjectedRamp(
   const configuredPct = progressionPctOf(plan)
   const thresholdPct = configuredPct + RAMP_TOLERANCE_PCT
   const result: RampCheck = { configuredPct, thresholdPct, weeks: [] }
+  // Deliberately 'active' and not `isLivePlan`: this warns about a ramp still
+  // ahead of the athlete, and a plan that has finished has no ramp left.
   if (!forecast || forecast.length === 0 || plan.status !== 'active') return result
 
   const planStart = new Date(plan.start_date)
@@ -156,10 +172,14 @@ export function checkProjectedRamp(
   return result
 }
 
-/** Groups workouts of the active plan by date key (yyyy-MM-dd). */
+/** Groups a plan's workouts by date key (yyyy-MM-dd), archived plans aside.
+ *
+ * A finished plan keeps its markers: the calendar is a training log, and the
+ * block just gone is the part of it most worth looking back at. Every workout
+ * is placed on its own date, so a closed plan can only mark days it covered. */
 export function groupPlannedWorkoutsByDate(plan: TrainingPlan | undefined): Map<string, PlannedWorkout[]> {
   const map = new Map<string, PlannedWorkout[]>()
-  if (!plan || plan.status !== 'active') return map
+  if (!plan || !isLivePlan(plan)) return map
 
   for (const workout of plan.workouts) {
     if (workout.workout_type === 'rest') continue

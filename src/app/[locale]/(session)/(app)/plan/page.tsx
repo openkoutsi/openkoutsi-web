@@ -683,6 +683,12 @@ export default function PlanPage() {
 
   // Several non-overlapping plans can be active at once, so render them all.
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
+  // Plans that ran their course — closed by the backend once their last day
+  // passed — kept apart from the ones filed away by hand. Anything with an
+  // unrecognised status is treated as archived, so nothing can go missing.
+  const completedPlans = plans?.filter((p) => p.status === 'completed') ?? []
+  const archivedPlans =
+    plans?.filter((p) => p.status !== 'active' && p.status !== 'completed') ?? []
 
   function planWeek(plan: TrainingPlan) {
     return Math.max(1, differenceInWeeks(new Date(), new Date(plan.start_date)) + 1)
@@ -713,11 +719,16 @@ export default function PlanPage() {
     }
   }
 
-  async function handleUnarchive(id: string) {
+  async function handleUnarchive(plan: TrainingPlan) {
     try {
-      await apiFetch(`/api/plans/${id}/unarchive`, { method: 'POST' })
+      await apiFetch(`/api/plans/${plan.id}/unarchive`, { method: 'POST' })
       await mutate()
-      toast({ title: t('plan.unarchived') })
+      toast({
+        title:
+          plan.status === 'completed'
+            ? t('plan.reopened')
+            : t('plan.unarchived'),
+      })
     } catch (err) {
       toast({
         title: tCommon('error'),
@@ -813,91 +824,170 @@ export default function PlanPage() {
         </Card>
       ))}
 
-      {plans && plans.filter((p) => p.status !== 'active').length > 0 && (
+      {completedPlans.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t('plan.completedPlans')}
+          </h2>
+          <div className="space-y-2">
+            {completedPlans.map((plan) => (
+              <PastPlanCard
+                key={plan.id}
+                plan={plan}
+                isOpen={expanded.has(plan.id)}
+                onToggle={() => toggleExpanded(plan.id)}
+                onReopen={() => handleUnarchive(plan)}
+                onDelete={() => handleDelete(plan.id)}
+                currentWeek={planWeek(plan)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {archivedPlans.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             {t('plan.archivedPlans')}
           </h2>
           <div className="space-y-2">
-            {plans
-              .filter((p) => p.status !== 'active')
-              .map((plan) => {
-                const isOpen = expanded.has(plan.id)
-                return (
-                  <Card key={plan.id}>
-                    <CardContent className="py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="flex-1 flex items-center justify-between text-left gap-2 min-w-0"
-                          onClick={() => toggleExpanded(plan.id)}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <p className="text-sm font-medium truncate">{plan.name}</p>
-                            {plan.generation_method === 'llm' && (
-                              <span className="text-xs rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 font-medium shrink-0">
-                                {t('plan.aiTag')}
-                              </span>
-                            )}
-                          </div>
-                          <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
-                            {t('plan.weeks', { count: plan.weeks ?? 0 })}
-                            {isOpen
-                              ? <ChevronUp className="h-3.5 w-3.5" />
-                              : <ChevronDown className="h-3.5 w-3.5" />
-                            }
-                          </span>
-                        </button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
-                          title={t('plan.unarchive')}
-                          onClick={() => handleUnarchive(plan.id)}
-                        >
-                          <ArchiveRestore className="h-3.5 w-3.5" />
-                          <span className="sr-only">{t('plan.unarchive')}</span>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t('plan.deleteTitle')}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t('plan.deleteDesc', { name: plan.name })}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => handleDelete(plan.id)}
-                              >
-                                {tCommon('delete')}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                      {isOpen && (
-                        <div className="mt-4 border-t pt-4">
-                          <PlanCalendar key={plan.id} plan={plan} currentWeek={planWeek(plan)} />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
+            {archivedPlans.map((plan) => (
+              <PastPlanCard
+                key={plan.id}
+                plan={plan}
+                isOpen={expanded.has(plan.id)}
+                onToggle={() => toggleExpanded(plan.id)}
+                onReopen={() => handleUnarchive(plan)}
+                onDelete={() => handleDelete(plan.id)}
+                currentWeek={planWeek(plan)}
+              />
+            ))}
           </div>
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * One plan that is no longer being followed — finished or filed away.
+ *
+ * Collapsed to a row until opened, since a past plan is reference material
+ * rather than something to act on. A finished plan says when it finished and
+ * how it went; both kinds can be reopened, which puts them back at the top of
+ * the page as the plan being followed.
+ */
+function PastPlanCard({
+  plan,
+  isOpen,
+  onToggle,
+  onReopen,
+  onDelete,
+  currentWeek,
+}: {
+  plan: TrainingPlan
+  isOpen: boolean
+  onToggle: () => void
+  onReopen: () => void
+  onDelete: () => void
+  currentWeek: number
+}) {
+  const t = useTranslations('app')
+  const tCommon = useTranslations('common')
+  const { data: athlete } = useSWR<AthleteProfile>('/api/athlete', fetcher)
+  const isCompleted = plan.status === 'completed'
+  const reopenLabel = isCompleted ? t('plan.reopen') : t('plan.unarchive')
+  const showAdherence =
+    showAdherenceScores(athlete?.app_settings) && plan.adherence_score != null
+
+  return (
+    <Card>
+      <CardContent className="py-3">
+        <div className="flex items-center gap-2">
+          <button
+            className="flex-1 flex items-center justify-between text-left gap-2 min-w-0"
+            onClick={onToggle}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <p className="text-sm font-medium truncate">{plan.name}</p>
+              {plan.generation_method === 'llm' && (
+                <span className="text-xs rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 font-medium shrink-0">
+                  {t('plan.aiTag')}
+                </span>
+              )}
+              {isCompleted && plan.completed_at && (
+                <span className="text-xs text-muted-foreground shrink-0 hidden sm:inline">
+                  {t('plan.finishedOn', {
+                    date: new Date(plan.completed_at).toLocaleDateString(),
+                  })}
+                </span>
+              )}
+            </div>
+            <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
+              {showAdherence && (
+                <span
+                  className={cn(
+                    'rounded-full px-2 py-0.5 font-medium',
+                    adherenceBadgeClass(plan.adherence_score),
+                  )}
+                >
+                  {t('plan.adherence.soFar', {
+                    score: formatAdherence(plan.adherence_score),
+                  })}
+                </span>
+              )}
+              {t('plan.weeks', { count: plan.weeks ?? 0 })}
+              {isOpen
+                ? <ChevronUp className="h-3.5 w-3.5" />
+                : <ChevronDown className="h-3.5 w-3.5" />
+              }
+            </span>
+          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+            title={reopenLabel}
+            onClick={onReopen}
+          >
+            <ArchiveRestore className="h-3.5 w-3.5" />
+            <span className="sr-only">{reopenLabel}</span>
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('plan.deleteTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('plan.deleteDesc', { name: plan.name })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={onDelete}
+                >
+                  {tCommon('delete')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+        {isOpen && (
+          <div className="mt-4 border-t pt-4">
+            <PlanCalendar key={plan.id} plan={plan} currentWeek={currentWeek} />
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

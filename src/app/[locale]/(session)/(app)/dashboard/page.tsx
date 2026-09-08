@@ -22,7 +22,7 @@ import { gamificationEnabled } from '@/lib/gamification'
 import { AchievementsCard } from '@/components/AchievementsCard'
 import { ActivityCalendar } from '@/components/activities/ActivityCalendar'
 import { RpePrompt } from '@/components/activities/RpePrompt'
-import { aggregatePlannedLoadByWeek } from '@/lib/planUtils'
+import { aggregatePlannedLoadByWeek, isLivePlan } from '@/lib/planUtils'
 import { parseMoodAndParagraphs, progressText, KoutsiAvatar, KoutsiBubble } from '@/components/koutsi-chat'
 import { AiDisclosure } from '@/components/AiDisclosure'
 import { HelpCircle, RefreshCw } from 'lucide-react'
@@ -370,6 +370,10 @@ export default function DashboardPage() {
   })
   const plans = plansPage?.items
   const activePlans = plans?.filter((p) => p.status === 'active') ?? []
+  // The calendar is a training log rather than a view of the current plan, so
+  // it keeps the markers of a plan that has run its course. Each workout is
+  // placed on its own date, so a finished plan can only mark days it covered.
+  const loggedPlans = plans?.filter(isLivePlan) ?? []
   // The dashed tail is trimmed to the selected period so it never dwarfs the
   // measured data; the goal outlook below keeps using the full projection.
   const forecastDays = forecastHorizon(days)
@@ -571,7 +575,7 @@ export default function DashboardPage() {
       {gamificationEnabled(athlete?.app_settings) && <AchievementsCard />}
 
       {/* Activity calendar */}
-      <ActivityCalendar activePlans={activePlans} />
+      <ActivityCalendar activePlans={loggedPlans} />
 
       {/* Daily training status feedback */}
       <TrainingStatusCard />
