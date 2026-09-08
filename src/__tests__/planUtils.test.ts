@@ -143,12 +143,24 @@ describe('aggregatePlannedLoadByWeek', () => {
     expect(aggregatePlannedLoadByWeek([]).size).toBe(0)
   })
 
-  it('skips plans with status !== "active"', () => {
+  it('skips archived and unrecognised plans', () => {
+    for (const status of ['archived', 'draft']) {
+      const plan = makePlan({
+        status,
+        workouts: [makeWorkout({ workout_type: 'easy' })],
+      })
+      expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
+    }
+  })
+
+  it('still counts a plan that has run its course', () => {
+    // Every week it covered is a week the athlete was given that Load, and the
+    // chart shows past weeks as well as the one in progress.
     const plan = makePlan({
-      status: 'draft',
+      status: 'completed',
       workouts: [makeWorkout({ workout_type: 'easy' })],
     })
-    expect(aggregatePlannedLoadByWeek([plan]).size).toBe(0)
+    expect(aggregatePlannedLoadByWeek([plan]).size).toBe(1)
   })
 
   it('skips workouts with null target_load', () => {
@@ -211,12 +223,22 @@ describe('groupPlannedWorkoutsByDate', () => {
     expect(groupPlannedWorkoutsByDate(undefined).size).toBe(0)
   })
 
-  it('returns empty map when plan is not active', () => {
+  it('returns empty map for an archived plan', () => {
     const plan = makePlan({
       status: 'archived',
       workouts: [makeWorkout({ workout_type: 'easy' })],
     })
     expect(groupPlannedWorkoutsByDate(plan).size).toBe(0)
+  })
+
+  it('keeps the markers of a plan that has run its course', () => {
+    // The calendar is a training log; the block just gone is the part of it
+    // most worth looking back at.
+    const plan = makePlan({
+      status: 'completed',
+      workouts: [makeWorkout({ workout_type: 'easy' })],
+    })
+    expect(groupPlannedWorkoutsByDate(plan).size).toBe(1)
   })
 
   it('groups workouts by computed date key', () => {

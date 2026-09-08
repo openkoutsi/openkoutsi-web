@@ -702,8 +702,12 @@ export interface TrainingPlan {
   end_date: string | null
   goal: string | null
   weeks: number | null
+  // 'active' while it's being followed, 'completed' once its last day has
+  // passed (the backend closes it), 'archived' if it was filed away.
   status: string
   created_at: string
+  // When the plan finished. Optional so older cached payloads still type-check.
+  completed_at?: string | null
   workouts: PlannedWorkout[]
   config: Record<string, unknown> | null
   generation_method: string | null
