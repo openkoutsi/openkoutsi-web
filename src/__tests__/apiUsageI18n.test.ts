@@ -36,8 +36,12 @@ const API_GROUPS = [
 const WEBHOOK_GROUPS = ['day', 'week', 'month', 'provider', 'outcome'] as const
 // Every outcome the two bridges can write. A missing one renders a raw id in
 // the table rather than a word.
+//
+// No `duplicate`: neither bridge deduplicates — every delivery past the filters
+// becomes a fresh row — so a translation for it would be copy for a value that
+// can never arrive. It goes back in when the dedupe does.
 const WEBHOOK_OUTCOMES = [
-  'accepted', 'duplicate', 'ignored', 'rejected', 'verification', 'unknown',
+  'accepted', 'ignored', 'rejected', 'verification', 'unknown',
 ] as const
 
 describe('third-party API usage i18n', () => {

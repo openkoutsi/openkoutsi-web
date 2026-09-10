@@ -257,7 +257,6 @@
       },
       "outcomes": {
         "accepted": "Accepted",
-        "duplicate": "Duplicate",
         "ignored": "Ignored",
         "rejected": "Rejected",
         "verification": "Verification",

@@ -257,7 +257,6 @@
       },
       "outcomes": {
         "accepted": "Hyväksytty",
-        "duplicate": "Kaksoiskappale",
         "ignored": "Ohitettu",
         "rejected": "Hylätty",
         "verification": "Vahvistus",
