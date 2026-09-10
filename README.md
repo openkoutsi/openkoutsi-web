@@ -447,6 +447,37 @@ npx vitest run         # run tests once
 npm run test:coverage  # run tests with coverage
 ```
 
+## Third-party API usage in the admin console
+
+The **Usage** tab leads with a **quota headroom** panel and the volume tables sit
+below it (issue #66). The order is the point: headroom is the only panel that
+answers "can we start a big import right now", and calendar buckets cannot answer
+it — Strava's quota windows are 15 minutes and a day.
+
+The panel does not estimate our standing from our own call counts. Strava reports
+it exactly in the rate-limit headers of every response, so the figure shown is the
+provider's own, from the last response the backend saw. Three display rules keep
+that honest, and they live in `src/lib/quota.ts` as pure functions so they can be
+tested without mounting the page:
+
+- A reading from a window that has since rolled over renders as **"Window reset —
+  0 used"**, drawn in a neutral colour rather than green. The zero is inferred
+  rather than observed, and painting it as healthy would claim a freshness we do
+  not have — while showing last window's 580/600 would scare an admin off an
+  import that has full headroom.
+- The **observation's age** is always shown, at the coarsest unit that still says
+  something. Headroom is a *now* number that is only as fresh as our last call.
+- The **overall and read-only quotas are shown separately**. A backfill is all
+  reads and Strava's read ceiling is roughly half the overall one, so it is the
+  one that runs out first.
+
+The webhook table names any bridge it could not reach rather than counting it as
+zero — an unreachable bridge is a gap in the table, not an absence of deliveries.
+
+Both `messages/en/admin.json` and `messages/fi/admin.json` carry the full key set;
+`src/__tests__/apiUsageI18n.test.ts` fails the build if a locale drifts, including
+on interpolation placeholders, which throw at render time in next-intl.
+
 ## Docker
 
 ```bash

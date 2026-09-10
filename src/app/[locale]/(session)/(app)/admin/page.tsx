@@ -6,6 +6,7 @@ import { useRouter } from '@/navigation'
 import useSWR from 'swr'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, fetcher } from '@/lib/api'
+import { observationAge, quotaBarPercent, quotaSeverity } from '@/lib/quota'
 import type {
   AdminPersonalAccessTokenResponse,
   UserResponse,
@@ -13,6 +14,10 @@ import type {
   InstanceSettingsResponse,
   InstanceSettingsPatch,
   LlmUsageSummaryResponse,
+  ApiUsageSummaryResponse,
+  QuotaHeadroomResponse,
+  QuotaWindow,
+  WebhookUsageSummaryResponse,
   Page,
 } from '@/lib/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -1402,7 +1407,7 @@ function SettingsTab() {
 
 const USAGE_GROUPS = ['user', 'provider', 'feature', 'day', 'week', 'month'] as const
 
-function UsageTab() {
+function LlmUsageCard() {
   const t = useTranslations('admin')
   const [groupBy, setGroupBy] = useState<(typeof USAGE_GROUPS)[number]>('user')
   const { data, isLoading } = useSWR<LlmUsageSummaryResponse>(
@@ -1466,6 +1471,318 @@ function UsageTab() {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+// ── Third-party API usage and quota headroom (issue #66) ──────────────────────
+
+const API_USAGE_GROUPS = [
+  'service', 'endpoint', 'status', 'outcome', 'user', 'day', 'week', 'month',
+] as const
+const WEBHOOK_GROUPS = ['day', 'week', 'month', 'provider', 'outcome'] as const
+
+const AGE_KEYS = {
+  seconds: 'usage.quota.ageSeconds',
+  minutes: 'usage.quota.ageMinutes',
+  hours: 'usage.quota.ageHours',
+  days: 'usage.quota.ageDays',
+} as const
+
+/** How long ago an observation was taken, at the coarsest unit that still says something. */
+function useAgeLabel() {
+  const t = useTranslations('admin')
+  return (seconds: number) => {
+    const { unit, n } = observationAge(seconds)
+    return t(AGE_KEYS[unit], { n })
+  }
+}
+
+const SEVERITY_BAR = {
+  // An inferred zero is drawn neutral, never as healthy green — see quotaSeverity.
+  reset: 'bg-muted-foreground/40',
+  critical: 'bg-destructive',
+  warning: 'bg-yellow-500',
+  ok: 'bg-primary',
+} as const
+
+function QuotaWindowRow({ w }: { w: QuotaWindow }) {
+  const t = useTranslations('admin')
+  const used = w.usage ?? 0
+  const limit = w.limit ?? 0
+  const pct = quotaBarPercent(w.usage, w.limit)
+  const bar = SEVERITY_BAR[quotaSeverity(w)]
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="font-medium">
+          {t(`usage.quota.scope.${w.scope}`)} · {t(`usage.quota.window.${w.window}`)}
+        </span>
+        <span className="tabular-nums text-muted-foreground">
+          {w.limit === null
+            ? '—'
+            : t('usage.quota.usedOfLimit', {
+                used: used.toLocaleString(),
+                limit: limit.toLocaleString(),
+              })}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div className={`h-full ${bar}`} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="flex items-baseline justify-between gap-2 text-xs text-muted-foreground">
+        <span>
+          {w.observed_in_window
+            ? t('usage.quota.remaining', { n: (w.remaining ?? 0).toLocaleString() })
+            : t('usage.quota.windowReset')}
+        </span>
+        <span>
+          {t('usage.quota.resetsAt', {
+            time: new Date(w.resets_at).toLocaleTimeString(undefined, {
+              hour: '2-digit', minute: '2-digit',
+            }),
+          })}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function HeadroomCard() {
+  const t = useTranslations('admin')
+  const ageLabel = useAgeLabel()
+  const { data, isLoading } = useSWR<QuotaHeadroomResponse>(
+    '/api/admin/quota/headroom',
+    fetcher,
+    // Headroom is a *now* number; a stale panel is the failure mode worth
+    // spending a poll on.
+    { refreshInterval: 60_000 },
+  )
+  const services = data?.services ?? []
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('usage.quota.title')}</CardTitle>
+        <CardDescription>{t('usage.quota.desc')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t('usage.loading')}</p>
+        ) : services.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('usage.quota.empty')}</p>
+        ) : (
+          services.map((s) => (
+            <div key={s.service} className="space-y-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-medium capitalize">{s.service}</h3>
+                <span className="text-xs text-muted-foreground">
+                  {s.observed_at === null
+                    ? t('usage.quota.noObservation')
+                    : t('usage.quota.observed', {
+                        age: ageLabel(s.age_seconds ?? 0),
+                      })}
+                </span>
+              </div>
+
+              {s.windows.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {s.observed_at === null
+                    ? t('usage.quota.neverCalled')
+                    : t('usage.quota.noQuotaPublished')}
+                </p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {s.windows.map((w, i) => (
+                    <QuotaWindowRow key={i} w={w} />
+                  ))}
+                </div>
+              )}
+
+              {s.last_rate_limited_at && (
+                <p className="text-xs text-destructive">
+                  {t('usage.quota.lastThrottled', {
+                    when: new Date(s.last_rate_limited_at).toLocaleString(),
+                  })}
+                </p>
+              )}
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function ApiUsageCard() {
+  const t = useTranslations('admin')
+  const [groupBy, setGroupBy] = useState<(typeof API_USAGE_GROUPS)[number]>('service')
+  const { data, isLoading } = useSWR<ApiUsageSummaryResponse>(
+    `/api/admin/api-usage/summary?group_by=${groupBy}`,
+    fetcher,
+  )
+  const buckets = data?.buckets ?? []
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('usage.api.title')}</CardTitle>
+        <CardDescription>{t('usage.api.desc')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="api-usage-group">{t('usage.groupBy')}</Label>
+          <select
+            id="api-usage-group"
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            value={groupBy}
+            onChange={(e) =>
+              setGroupBy(e.target.value as (typeof API_USAGE_GROUPS)[number])
+            }
+          >
+            {API_USAGE_GROUPS.map((g) => (
+              <option key={g} value={g}>{t(`usage.api.group.${g}`)}</option>
+            ))}
+          </select>
+        </div>
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t('usage.loading')}</p>
+        ) : buckets.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('usage.api.empty')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-2 pr-4 font-medium">{t(`usage.api.group.${groupBy}`)}</th>
+                  <th className="pb-2 pr-4 text-right font-medium">{t('usage.api.calls')}</th>
+                  <th className="pb-2 pr-4 text-right font-medium">{t('usage.api.ok')}</th>
+                  <th className="pb-2 pr-4 text-right font-medium">{t('usage.api.errors')}</th>
+                  <th className="pb-2 pr-4 text-right font-medium">{t('usage.api.throttled')}</th>
+                  <th className="pb-2 text-right font-medium">{t('usage.api.avgMs')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {buckets.map((b, i) => {
+                  const errors = b.client_error + b.server_error + b.transport_error
+                  return (
+                    <tr key={i} className="border-b last:border-0">
+                      <td className="py-2 pr-4 font-mono">{b.key ?? '—'}</td>
+                      <td className="py-2 pr-4 text-right tabular-nums">{b.calls.toLocaleString()}</td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-muted-foreground">
+                        {b.ok.toLocaleString()}
+                      </td>
+                      <td className={`py-2 pr-4 text-right tabular-nums ${errors > 0 ? '' : 'text-muted-foreground'}`}>
+                        {errors.toLocaleString()}
+                      </td>
+                      <td className={`py-2 pr-4 text-right tabular-nums ${b.rate_limited > 0 ? 'font-medium text-destructive' : 'text-muted-foreground'}`}>
+                        {b.rate_limited.toLocaleString()}
+                      </td>
+                      <td className="py-2 text-right tabular-nums text-muted-foreground">
+                        {b.avg_duration_ms === null ? '—' : b.avg_duration_ms.toLocaleString()}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function WebhookUsageCard() {
+  const t = useTranslations('admin')
+  const [groupBy, setGroupBy] = useState<(typeof WEBHOOK_GROUPS)[number]>('day')
+  const { data, isLoading } = useSWR<WebhookUsageSummaryResponse>(
+    `/api/admin/webhook-usage/summary?group_by=${groupBy}`,
+    fetcher,
+  )
+  const buckets = data?.buckets ?? []
+  const unavailable = data?.unavailable ?? []
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t('usage.webhooks.title')}</CardTitle>
+        <CardDescription>{t('usage.webhooks.desc')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="webhook-usage-group">{t('usage.groupBy')}</Label>
+          <select
+            id="webhook-usage-group"
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            value={groupBy}
+            onChange={(e) => setGroupBy(e.target.value as (typeof WEBHOOK_GROUPS)[number])}
+          >
+            {WEBHOOK_GROUPS.map((g) => (
+              <option key={g} value={g}>{t(`usage.webhooks.group.${g}`)}</option>
+            ))}
+          </select>
+        </div>
+
+        {unavailable.length > 0 && (
+          // Named rather than silently counted as zero: an unreachable bridge is
+          // a gap in the table, not an absence of deliveries.
+          <p className="text-sm text-yellow-600 dark:text-yellow-500">
+            {t('usage.webhooks.unavailable', { providers: unavailable.join(', ') })}
+          </p>
+        )}
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t('usage.loading')}</p>
+        ) : buckets.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('usage.webhooks.empty')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-2 pr-4 font-medium">{t(`usage.webhooks.group.${groupBy}`)}</th>
+                  <th className="pb-2 pr-4 font-medium">{t('usage.webhooks.provider')}</th>
+                  <th className="pb-2 pr-4 font-medium">{t('usage.webhooks.outcome')}</th>
+                  <th className="pb-2 text-right font-medium">{t('usage.webhooks.count')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {buckets.map((b, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="py-2 pr-4 font-mono">{b.key ?? '—'}</td>
+                    <td className="py-2 pr-4 capitalize">{b.provider ?? '—'}</td>
+                    <td className="py-2 pr-4">
+                      {b.outcome ? t(`usage.webhooks.outcomes.${b.outcome}`) : '—'}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">{b.count.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * The Usage tab.
+ *
+ * Headroom leads, because it is the only panel that answers "can we start a big
+ * import right now" — the volume tables below it answer the different question
+ * of what we are trending toward and what email costs.
+ */
+function UsageTab() {
+  return (
+    <div className="space-y-6">
+      <HeadroomCard />
+      <ApiUsageCard />
+      <WebhookUsageCard />
+      <LlmUsageCard />
+    </div>
   )
 }
 

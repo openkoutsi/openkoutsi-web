@@ -193,6 +193,76 @@
     "totalTokens": "Total tokens",
     "unknown": "Unknown",
     "loading": "Loading…",
-    "empty": "No usage recorded yet."
+    "empty": "No usage recorded yet.",
+    "quota": {
+      "title": "Quota headroom",
+      "desc": "Where we stand against each provider’s rate limit, read from their own response headers. The quota belongs to the application, not to an athlete — one big import can throttle everyone.",
+      "empty": "No services to report.",
+      "noObservation": "no observation yet",
+      "observed": "observed {age}",
+      "neverCalled": "We have not called this provider yet.",
+      "noQuotaPublished": "This provider publishes no rate-limit headers.",
+      "windowReset": "Window reset — 0 used",
+      "usedOfLimit": "{used} / {limit}",
+      "remaining": "{n} left",
+      "resetsAt": "resets {time}",
+      "lastThrottled": "Last rate-limited (429): {when}",
+      "ageSeconds": "{n}s ago",
+      "ageMinutes": "{n} min ago",
+      "ageHours": "{n} h ago",
+      "ageDays": "{n} d ago",
+      "window": {
+        "short": "15 min",
+        "daily": "Daily"
+      },
+      "scope": {
+        "overall": "Overall",
+        "read": "Read"
+      }
+    },
+    "api": {
+      "title": "Third-party API calls",
+      "desc": "Outbound requests to Strava and Wahoo, and outbound email. Providers are counted per HTTP request, because that is how their quotas are counted; email is counted per message, because that is how it is billed.",
+      "empty": "No third-party calls recorded yet.",
+      "calls": "Calls",
+      "ok": "OK",
+      "errors": "Errors",
+      "throttled": "Throttled",
+      "avgMs": "Avg ms",
+      "group": {
+        "service": "Service",
+        "endpoint": "Endpoint",
+        "status": "Status",
+        "outcome": "Outcome",
+        "user": "User",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      }
+    },
+    "webhooks": {
+      "title": "Inbound webhooks",
+      "desc": "Deliveries received by the Strava and Wahoo bridges — the only place a delivery is seen arriving. Counters survive the bridges’ seven-day event prune, so monthly totals stay answerable.",
+      "empty": "No webhook deliveries recorded yet.",
+      "count": "Deliveries",
+      "provider": "Provider",
+      "outcome": "Outcome",
+      "unavailable": "Could not reach: {providers}. The table below is incomplete.",
+      "group": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "provider": "Provider",
+        "outcome": "Outcome"
+      },
+      "outcomes": {
+        "accepted": "Accepted",
+        "duplicate": "Duplicate",
+        "ignored": "Ignored",
+        "rejected": "Rejected",
+        "verification": "Verification",
+        "unknown": "Unknown"
+      }
+    }
   }
 }
