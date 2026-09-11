@@ -193,6 +193,75 @@
     "totalTokens": "Tokenit yhteensä",
     "unknown": "Tuntematon",
     "loading": "Ladataan…",
-    "empty": "Käyttöä ei ole vielä kirjattu."
+    "empty": "Käyttöä ei ole vielä kirjattu.",
+    "quota": {
+      "title": "Kiintiön liikkumavara",
+      "desc": "Tilanteemme kunkin palveluntarjoajan kutsurajaa vasten, luettuna niiden omista vastausotsakkeista. Kiintiö on sovelluskohtainen, ei urheilijakohtainen — yksi iso tuonti voi rajoittaa kaikkia.",
+      "empty": "Ei raportoitavia palveluita.",
+      "noObservation": "ei vielä havaintoa",
+      "observed": "havaittu {age}",
+      "neverCalled": "Tätä palveluntarjoajaa ei ole vielä kutsuttu.",
+      "noQuotaPublished": "Tämä palveluntarjoaja ei julkaise kutsurajaotsakkeita.",
+      "windowReset": "Ikkuna nollautui — 0 käytetty",
+      "usedOfLimit": "{used} / {limit}",
+      "remaining": "{n} jäljellä",
+      "resetsAt": "nollautuu {time}",
+      "lastThrottled": "Viimeksi rajoitettu (429): {when}",
+      "ageSeconds": "{n} s sitten",
+      "ageMinutes": "{n} min sitten",
+      "ageHours": "{n} h sitten",
+      "ageDays": "{n} vrk sitten",
+      "window": {
+        "short": "15 min",
+        "daily": "Vuorokausi"
+      },
+      "scope": {
+        "overall": "Kokonais",
+        "read": "Luku"
+      }
+    },
+    "api": {
+      "title": "Kolmannen osapuolen API-kutsut",
+      "desc": "Lähtevät pyynnöt Stravaan ja Wahooseen sekä lähtevä sähköposti. Palveluntarjoajat lasketaan HTTP-pyyntöinä, koska niiden kiintiöt lasketaan niin; sähköposti lasketaan viesteinä, koska se laskutetaan niin.",
+      "empty": "Kolmannen osapuolen kutsuja ei ole vielä kirjattu.",
+      "calls": "Kutsut",
+      "ok": "OK",
+      "errors": "Virheet",
+      "throttled": "Rajoitetut",
+      "avgMs": "Ka. ms",
+      "group": {
+        "service": "Palvelu",
+        "endpoint": "Päätepiste",
+        "status": "Tila",
+        "outcome": "Lopputulos",
+        "user": "Käyttäjä",
+        "day": "Päivä",
+        "week": "Viikko",
+        "month": "Kuukausi"
+      }
+    },
+    "webhooks": {
+      "title": "Saapuvat webhookit",
+      "desc": "Stravan ja Wahoon siltojen vastaanottamat toimitukset — silta on ainoa paikka, jossa toimituksen saapuminen nähdään. Laskurit säilyvät siltojen seitsemän päivän tapahtumasiivouksen yli, joten kuukausisummat pysyvät saatavilla.",
+      "empty": "Webhook-toimituksia ei ole vielä kirjattu.",
+      "count": "Toimitukset",
+      "provider": "Palveluntarjoaja",
+      "outcome": "Lopputulos",
+      "unavailable": "Ei tavoitettu: {providers}. Alla oleva taulukko on puutteellinen.",
+      "group": {
+        "day": "Päivä",
+        "week": "Viikko",
+        "month": "Kuukausi",
+        "provider": "Palveluntarjoaja",
+        "outcome": "Lopputulos"
+      },
+      "outcomes": {
+        "accepted": "Hyväksytty",
+        "ignored": "Ohitettu",
+        "rejected": "Hylätty",
+        "verification": "Vahvistus",
+        "unknown": "Tuntematon"
+      }
+    }
   }
 }

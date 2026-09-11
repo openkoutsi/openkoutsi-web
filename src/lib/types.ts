@@ -118,6 +118,82 @@ export interface LlmUsageSummaryResponse {
   buckets: LlmUsageBucket[]
 }
 
+// ── Third-party API usage and quota headroom (issue #66) ─────────────────────
+
+// One aggregation row of the outbound third-party API-usage summary. `calls`
+// counts HTTP requests for the providers and messages for email — the unit each
+// is respectively limited and billed in. The outcome breakdown travels with the
+// count because 900 calls means something very different when 200 are throttled.
+export interface ApiUsageBucket {
+  key: string | null
+  calls: number
+  ok: number
+  client_error: number
+  server_error: number
+  transport_error: number
+  rate_limited: number
+  avg_duration_ms: number | null
+}
+
+export interface ApiUsageSummaryResponse {
+  group_by: string
+  from?: string | null
+  to?: string | null
+  buckets: ApiUsageBucket[]
+}
+
+// One quota window's standing for a service.
+//
+// `observed_in_window` is the field that stops the panel lying. When it is false
+// the window has rolled over since we last called the provider, so `usage` is 0
+// by inference rather than by observation — the counter really is empty, and
+// showing last window's number instead would report alarming usage against a
+// window nothing has spent.
+export interface QuotaWindow {
+  window: 'short' | 'daily'
+  scope: 'overall' | 'read'
+  usage: number | null
+  limit: number | null
+  remaining: number | null
+  window_start: string
+  resets_at: string
+  observed_in_window: boolean
+}
+
+// A service's headroom. `observed_at`/`age_seconds` are present because headroom
+// is a *now* number that is only as fresh as our last call — the UI has to be
+// able to say "no observation in this window" rather than imply a live reading.
+export interface QuotaHeadroom {
+  service: string
+  observed_at: string | null
+  age_seconds: number | null
+  windows: QuotaWindow[]
+  last_rate_limited_at: string | null
+}
+
+export interface QuotaHeadroomResponse {
+  services: QuotaHeadroom[]
+}
+
+// One aggregation row of the inbound-webhook summary, counted at the bridges.
+export interface WebhookUsageBucket {
+  key: string | null
+  provider: string | null
+  outcome: string | null
+  count: number
+}
+
+export interface WebhookUsageSummaryResponse {
+  group_by: string
+  from?: string | null
+  to?: string | null
+  buckets: WebhookUsageBucket[]
+  // Bridges that could not be reached. The table renders from whatever answered,
+  // with these named — a bridge being down is not a reason to show nothing, but
+  // it is a reason not to imply completeness.
+  unavailable: string[]
+}
+
 export interface InstanceInfoResponse {
   admin_contact: string | null
   privacy_policy_url: string
