@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, apiDownload, fetcher } from '@/lib/api'
-import type { AthleteProfile, WeightLogEntry, Zone } from '@/lib/types'
+import type { AthleteProfile, IntegrationsStatus, WeightLogEntry, Zone } from '@/lib/types'
 import {
   defaultHrZones,
   defaultPowerZones,
@@ -91,6 +91,16 @@ export default function ProfilePage() {
   const { data: profile, mutate: mutateProfile } = useSWR<AthleteProfile>('/api/athlete', fetcher)
   const { data: weightLog } = useSWR<WeightLogEntry[]>('/api/athlete/weight-log', fetcher)
   const { data: availableProviders } = useSWR<{ available: string[] }>('/api/integrations/available', fetcher)
+  // Polled while an import is running so the card stops saying "Importing…" on
+  // its own; otherwise left to SWR's own revalidation (issue #68).
+  const { data: integrationsStatus, mutate: mutateIntegrations } = useSWR<IntegrationsStatus>(
+    '/api/integrations/status',
+    fetcher,
+    {
+      refreshInterval: (latest) =>
+        Object.values(latest?.sync ?? {}).some((s) => s.status === 'running') ? 15_000 : 0,
+    },
+  )
   const { data: llmModels } = useSWR<{ models: { name: string; label: string }[]; selected: string | null }>('/api/llm/models', fetcher)
 
   const [name, setName] = useState(athlete?.name ?? '')
@@ -472,6 +482,9 @@ export default function ProfilePage() {
     try {
       await apiFetch(`/api/integrations/${provider}/sync`, { method: 'POST' })
       toast({ title: t('profile.provider.syncStarted'), description: t('profile.provider.syncStartedDesc') })
+      // The run has taken its lease by now, so this is what turns the card over
+      // to "Importing…" instead of leaving the last run's outcome on screen.
+      await mutateIntegrations()
     } catch (err) {
       toast({
         title: t('profile.provider.syncFailed'),
@@ -859,6 +872,7 @@ export default function ProfilePage() {
                 onSync={() => handleProviderSync(provider)}
                 onDisconnect={(deleteData) => handleProviderDisconnect(provider, deleteData)}
                 syncing={syncingProvider === provider}
+                sync={integrationsStatus?.sync?.[provider]}
               />
               {provider === 'wahoo' && (
                 <div className="mt-2 flex items-center gap-2">

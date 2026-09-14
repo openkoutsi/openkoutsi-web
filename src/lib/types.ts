@@ -323,6 +323,45 @@ export interface AthleteProfile {
   updated_at: string
 }
 
+/**
+ * What one provider's last history import did (issue #68).
+ *
+ * A backfill can end four ways short of the athlete's whole history, and they
+ * all used to be indistinguishable from a finished one. `more_expected` is the
+ * field to act on without learning the vocabulary: there is history left that
+ * pressing Sync again would import.
+ */
+export interface ProviderSyncStatus {
+  /** `interrupted` is a run whose process died mid-walk — not a live import. */
+  status: 'never' | 'running' | 'completed' | 'stopped' | 'interrupted'
+  stop_reason:
+    | 'throttled'
+    | 'safety_limit'
+    | 'provider_outage'
+    | 'lease_lost'
+    | 'error'
+    | null
+  stop_detail: string | null
+  started_at: string | null
+  finished_at: string | null
+  /** Activities that run imported, repaired or restated. */
+  imported: number
+  /** Activities the provider listed to it. */
+  listed: number
+  /** Oldest activity date the import has ever reached. */
+  oldest_seen_on: string | null
+  more_expected: boolean
+  /** Runs in a row that have ended the same way. */
+  repeat_count: number
+  repeat_since: string | null
+}
+
+export interface IntegrationsStatus {
+  connected: string[]
+  /** Keyed by provider name. Only connected providers appear. */
+  sync: Record<string, ProviderSyncStatus>
+}
+
 /** Why `Activity.decoupling_pct` is absent — see the backend's decoupling gate. */
 export type DecouplingReason =
   | 'too_short'
