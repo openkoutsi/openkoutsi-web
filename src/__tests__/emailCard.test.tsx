@@ -40,6 +40,8 @@ function instanceInfo(emailEnabled: boolean): InstanceInfoResponse {
     allow_self_signup: false,
     allow_personal_access_tokens: true,
     allow_course_recon: false,
+    signups_halted: false,
+    signup_halt_reason: null,
   }
 }
 

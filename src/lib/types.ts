@@ -88,6 +88,11 @@ export interface InstanceSettingsResponse {
   // above — the half that distinguishes it needs a routing sidecar the
   // self-hoster builds tiles for themselves.
   allow_course_recon: boolean
+  // A temporary stop on self-serve signup, and the admin's own reason for it.
+  // Separate from `allow_self_signup` above: that one is standing policy, this
+  // one pauses a door otherwise open.
+  signups_halted: boolean
+  signup_halt_reason: string | null
 }
 
 export interface InstanceSettingsPatch {
@@ -99,6 +104,9 @@ export interface InstanceSettingsPatch {
   allow_personal_access_tokens?: boolean
   allow_mcp_server?: boolean
   allow_course_recon?: boolean
+  signups_halted?: boolean
+  // Empty string clears it, like `admin_contact`. Capped at 500 chars server-side.
+  signup_halt_reason?: string | null
 }
 
 // One aggregation row of the admin LLM-usage summary (issue #9).
@@ -205,6 +213,14 @@ export interface InstanceInfoResponse {
   allow_personal_access_tokens: boolean
   // Issue #56: whether the Courses page is offered at all on this instance.
   allow_course_recon: boolean
+  // Whether new self-serve signups are paused right now, and the admin's
+  // reason. Published beside `allow_self_signup` rather than folded into it:
+  // that flag says whether the instance offers self-serve signup at all, and
+  // collapsing the two would send the sign-up page down its "not enabled on
+  // this instance" branch and lose the reason. The reason is only sent while
+  // the halt is on.
+  signups_halted: boolean
+  signup_halt_reason: string | null
 }
 
 // ── Account identifiers (issue #62) ────────────────────────────────────────

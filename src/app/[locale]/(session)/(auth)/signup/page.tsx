@@ -87,6 +87,47 @@ export default function SignupPage() {
     )
   }
 
+  // Paused, not withdrawn. Checked *after* the gate above, mirroring the
+  // backend: an instance that offers no self-serve signup says so and never
+  // admits to a halt on top of it. The admin's reason is rendered verbatim,
+  // because a pause nobody explains is indistinguishable from a broken site.
+  if (instanceInfo.signups_halted) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">{t('signup.onHoldTitle')}</CardTitle>
+          <CardDescription>{t('signup.onHoldDesc')}</CardDescription>
+        </CardHeader>
+        {(instanceInfo.signup_halt_reason || instanceInfo.admin_contact) && (
+          <CardContent className="space-y-4">
+            {instanceInfo.signup_halt_reason && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('signup.onHoldReason')}</p>
+                {/* Admin-written free text. React escapes it; `whitespace-pre-line`
+                    keeps the line breaks they typed. */}
+                <p className="text-sm mt-1 whitespace-pre-line">
+                  {instanceInfo.signup_halt_reason}
+                </p>
+              </div>
+            )}
+            {instanceInfo.admin_contact && (
+              // The reader's next question, answered without making them hunt.
+              <div>
+                <p className="text-sm text-muted-foreground">{t('signup.onHoldContact')}</p>
+                <p className="text-sm font-medium mt-1">{instanceInfo.admin_contact}</p>
+              </div>
+            )}
+          </CardContent>
+        )}
+        <CardFooter>
+          <Link href={`/login`} className="text-sm underline underline-offset-4 hover:text-primary">
+            {t('signup.backToSignIn')}
+          </Link>
+        </CardFooter>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>

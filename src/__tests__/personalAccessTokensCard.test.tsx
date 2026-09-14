@@ -70,6 +70,8 @@ function instanceInfo(enabled: boolean): InstanceInfoResponse {
     allow_self_signup: false,
     allow_personal_access_tokens: enabled,
     allow_course_recon: false,
+    signups_halted: false,
+    signup_halt_reason: null,
   }
 }
 
