@@ -64,6 +64,40 @@ all, as a hand-logged entry does. The two disagree on any ride with stops in it,
 so `avgSpeedMs` in `src/lib/utils.ts` never recomputes a figure the recording
 already has.
 
+## When a provider import stops partway
+
+A history import from Strava or Wahoo can end before it reaches the end of an
+athlete's history — the provider rate-limits us, it stops serving activity data,
+the walk hits its own safety limit, or another import takes over. Until the
+backend started recording which, all four looked exactly like a finished import
+from here: the Sync button went back to normal, the activity list stopped
+growing, and nothing said there was more.
+
+`GET /api/integrations/status` now answers it per provider, and the provider card
+on the profile page shows the answer. `src/lib/providerSync.ts` holds the
+decision of *which* thing to say, separately from the card, because that is the
+part worth testing:
+
+- A provider nobody has synced yet gets **no line**. A freshly connected account
+  has not failed at anything, and an empty state that reads like a warning is
+  worse than silence.
+- A finished import, and one still running, are muted.
+- A stop is amber, names the reason, says what it did manage to import and how
+  far back it reached, and ends with the only thing the athlete can do about it:
+  press Sync again to carry on from where it stopped. That last line is driven by
+  `more_expected` rather than by the reason, so a reason this build has never
+  heard of still ends with something actionable.
+- `repeat_count` earns a sentence only once it is above 1. The same stop three
+  runs in a row is a provider problem or a poisoned range of activities — the one
+  thing no single run could have told them — and one bad afternoon is not.
+
+A run whose server process died mid-walk reads as `interrupted` rather than as a
+live import, so the card never shows a spinner that will never finish.
+
+The status is polled only while an import is actually running, and refetched
+immediately after pressing Sync so the card turns over to "Importing…" instead of
+leaving the previous run's outcome on screen.
+
 ## Data freshness
 
 Screens that show live data poll with SWR's `refreshInterval`, but a timer alone

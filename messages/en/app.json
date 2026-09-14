@@ -401,7 +401,21 @@
       "notConfigured": "{name} credentials are not configured on this server.",
       "notConfiguredTitle": "{name} is not configured",
       "notConfiguredDesc": "The server does not have {name} credentials set up. Ask your server administrator to configure the {name} integration.",
-      "wahooDeviceOnly": "Hide activities not from a Wahoo device"
+      "wahooDeviceOnly": "Hide activities not from a Wahoo device",
+      "sync": {
+        "running": "Importing your history…",
+        "finished": "Import finished — {count, plural, =0 {no new activities} one {1 new activity} other {# new activities}}.",
+        "interrupted": "The last import stopped before it finished.",
+        "stoppedThrottled": "{name} rate-limited us, so the import stopped before it finished.",
+        "stoppedSafetyLimit": "The import stopped at its safety limit before it finished.",
+        "stoppedProviderOutage": "{name} stopped sending activity data, so the import stopped before it finished.",
+        "stoppedLeaseLost": "Another import took over before this one finished.",
+        "stoppedError": "The import stopped with an error before it finished.",
+        "importedSoFar": "{count, plural, one {1 activity} other {# activities}} imported.",
+        "reached": "Reached back to {date} so far.",
+        "repeated": "This has happened {n} times in a row.",
+        "resume": "Press Sync now to carry on from where it stopped."
+      }
     },
     "zoneEditor": {
       "name": "Name",

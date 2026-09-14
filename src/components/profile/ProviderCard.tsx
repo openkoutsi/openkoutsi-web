@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
+import { syncNote } from '@/lib/providerSync'
+import type { ProviderSyncStatus } from '@/lib/types'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -24,6 +26,8 @@ interface ProviderCardProps {
   /** Called with deleteData=true or false depending on user's choice */
   onDisconnect: (deleteData: boolean) => void
   syncing?: boolean
+  /** What this provider's last history import did (issue #68). */
+  sync?: ProviderSyncStatus
 }
 
 export function ProviderCard({
@@ -34,6 +38,7 @@ export function ProviderCard({
   onSync,
   onDisconnect,
   syncing = false,
+  sync,
 }: ProviderCardProps) {
   const t = useTranslations('app')
   const tCommon = useTranslations('common')
@@ -66,6 +71,7 @@ export function ProviderCard({
   }
 
   const notConfigured = configured === false
+  const note = connected ? syncNote(sync) : null
 
   return (
     <>
@@ -128,6 +134,26 @@ export function ProviderCard({
       {notConfigured && (
         <p className="mt-1.5 text-xs text-muted-foreground">
           {t('profile.provider.notConfigured', { name })}
+        </p>
+      )}
+
+      {/* An import that stopped partway used to look exactly like one that
+          finished (issue #68). This is the line that tells them apart, and the
+          only place an athlete is told there is more history to fetch. */}
+      {note && (
+        <p
+          data-testid="provider-sync-note"
+          className={
+            note.tone === 'warning'
+              ? 'mt-1.5 text-xs text-amber-600 dark:text-amber-500'
+              : 'mt-1.5 text-xs text-muted-foreground'
+          }
+        >
+          {note.lines
+            .map((line) =>
+              t(`profile.provider.sync.${line.key}`, { name, ...(line.values ?? {}) }),
+            )
+            .join(' ')}
         </p>
       )}
 

@@ -401,7 +401,21 @@
       "notConfigured": "{name}-tunnuksia ei ole määritetty tällä palvelimella.",
       "notConfiguredTitle": "{name}:a ei ole määritetty",
       "notConfiguredDesc": "Palvelimella ei ole {name}-tunnuksia määritetty. Pyydä palvelimen ylläpitäjää määrittämään {name}-integraatio.",
-      "wahooDeviceOnly": "Piilota harjoitukset, jotka eivät ole Wahoo-laitteelta"
+      "wahooDeviceOnly": "Piilota harjoitukset, jotka eivät ole Wahoo-laitteelta",
+      "sync": {
+        "running": "Tuodaan historiaasi…",
+        "finished": "Tuonti valmis — {count, plural, =0 {ei uusia harjoituksia} one {1 uusi harjoitus} other {# uutta harjoitusta}}.",
+        "interrupted": "Edellinen tuonti keskeytyi ennen valmistumista.",
+        "stoppedThrottled": "{name} rajoitti pyyntöjämme, joten tuonti keskeytyi ennen valmistumista.",
+        "stoppedSafetyLimit": "Tuonti pysähtyi turvarajaansa ennen valmistumista.",
+        "stoppedProviderOutage": "{name} lakkasi lähettämästä harjoitusdataa, joten tuonti keskeytyi ennen valmistumista.",
+        "stoppedLeaseLost": "Toinen tuonti otti vuoron ennen kuin tämä ehti valmistua.",
+        "stoppedError": "Tuonti keskeytyi virheeseen ennen valmistumista.",
+        "importedSoFar": "{count, plural, one {1 harjoitus} other {# harjoitusta}} tuotu.",
+        "reached": "Edetty toistaiseksi {date} asti.",
+        "repeated": "Näin on käynyt {n} kertaa peräkkäin.",
+        "resume": "Paina Synkronoi nyt jatkaaksesi siitä, mihin tuonti jäi."
+      }
     },
     "zoneEditor": {
       "name": "Nimi",
