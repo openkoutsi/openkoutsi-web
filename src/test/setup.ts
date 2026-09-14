@@ -20,6 +20,21 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 })
 
+// jsdom implements no ResizeObserver, and Radix measures its thumb with one —
+// so rendering a Switch (or anything else built on `useSize`) throws on mount
+// rather than failing an assertion. A no-op is enough: nothing here asserts on
+// layout, and the alternative is that no test may render a toggle.
+if (!('ResizeObserver' in globalThis)) {
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    value: class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+    writable: true,
+  })
+}
+
 beforeEach(() => {
   // Reset the in-memory access token between tests
   setAccessToken(null)

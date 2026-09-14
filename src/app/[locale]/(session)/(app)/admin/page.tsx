@@ -979,6 +979,11 @@ function SettingsTab() {
   // Issue #56: unlike the two above this ships off, so an admin who has
   // never opened this page has not accidentally offered the feature.
   const [allowCourseRecon, setAllowCourseRecon] = useState(false)
+  // A temporary pause on self-serve signup, and the sentence explaining it.
+  // Separate from `allowSelfSignup`: that is standing policy, this is a stop on
+  // a door otherwise open, so lifting it restores whatever was set before.
+  const [signupsHalted, setSignupsHalted] = useState(false)
+  const [signupHaltReason, setSignupHaltReason] = useState('')
   const [modelRows, setModelRows] = useState<ModelRow[]>([])
   const [requiresSubscription, setRequiresSubscription] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -994,6 +999,8 @@ function SettingsTab() {
       setAllowTokens(Boolean(settings.allow_personal_access_tokens))
       setAllowMcp(Boolean(settings.allow_mcp_server))
       setAllowCourseRecon(Boolean(settings.allow_course_recon))
+      setSignupsHalted(Boolean(settings.signups_halted))
+      setSignupHaltReason(settings.signup_halt_reason ?? '')
       setRequiresSubscription(Boolean(settings.llm_requires_subscription))
       setModelRows(
         (settings.llm_models ?? []).map((m) => ({
@@ -1037,6 +1044,8 @@ function SettingsTab() {
         allow_personal_access_tokens: allowTokens,
         allow_mcp_server: allowMcp,
         allow_course_recon: allowCourseRecon,
+      signups_halted: signupsHalted,
+      signup_halt_reason: signupHaltReason || null,
         llm_models: models,
         llm_requires_subscription: requiresSubscription,
       }
@@ -1108,6 +1117,51 @@ function SettingsTab() {
               onCheckedChange={setAllowSelfSignup}
             />
           </div>
+          {allowSelfSignup && (
+            // Only meaningful while self-serve signup is offered at all — a
+            // pause on a door that is already shut is just noise on the page.
+            <div className="space-y-3 rounded-md border border-input p-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="signups-halted">{t('settings.signupsHalted')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('settings.signupsHaltedDesc')}
+                  </p>
+                  {signupsHalted && (
+                    // Say what the switch does *not* stop, where the decision is
+                    // made: an admin who thinks this closes every route in will
+                    // be surprised by the next invited user.
+                    <p className="text-xs text-amber-600 dark:text-amber-500">
+                      {t('settings.signupsHaltedWarning')}
+                    </p>
+                  )}
+                </div>
+                <Switch
+                  id="signups-halted"
+                  checked={signupsHalted}
+                  onCheckedChange={setSignupsHalted}
+                />
+              </div>
+              {signupsHalted && (
+                <div className="space-y-2">
+                  <Label htmlFor="signup-halt-reason">
+                    {t('settings.signupHaltReason')}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('settings.signupHaltReasonDesc')}
+                  </p>
+                  <Textarea
+                    id="signup-halt-reason"
+                    rows={3}
+                    maxLength={500}
+                    placeholder={t('settings.signupHaltReasonPlaceholder')}
+                    value={signupHaltReason}
+                    onChange={(e) => setSignupHaltReason(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex items-start justify-between gap-4 rounded-md border border-input p-3">
             <div className="space-y-1">
               <Label htmlFor="allow-tokens">{t('settings.allowTokens')}</Label>
