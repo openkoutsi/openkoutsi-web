@@ -53,5 +53,75 @@
     "conversationFullTitle": "This conversation is full",
     "conversationFullBody": "Start a new one to carry on — Koutsi won't lose track of your training, it looks it up fresh each time.",
     "turnInFlight": "Koutsi is still answering your last question."
+  },
+  "proposal": {
+    "title": {
+      "create_plan": "Koutsi has drafted a plan",
+      "update_plan": "Koutsi has drafted a change to your plan",
+      "update_workout": "Koutsi has drafted a change to a session"
+    },
+    "nothingYet": "Nothing has changed yet. This happens only if you accept it.",
+    "dates": "{start} – {end} · {weeks} weeks",
+    "weeksLabel": "Week by week",
+    "weekLabel": "Week {number}",
+    "weekType": {
+      "build": "Build",
+      "recovery": "Recovery",
+      "taper": "Taper"
+    },
+    "weekSummary": "{sessions} sessions · {load} Load · {hours} h",
+    "firstWeek": "The first week",
+    "days": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "restDay": "Rest",
+    "sessionMeta": "({minutes} min, {load} Load)",
+    "moreWeeks": "…and {count} more weeks, summarised above.",
+    "changesLabel": "What would change",
+    "changeArrow": "{before} → {after}",
+    "unset": "not set",
+    "field": {
+      "name": "Name",
+      "goal": "Goal",
+      "start_date": "Start date",
+      "weeks": "Length",
+      "status": "Status",
+      "workout_type": "Type",
+      "description": "What to do",
+      "duration_min": "Duration (min)",
+      "target_load": "Target Load",
+      "day_of_week": "Day",
+      "week_number": "Week",
+      "skip_reason": "Skipped because"
+    },
+    "archiveTitle": "Accepting will archive {count} of your plans",
+    "archiveUndo": "You can bring an archived plan back from the plan page.",
+    "reopens": "Accepting will reactivate a plan you had finished or filed away.",
+    "ruleBased": "Koutsi's own planner drafted these weeks — its AI model couldn't be reached for this one.",
+    "approve": {
+      "create_plan": "Yes, create it",
+      "update_plan": "Yes, change it",
+      "update_workout": "Yes, change it"
+    },
+    "decline": "No, leave it",
+    "expires": "This offer stands until {when}.",
+    "openPlan": "Open your plan",
+    "status": {
+      "applied": "You accepted this — it is live.",
+      "declined": "You left things as they were.",
+      "expired": "This offer expired without an answer.",
+      "superseded": "Koutsi replaced this with a later suggestion."
+    },
+    "errors": {
+      "expired": "That offer has expired. Ask Koutsi again and it will draft a fresh one.",
+      "decided": "You have already answered that one.",
+      "stale": "Your plans have changed since Koutsi drafted that, so it would no longer do what the card said. Ask Koutsi again."
+    }
   }
 }

@@ -19,6 +19,7 @@ import type {
   ChatAvailability,
   ChatConversation,
   ChatConversationDetail,
+  ChatProposalDecision,
 } from '@/lib/types'
 
 const AVAILABILITY_KEY = '/api/chat/availability'
@@ -51,6 +52,7 @@ export default function ChatPage() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [listOpen, setListOpen] = useState(false)
   const [sending, setSending] = useState(false)
+  const [deciding, setDeciding] = useState(false)
 
   const { data: availability, mutate: mutateAvailability } =
     useSWR<ChatAvailability>(AVAILABILITY_KEY, fetcher)
@@ -167,6 +169,38 @@ export default function ChatPage() {
       setSending(false)
     }
   }, [activeId, locale, lastMessage, mutateActive, reportError])
+
+  const decide = useCallback(
+    // Answering an offer Koutsi made (issue #72). Not a chat turn: it spends
+    // nothing from the daily budget, cannot fail on a slow model, and the
+    // outcome — *your plan is live* — is a fact the backend knows exactly.
+    //
+    // A refusal here is not an error to apologise for. The backend re-runs every
+    // invariant at apply time, so `proposal_stale` means the athlete's training
+    // moved since the card was drawn and the plans it named are not the plans
+    // that would be archived — which is precisely the consent the card exists to
+    // obtain, refusing to be given by accident.
+    async (messageId: string, decision: 'approve' | 'decline') => {
+      if (!activeId) return
+      setDeciding(true)
+      try {
+        await apiFetch<ChatProposalDecision>(
+          `${CONVERSATIONS_KEY}/${activeId}/messages/${messageId}/proposal/${decision}`,
+          { method: 'POST' },
+        )
+      } catch (error) {
+        reportError(error)
+      } finally {
+        // Refetched either way: a refusal has usually *also* settled the
+        // proposal server-side (an expired one is marked expired as it is
+        // refused), so the card has to be redrawn from what is actually there
+        // rather than from what it was showing.
+        await mutateActive()
+        setDeciding(false)
+      }
+    },
+    [activeId, mutateActive, reportError],
+  )
 
   const remove = useCallback(
     async (id: string) => {
@@ -288,7 +322,12 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <EmptyThread />
           ) : (
-            <ChatThread messages={messages} onRetry={retry} />
+            <ChatThread
+              messages={messages}
+              onRetry={retry}
+              onDecide={decide}
+              deciding={deciding}
+            />
           )}
 
           {conversationFull && (

@@ -67,7 +67,9 @@
         "get_power_profile": "Koutsi is checking your power curve…",
         "get_training_status": "Koutsi is checking how you're doing right now…",
         "get_zone_totals": "Koutsi is adding up your time in each zone…",
-        "list_recent_activities": "Koutsi is looking over your recent sessions…"
+        "list_recent_activities": "Koutsi is looking over your recent sessions…",
+        "propose_plan_change": "Koutsi is working out the change…",
+        "propose_training_plan": "Koutsi is drafting a plan for you…"
       },
       "toolLabels": {
         "find_activity": "A session you asked about",
@@ -79,7 +81,9 @@
         "get_power_profile": "Your power curve",
         "get_training_status": "How you're doing right now",
         "get_zone_totals": "Your time in each zone",
-        "list_recent_activities": "Your recent sessions"
+        "list_recent_activities": "Your recent sessions",
+        "propose_plan_change": "A change drafted for you",
+        "propose_training_plan": "A plan drafted for you"
       },
       "toolLabelUnknown": "Something in your training data"
     }

@@ -1,17 +1,40 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createElement as h } from 'react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-import type { ChatMessage } from '@/lib/types'
+import type { ChatMessage, ChatProposal, PlanProposalSummary } from '@/lib/types'
 
 // Echoing translator, matching the other component tests here. `has` reports
 // every key as present so the fallback branches are exercised separately below.
+//
+// Keys come back relative to the *message file* rather than to the namespace
+// asked for, so `useTranslations('chat.proposal')('decline')` echoes
+// `proposal.decline` — which is what the key is called in `messages/en/chat.json`
+// and therefore what these assertions can be read against. Without that, a
+// component reaching for a sub-namespace would echo bare `decline` and the test
+// would be pinning a string that exists nowhere.
+const MESSAGE_FILES = ['common.llm', 'common', 'chat']
+
 vi.mock('next-intl', () => {
-  const t = Object.assign((key: string) => key, {
-    has: (key: string) => !key.includes('__missing__'),
-    raw: (key: string) => [key],
-  })
-  return { useTranslations: () => t }
+  const translator = (namespace?: string) => {
+    let prefix = namespace ? `${namespace}.` : ''
+    for (const file of MESSAGE_FILES) {
+      if (namespace === file) {
+        prefix = ''
+        break
+      }
+      if (namespace?.startsWith(`${file}.`)) {
+        prefix = `${namespace.slice(file.length + 1)}.`
+        break
+      }
+    }
+    return Object.assign((key: string) => `${prefix}${key}`, {
+      has: (key: string) => !key.includes('__missing__'),
+      raw: (key: string) => [`${prefix}${key}`],
+    })
+  }
+  return { useTranslations: translator }
 })
 
 vi.mock('@/navigation', () => ({
@@ -29,6 +52,51 @@ function message(partial: Partial<ChatMessage>): ChatMessage {
     content: '',
     status: 'complete',
     created_at: '2026-08-11T09:00:00Z',
+    ...partial,
+  }
+}
+
+function summary(partial: Partial<PlanProposalSummary> = {}): PlanProposalSummary {
+  return {
+    kind: 'create_plan',
+    built_by: 'llm',
+    fallback_reason: null,
+    plan_name: 'October gran fondo build',
+    goal: 'Hilly gran fondo',
+    start_date: '2026-09-01',
+    end_date: '2026-10-26',
+    weeks: 8,
+    weekly: [
+      { week_number: 1, week_type: 'build', sessions: 4, total_load: 310, total_duration_min: 360 },
+      { week_number: 2, week_type: 'recovery', sessions: 3, total_load: 210, total_duration_min: 240 },
+    ],
+    first_week: [
+      { day_of_week: 1, workout_type: 'rest', description: null, duration_min: null, target_load: null },
+      { day_of_week: 2, workout_type: 'threshold', description: '2x12 min at threshold', duration_min: 60, target_load: 80 },
+    ],
+    remaining_weeks: 7,
+    changes: [],
+    target_plan_id: null,
+    target_workout_id: null,
+    target_date: null,
+    target_label: null,
+    reopens_plan: false,
+    archives: [],
+    ...partial,
+  }
+}
+
+function proposal(partial: Partial<ChatProposal> = {}): ChatProposal {
+  return {
+    id: 'prop-1',
+    kind: 'create_plan',
+    status: 'pending',
+    built_by: 'llm',
+    summary: summary(),
+    created_at: '2026-08-11T09:00:00Z',
+    expires_at: '2026-08-12T09:00:00Z',
+    decided_at: null,
+    applied_plan_id: null,
     ...partial,
   }
 }
@@ -279,6 +347,218 @@ describe('ChatThread', () => {
       }),
     )
     expect(screen.getByText('retry')).toBeInTheDocument()
+  })
+
+  // ── The offer Koutsi made (issue #72) ─────────────────────────────────────
+
+  it('puts the offer under the answer that describes it, with both answers', () => {
+    // The card *is* the prompt. There is no typed "yes" anywhere in the thread,
+    // because a typed one would put the decision back inside the very thing
+    // being gated — the model can draft, and only this click writes.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nEight weeks for October.',
+            proposal: proposal(),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('proposal.approve.create_plan')).toBeInTheDocument()
+    expect(screen.getByText('proposal.decline')).toBeInTheDocument()
+    expect(screen.getByText('proposal.nothingYet')).toBeInTheDocument()
+    expect(screen.getByText('October gran fondo build')).toBeInTheDocument()
+  })
+
+  it('names the plans an approval would archive, as an alert', () => {
+    // The load-bearing bit of the card: creating a plan files away every active
+    // plan whose dates overlap it. A yes given without seeing this is not
+    // consent to what actually happens.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nDone.',
+            proposal: proposal({
+              summary: summary({
+                archives: [
+                  {
+                    plan_id: 'plan-spring',
+                    name: 'Summer maintenance',
+                    start_date: '2026-06-01',
+                    end_date: '2026-10-04',
+                  },
+                ],
+              }),
+            }),
+          }),
+        ],
+      }),
+    )
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('proposal.archiveTitle')
+    expect(alert).toHaveTextContent('Summer maintenance')
+    // And the recovery path, so the warning does not read as final.
+    expect(alert).toHaveTextContent('proposal.archiveUndo')
+  })
+
+  it('shows no archive warning when an approval would file nothing away', () => {
+    render(
+      h(ChatThread, {
+        messages: [message({ content: 'MOOD:knowing\n\nDone.', proposal: proposal() })],
+      }),
+    )
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['applied', 'proposal.status.applied'],
+    ['declined', 'proposal.status.declined'],
+    ['expired', 'proposal.status.expired'],
+    ['superseded', 'proposal.status.superseded'],
+  ] as const)('renders a %s offer as settled, with no buttons', (status, key) => {
+    // A turn that carried an offer should still read as one afterwards — and an
+    // offer that has lapsed must not sit there looking live.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nDone.',
+            proposal: proposal({ status }),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText(key)).toBeInTheDocument()
+    expect(screen.queryByText('proposal.approve.create_plan')).not.toBeInTheDocument()
+    expect(screen.queryByText('proposal.decline')).not.toBeInTheDocument()
+  })
+
+  it('sends the athlete to the plan once they have accepted', () => {
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nDone.',
+            proposal: proposal({ status: 'applied', applied_plan_id: 'plan-9' }),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('proposal.openPlan')).toHaveAttribute('href', '/plan')
+  })
+
+  it('reports the decision with the turn it belongs to', async () => {
+    const onDecide = vi.fn()
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ id: 'answer-1', content: 'MOOD:knowing\n\nDone.', proposal: proposal() }),
+        ],
+        onDecide,
+      }),
+    )
+    await userEvent.click(screen.getByText('proposal.approve.create_plan'))
+    expect(onDecide).toHaveBeenCalledWith('answer-1', 'approve')
+    await userEvent.click(screen.getByText('proposal.decline'))
+    expect(onDecide).toHaveBeenCalledWith('answer-1', 'decline')
+  })
+
+  it('keeps an older offer answerable after a follow-up question', () => {
+    // Unlike retry, which only ever acts on the newest turn: an athlete who
+    // asked "what would that do to my Saturdays?" before deciding must still be
+    // able to come back and click yes. The backend agrees — a proposal is
+    // superseded only by another proposal, never by an ordinary question.
+    const onDecide = vi.fn()
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ id: 'answer-1', content: 'MOOD:knowing\n\nEight weeks.', proposal: proposal() }),
+          message({ role: 'user', status: null, content: 'What about my Saturdays?' }),
+          message({ content: 'MOOD:knowing\n\nThey stay long.' }),
+        ],
+        onDecide,
+      }),
+    )
+    expect(screen.getByText('proposal.approve.create_plan')).toBeInTheDocument()
+  })
+
+  it('does not ask for a decision while the answer is still being written', () => {
+    // A card under a half-written answer would be asking the athlete to decide
+    // on something still being explained to them.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({ status: 'pending', content: 'MOOD:knowing\n\nEight we', proposal: proposal() }),
+        ],
+      }),
+    )
+    expect(screen.queryByText('proposal.approve.create_plan')).not.toBeInTheDocument()
+  })
+
+  it('says when the weeks came from the builder rather than from Koutsi', () => {
+    // A fallback is a different thing to be offered, not a worse version of the
+    // same thing, so the card says so rather than passing it off.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nDone.',
+            proposal: proposal({
+              built_by: 'rule_based',
+              summary: summary({ built_by: 'rule_based', fallback_reason: 'x' }),
+            }),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('proposal.ruleBased')).toBeInTheDocument()
+  })
+
+  it('shows a change as the fields it would move', () => {
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nThursday, easier.',
+            proposal: proposal({
+              kind: 'update_workout',
+              summary: summary({
+                kind: 'update_workout',
+                plan_name: 'Spring base',
+                target_label: "Thursday's threshold",
+                changes: [{ field: 'duration_min', before: '75', after: '55' }],
+                weekly: [],
+                first_week: [],
+                remaining_weeks: 0,
+              }),
+            }),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('proposal.title.update_workout')).toBeInTheDocument()
+    expect(screen.getByText('proposal.field.duration_min')).toBeInTheDocument()
+    expect(screen.getByText('proposal.changeArrow')).toBeInTheDocument()
+    expect(screen.getByText('proposal.approve.update_workout')).toBeInTheDocument()
+  })
+
+  it('does not offer the plan link beside a card that already leads somewhere', () => {
+    // Two next steps under one turn, one of which invites the athlete to go and
+    // do by hand the thing they are being asked to approve.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nDone.',
+            tool_names: ['get_plan_status', 'propose_training_plan'],
+            proposal: proposal(),
+          }),
+        ],
+      }),
+    )
+    expect(screen.queryByText('planLink')).not.toBeInTheDocument()
   })
 
   it('leaves the AI disclosure to the composer instead of repeating it', () => {

@@ -67,7 +67,9 @@
         "get_power_profile": "Koutsi tarkistaa tehokäyrääsi…",
         "get_training_status": "Koutsi tarkistaa, missä kunnossa olet juuri nyt…",
         "get_zone_totals": "Koutsi laskee yhteen aikaasi eri tehoalueilla…",
-        "list_recent_activities": "Koutsi käy läpi viimeaikaisia harjoituksiasi…"
+        "list_recent_activities": "Koutsi käy läpi viimeaikaisia harjoituksiasi…",
+        "propose_plan_change": "Koutsi miettii muutosta…",
+        "propose_training_plan": "Koutsi laatii sinulle ohjelmaa…"
       },
       "toolLabels": {
         "find_activity": "Kysymäsi harjoitus",
@@ -79,7 +81,9 @@
         "get_power_profile": "Tehokäyräsi",
         "get_training_status": "Kuntotilanteesi juuri nyt",
         "get_zone_totals": "Aikasi eri tehoalueilla",
-        "list_recent_activities": "Viimeaikaiset harjoituksesi"
+        "list_recent_activities": "Viimeaikaiset harjoituksesi",
+        "propose_plan_change": "Sinulle laadittu muutos",
+        "propose_training_plan": "Sinulle laadittu ohjelma"
       },
       "toolLabelUnknown": "Jotain harjoitustiedoistasi"
     }

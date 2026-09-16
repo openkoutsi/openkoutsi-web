@@ -429,6 +429,40 @@ second turn of the budget, and send a history ending with the same question
 adjacent to itself. Only the newest turn offers the button, since that is the
 only one the page acts on.
 
+### The offer card, and why the answer is a button
+
+Koutsi can draft a training plan, or a change to one, and put it in front of the
+athlete (issue #72). It **cannot apply one**: no tool reaches the plan tables,
+and the only code that writes a plan is an endpoint requiring the athlete's own
+session and a proposal id. So the card `PlanProposalCard` renders under the turn
+that drafted it **is the prompt** — the athlete answers with **Yes** or **No**,
+never by typing "yes" into the thread, because a typed yes would put the decision
+back inside the very thing being gated.
+
+The most important thing on the card is the archive warning. Creating a plan
+files away every active plan whose dates overlap it, so the card names those
+plans — by name and date range — *above* the buttons, along with the fact that
+archiving is reversible from the plan page. A yes given without seeing that is
+not consent to what actually happens. `ChatProposal.summary` carries them, and
+the backend re-checks the set when the athlete clicks: if their plans moved in
+between, the approval is refused with `proposal_stale` rather than archiving
+something nobody mentioned.
+
+Four settled states are rendered rather than hidden — `applied`, `declined`,
+`expired`, `superseded` — because a turn that carried an offer should still read
+as one afterwards, and a lapsed offer must not sit there looking live. An
+accepted one links to the plan. Every turn's offer stays answerable, unlike the
+retry button above: an athlete who asked a follow-up question before deciding
+must still be able to come back and click yes, and the backend agrees — a
+proposal is superseded only by another proposal, never by an ordinary question.
+
+`week_type` arrives as a machine key (`build`, `recovery`, `taper`) with no prose
+beside it, deliberately: the preview has to read the same in Finnish as in
+English, so the sentences live in `messages/{en,fi}/chat.json` like every other
+string. A draft whose weeks came from the deterministic builder rather than from
+a model says so on the card — a fallback is a different thing to be offered, not
+a quietly worse version of the same thing.
+
 ### The lookups are part of the thread
 
 A turn's tool calls are drawn as steps **above** the answer, in the order they
