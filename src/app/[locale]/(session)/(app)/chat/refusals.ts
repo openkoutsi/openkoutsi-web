@@ -21,4 +21,12 @@ export const REFUSAL_KEYS: Record<string, string> = {
   chat_turn_in_flight: 'budget.turnInFlight',
   chat_disabled: 'unavailable.disabledBody',
   chat_tools_unsupported: 'unavailable.toolsBody',
+  // Answering an offer (issue #72). Three different things to be told, because
+  // they need three different next steps: ask again, look at what you already
+  // decided, or ask again *because your training has moved*. The last one is
+  // the apply-time re-validation refusing rather than quietly archiving a
+  // different set of plans than the card named.
+  proposal_expired: 'proposal.errors.expired',
+  proposal_decided: 'proposal.errors.decided',
+  proposal_stale: 'proposal.errors.stale',
 }

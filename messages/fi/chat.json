@@ -53,5 +53,76 @@
     "conversationFullTitle": "Tämä keskustelu on täynnä",
     "conversationFullBody": "Aloita uusi jatkaaksesi — Koutsi ei menetä otetta harjoittelustasi, se hakee tiedot joka kerta uudestaan.",
     "turnInFlight": "Koutsi vastaa vielä edelliseen kysymykseesi."
+  },
+  "proposal": {
+    "title": {
+      "create_plan": "Koutsi on luonnostellut ohjelman",
+      "update_plan": "Koutsi on luonnostellut muutoksen ohjelmaasi",
+      "update_workout": "Koutsi on luonnostellut muutoksen harjoitukseen"
+    },
+    "nothingYet": "Mitään ei ole vielä muutettu. Tämä tapahtuu vain, jos hyväksyt sen.",
+    "dates": "{start} – {end} · {weeks} viikkoa",
+    "weeksLabel": "Viikko viikolta",
+    "weekLabel": "Viikko {number}",
+    "weekType": {
+      "build": "Kehitys",
+      "recovery": "Palautus",
+      "taper": "Kevennys"
+    },
+    "weekSummary": "{sessions} harjoitusta · {load} kuormaa · {hours} h",
+    "firstWeek": "Ensimmäinen viikko",
+    "days": {
+      "1": "ma",
+      "2": "ti",
+      "3": "ke",
+      "4": "to",
+      "5": "pe",
+      "6": "la",
+      "7": "su"
+    },
+    "restDay": "Lepo",
+    "sessionMeta": "({minutes} min, {load} kuormaa)",
+    "moreWeeks": "…ja {count} viikkoa lisää, yhteenvetona yllä.",
+    "changesLabel": "Mikä muuttuisi",
+    "changeArrow": "{before} → {after}",
+    "unset": "ei asetettu",
+    "field": {
+      "name": "Nimi",
+      "goal": "Tavoite",
+      "start_date": "Aloituspäivä",
+      "weeks": "Pituus",
+      "status": "Tila",
+      "workout_type": "Tyyppi",
+      "description": "Mitä tehdään",
+      "duration_min": "Kesto (min)",
+      "target_load": "Tavoitekuorma",
+      "day_of_week": "Päivä",
+      "week_number": "Viikko",
+      "skip_reason": "Jätetty väliin, koska"
+    },
+    "archiveTitle": "Hyväksyminen arkistoi {count} ohjelmaasi",
+    "archiveUndo": "Voit palauttaa arkistoidun ohjelman ohjelmasivulta.",
+    "reopens": "Hyväksyminen aktivoi uudelleen ohjelman, jonka olit päättänyt tai arkistoinut.",
+    "ruleBased": "Nämä viikot laati Koutsin oma ohjelmageneraattori — tekoälymalliin ei saatu yhteyttä tällä kertaa.",
+    "approve": {
+      "create_plan": "Kyllä, luo se",
+      "update_plan": "Kyllä, tee muutos",
+      "update_workout": "Kyllä, tee muutos"
+    },
+    "decline": "Ei, jätä ennalleen",
+    "expires": "Tarjous on voimassa {when} asti.",
+    "openPlan": "Avaa ohjelmasi",
+    "status": {
+      "applied": "Hyväksyit tämän — se on käytössä.",
+      "declined": "Jätit asiat ennalleen.",
+      "expired": "Tarjous vanheni ilman vastausta.",
+      "superseded": "Koutsi korvasi tämän myöhemmällä ehdotuksella."
+    },
+    "errors": {
+      "expired": "Tarjous on vanhentunut. Pyydä Koutsilta uusi.",
+      "decided": "Olet jo vastannut tähän.",
+      "stale": "Ohjelmasi ovat muuttuneet sen jälkeen kun Koutsi laati tämän, joten se ei enää tekisi sitä mitä kortissa luki. Pyydä Koutsilta uusi."
+    },
+    "stranded": "Tämä lyhentää ohjelmaa, ja {count} suunniteltua harjoitusta jää sen uuden viimeisen päivän jälkeen. Niitä ei poisteta, ja ne lasketaan edelleen väliin jääneiksi — tyhjennä kyseiset päivät itse, jos et halua niitä pisteytettävän."
   }
 }

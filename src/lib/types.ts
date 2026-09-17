@@ -1069,6 +1069,128 @@ export interface Achievements {
  */
 export type ChatMessageStatus = 'queued' | 'pending' | 'complete' | 'error'
 
+/**
+ * What Koutsi has offered to do, and where that offer stands (issue #72).
+ *
+ * Only `pending` has anything left to answer. The others are the record of what
+ * happened, kept in the thread so a turn that carried an offer does not read as
+ * though it were still live.
+ */
+export type PlanProposalStatus =
+  | 'pending'
+  | 'applied'
+  | 'declined'
+  | 'expired'
+  | 'superseded'
+
+export type PlanProposalKind = 'create_plan' | 'update_plan' | 'update_workout'
+
+/** A plan an approval would file away, because its dates overlap. */
+export interface ArchivedPlanPreview {
+  plan_id: string
+  name: string
+  start_date: string | null
+  end_date: string | null
+}
+
+export interface ProposedWeek {
+  week_number: number
+  /**
+   * `build` | `recovery` | `taper`, or null. A machine key, not a sentence —
+   * the backend deliberately sends no prose here, because the preview has to
+   * read the same in Finnish as in English.
+   */
+  week_type: string | null
+  sessions: number
+  total_load: number | null
+  total_duration_min: number | null
+}
+
+export interface ProposedSession {
+  day_of_week: number
+  workout_type: string | null
+  description: string | null
+  duration_min: number | null
+  target_load: number | null
+}
+
+/** One field a change would move, already rendered as text by the backend. */
+export interface ProposedChange {
+  field: string
+  before: string | null
+  after: string | null
+}
+
+/**
+ * Everything the athlete needs in order to answer yes or no.
+ *
+ * `archives` is the one field here that is not decoration: creating a plan
+ * archives every active plan whose dates overlap it, so a card that did not
+ * show this would be collecting an uninformed yes.
+ */
+export interface PlanProposalSummary {
+  kind: PlanProposalKind
+  /** `llm` when a model wrote the weeks, `rule_based` when the builder did. */
+  built_by: string
+  fallback_reason: string | null
+  plan_name: string | null
+  goal: string | null
+  start_date: string | null
+  end_date: string | null
+  weeks: number | null
+  weekly: ProposedWeek[]
+  first_week: ProposedSession[]
+  remaining_weeks: number
+  changes: ProposedChange[]
+  target_plan_id: string | null
+  target_workout_id: string | null
+  target_date: string | null
+  target_label: string | null
+  reopens_plan: boolean
+  archives: ArchivedPlanPreview[]
+  /**
+   * How many further plans an approval would archive beyond `archives`. Always
+   * 0 here — the backend caps only what it hands a *model*, and the card is
+   * given the whole list.
+   */
+  archives_omitted: number
+  /** Likewise for the week table: 0 in the stored summary the card reads. */
+  weeks_omitted: number
+  /**
+   * Sessions that would fall beyond the plan's new last day if this change
+   * shortens it. They are not deleted and they keep being scored — as missed —
+   * so approving a shorter plan costs adherence unless the athlete clears those
+   * days themselves. Shown, because a yes that did not know that is not consent.
+   */
+  stranded_sessions: number
+}
+
+/**
+ * A training-plan change Koutsi drafted on one turn (issue #72).
+ *
+ * Nothing here has been applied. The card the thread renders from this **is**
+ * the prompt: the athlete answers with a button, never by typing "yes", because
+ * a typed yes would put the decision back inside the thing being gated.
+ */
+export interface ChatProposal {
+  id: string
+  kind: PlanProposalKind
+  status: PlanProposalStatus
+  built_by: string | null
+  summary: PlanProposalSummary
+  created_at: string
+  expires_at: string | null
+  decided_at: string | null
+  /** The plan an approval created — where to send the athlete next. */
+  applied_plan_id: string | null
+}
+
+/** What came of answering an offer. `plan` is null on a decline. */
+export interface ChatProposalDecision {
+  proposal: ChatProposal
+  plan: TrainingPlan | null
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
@@ -1089,6 +1211,11 @@ export interface ChatMessage {
   error_code?: string | null
   /** Registry tool names the turn consulted — never arguments or results. */
   tool_names?: string[] | null
+  /**
+   * The plan Koutsi offered on this turn, if it offered one (issue #72). Null
+   * on every other turn, which is almost all of them.
+   */
+  proposal?: ChatProposal | null
   created_at: string
 }
 

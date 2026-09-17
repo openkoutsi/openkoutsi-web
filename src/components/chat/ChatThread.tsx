@@ -12,6 +12,7 @@ import {
   toolLabelText,
   toolNameFromCode,
 } from '@/components/koutsi-chat'
+import { PlanProposalCard } from '@/components/chat/PlanProposalCard'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/navigation'
 import type { ChatMessage } from '@/lib/types'
@@ -19,11 +20,16 @@ import type { ChatMessage } from '@/lib/types'
 /**
  * Which tools, if any, mean the answer is about the athlete's plan.
  *
- * Koutsi can advise but not act — write tools are deferred by issue #42 — so
- * "what should I cut next week?" ends with advice the athlete has to go and
- * apply. Linking to the plan from exactly the turns that consulted it turns a
- * dead end into a next step, without pretending to a capability that isn't
- * there.
+ * Koutsi can *offer* to change a plan (issue #72) but cannot change one — the
+ * athlete's click on the card below is what writes — so a turn that only looked
+ * at the plan still ends with advice they have to go and apply. Linking to the
+ * plan from exactly the turns that consulted it turns a dead end into a next
+ * step.
+ *
+ * The propose tools are deliberately not in this set: a turn that offered
+ * something already carries a card with its own next step, and a second link
+ * beside it would invite the athlete to go and do by hand the thing they are
+ * being asked to approve.
  */
 const PLAN_TOOLS = new Set(['get_plan_status'])
 
@@ -140,9 +146,13 @@ function ToolSteps({
 function AssistantTurn({
   message,
   onRetry,
+  onDecide,
+  deciding = false,
 }: {
   message: ChatMessage
   onRetry?: () => void
+  onDecide?: (messageId: string, decision: 'approve' | 'decline') => void
+  deciding?: boolean
 }) {
   const t = useTranslations('chat')
   const tLlm = useTranslations('common.llm')
@@ -175,8 +185,11 @@ function AssistantTurn({
     running !== null && tools[tools.length - 1] === running
       ? tools.slice(0, -1)
       : tools
+  const proposal = message.proposal ?? null
   const showPlanLink =
-    message.status === 'complete' && tools.some((name) => PLAN_TOOLS.has(name))
+    message.status === 'complete' &&
+    !proposal &&
+    tools.some((name) => PLAN_TOOLS.has(name))
 
   return (
     <div className="flex flex-col gap-3">
@@ -204,6 +217,20 @@ function AssistantTurn({
           )
         })
       )}
+      {/* The offer goes *under* the prose that describes it. Koutsi says what it
+          has drafted and what accepting would archive; the card is where the
+          athlete answers — with a button, never by typing "yes" into the
+          thread, which would put the decision back inside the thing being
+          gated. Only ever on a settled turn: a card under a half-written answer
+          would be asking them to decide on something still being explained. */}
+      {proposal && !pending && (
+        <PlanProposalCard
+          proposal={proposal}
+          busy={deciding}
+          onApprove={() => onDecide?.(message.id, 'approve')}
+          onDecline={() => onDecide?.(message.id, 'decline')}
+        />
+      )}
       {showPlanLink && (
         <Link
           href="/plan"
@@ -219,9 +246,13 @@ function AssistantTurn({
 export function ChatThread({
   messages,
   onRetry,
+  onDecide,
+  deciding = false,
 }: {
   messages: ChatMessage[]
   onRetry?: () => void
+  onDecide?: (messageId: string, decision: 'approve' | 'decline') => void
+  deciding?: boolean
 }) {
   const endRef = useRef<HTMLDivElement>(null)
   const lastId = messages[messages.length - 1]?.id
@@ -269,6 +300,13 @@ export function ChatThread({
             // the ordinary way, by rephrasing after a failure instead of
             // retrying it.
             onRetry={index === messages.length - 1 ? onRetry : undefined}
+            // Every turn's offer stays answerable, unlike the retry above: an
+            // athlete who asked a follow-up question before deciding must still
+            // be able to come back and click yes on the offer they were asking
+            // about. The backend agrees — a proposal is superseded only by
+            // another proposal, never by an ordinary question.
+            onDecide={onDecide}
+            deciding={deciding}
           />
         ),
       )}

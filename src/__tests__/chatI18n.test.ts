@@ -13,6 +13,12 @@ const REFUSAL_CODES = [
   'chat_daily_budget',
   'chat_conversation_budget',
   'chat_turn_in_flight',
+  // Answering an offer Koutsi made (issue #72). `proposal_stale` is the one
+  // that matters: the backend re-runs every invariant at apply time, so it
+  // fires when the athlete's plans moved after the card was drawn.
+  'proposal_expired',
+  'proposal_decided',
+  'proposal_stale',
 ] as const
 
 /**
@@ -106,6 +112,69 @@ describe('chat i18n', () => {
   it('maps every refusal code the API documents', () => {
     for (const code of REFUSAL_CODES) {
       expect(REFUSAL_KEYS, code).toHaveProperty(code)
+    }
+  })
+
+  it('says on the card that nothing has happened yet', () => {
+    // The card *is* the prompt: the athlete answers with a button, and the one
+    // thing they must not be left guessing about is whether Koutsi has already
+    // done the thing it is describing.
+    for (const chat of [chatEn, chatFi]) {
+      expect(chat.proposal.nothingYet.trim()).not.toBe('')
+    }
+    expect(chatEn.proposal.nothingYet.toLowerCase()).toContain('nothing has changed')
+  })
+
+  it('warns, in both locales, that accepting archives overlapping plans', () => {
+    // The load-bearing copy on the card. Creating a plan files away every
+    // active plan whose dates overlap it, and a yes given without knowing that
+    // is not consent to what actually happens.
+    expect(chatEn.proposal.archiveTitle.toLowerCase()).toContain('archive')
+    expect(chatFi.proposal.archiveTitle.toLowerCase()).toContain('arkistoi')
+    // And says the recovery path, because the warning without it reads as final.
+    expect(chatEn.proposal.archiveUndo.toLowerCase()).toContain('back')
+    expect(chatFi.proposal.archiveUndo.toLowerCase()).toContain('palauttaa')
+  })
+
+  it('warns about sessions a shortened plan would strand, in both locales', () => {
+    // They are not deleted and they keep scoring as missed, so a plan the
+    // athlete shortened costs them adherence unless they clear those days.
+    expect(chatEn.proposal.stranded.toLowerCase()).toContain('missed')
+    expect(chatEn.proposal.stranded).toContain('{count}')
+    expect(chatFi.proposal.stranded).toContain('{count}')
+  })
+
+  it('has copy for every state an offer can settle into', () => {
+    for (const chat of [chatEn, chatFi]) {
+      for (const state of ['applied', 'declined', 'expired', 'superseded']) {
+        expect(chat.proposal.status, state).toHaveProperty(state)
+      }
+    }
+  })
+
+  it('offers a yes and a no for every kind of change', () => {
+    // Never a typed "yes": the answer is a button, because a typed one would
+    // put the decision back inside the thing being gated.
+    for (const chat of [chatEn, chatFi]) {
+      for (const kind of ['create_plan', 'update_plan', 'update_workout']) {
+        expect(chat.proposal.title, kind).toHaveProperty(kind)
+        expect(chat.proposal.approve, kind).toHaveProperty(kind)
+      }
+      expect(chat.proposal.decline.trim()).not.toBe('')
+    }
+  })
+
+  it('names the week roles rather than leaving them as backend keys', () => {
+    // The backend deliberately sends `week_type` as a machine key and no prose,
+    // so the preview reads the same in Finnish as in English. That only works
+    // if this side actually translates the keys.
+    for (const chat of [chatEn, chatFi]) {
+      for (const role of ['build', 'recovery', 'taper']) {
+        expect(chat.proposal.weekType, role).toHaveProperty(role)
+      }
+      for (const day of ['1', '2', '3', '4', '5', '6', '7']) {
+        expect(chat.proposal.days, day).toHaveProperty(day)
+      }
     }
   })
 

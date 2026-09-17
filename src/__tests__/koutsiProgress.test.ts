@@ -24,7 +24,9 @@ import {
  * and a code we *don't* know still renders something an athlete can read.
  */
 
-// The ten tools the backend's registry publishes. A code arrives as
+// Every tool the backend's registry *registers*, not only the ten it publishes
+// over `/mcp`: a progress code comes from the in-process agent, which reaches
+// the two internal proposal tools as well (issue #72). A code arrives as
 // `tool.<name>`; see `backend/app/services/llm_agent.py:progress_vocabulary`.
 const TOOL_CODES = [
   'find_activity',
@@ -37,6 +39,8 @@ const TOOL_CODES = [
   'get_training_status',
   'get_zone_totals',
   'list_recent_activities',
+  'propose_training_plan',
+  'propose_plan_change',
 ] as const
 
 /** A `useTranslations('common.llm')` stand-in over a real message file. */
@@ -183,6 +187,18 @@ describe('progress strings', () => {
     expect(Object.keys(commonFi.llm.progress.toolLabels).sort()).toEqual(
       Object.keys(commonEn.llm.progress.toolLabels).sort(),
     )
+  })
+
+  it('warns that drafting a plan takes a moment', () => {
+    // A proposal makes a second, schema-constrained model call, so this line
+    // stays up for seconds rather than milliseconds. Copy that read like an
+    // instant lookup would make a healthy draft look like a hang.
+    for (const messages of [commonEn, commonFi]) {
+      expect(messages.llm.progress.tools.propose_training_plan).toMatch(/…$/)
+    }
+    expect(
+      commonEn.llm.progress.tools.propose_training_plan.toLowerCase(),
+    ).toContain('drafting')
   })
 
   it('says what Koutsi is doing rather than naming the tool', () => {
