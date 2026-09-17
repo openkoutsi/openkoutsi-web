@@ -1148,6 +1148,21 @@ export interface PlanProposalSummary {
   target_label: string | null
   reopens_plan: boolean
   archives: ArchivedPlanPreview[]
+  /**
+   * How many further plans an approval would archive beyond `archives`. Always
+   * 0 here — the backend caps only what it hands a *model*, and the card is
+   * given the whole list.
+   */
+  archives_omitted: number
+  /** Likewise for the week table: 0 in the stored summary the card reads. */
+  weeks_omitted: number
+  /**
+   * Sessions that would fall beyond the plan's new last day if this change
+   * shortens it. They are not deleted and they keep being scored — as missed —
+   * so approving a shorter plan costs adherence unless the athlete clears those
+   * days themselves. Shown, because a yes that did not know that is not consent.
+   */
+  stranded_sessions: number
 }
 
 /**

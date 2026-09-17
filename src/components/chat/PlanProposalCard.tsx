@@ -250,6 +250,23 @@ export function PlanProposalCard({
         <p className="mt-2 text-xs text-muted-foreground">{t('reopens')}</p>
       )}
 
+      {/* Shortening a plan leaves its later sessions where they are, and they go
+          on being scored — as missed. The write matches what the plan page has
+          always done; what would not be honest is a card showing "4 weeks → 1"
+          and letting the athlete find out afterwards why their adherence fell. */}
+      {summary.stranded_sessions > 0 && (
+        <p
+          role="alert"
+          className="mt-2 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-xs"
+        >
+          <AlertTriangle
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive"
+            aria-hidden
+          />
+          <span>{t('stranded', { count: summary.stranded_sessions })}</span>
+        </p>
+      )}
+
       {/* A rule-built draft is a different thing to be offered, not a worse
           version of the same thing — so it says so rather than passing itself
           off as one Koutsi wrote. */}

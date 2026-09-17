@@ -136,6 +136,14 @@ describe('chat i18n', () => {
     expect(chatFi.proposal.archiveUndo.toLowerCase()).toContain('palauttaa')
   })
 
+  it('warns about sessions a shortened plan would strand, in both locales', () => {
+    // They are not deleted and they keep scoring as missed, so a plan the
+    // athlete shortened costs them adherence unless they clear those days.
+    expect(chatEn.proposal.stranded.toLowerCase()).toContain('missed')
+    expect(chatEn.proposal.stranded).toContain('{count}')
+    expect(chatFi.proposal.stranded).toContain('{count}')
+  })
+
   it('has copy for every state an offer can settle into', () => {
     for (const chat of [chatEn, chatFi]) {
       for (const state of ['applied', 'declined', 'expired', 'superseded']) {

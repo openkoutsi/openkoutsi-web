@@ -82,6 +82,9 @@ function summary(partial: Partial<PlanProposalSummary> = {}): PlanProposalSummar
     target_label: null,
     reopens_plan: false,
     archives: [],
+    archives_omitted: 0,
+    weeks_omitted: 0,
+    stranded_sessions: 0,
     ...partial,
   }
 }
@@ -495,6 +498,43 @@ describe('ChatThread', () => {
       }),
     )
     expect(screen.queryByText('proposal.approve.create_plan')).not.toBeInTheDocument()
+  })
+
+  it('warns that shortening a plan leaves sessions that still score as missed', () => {
+    // The write matches what the plan page has always done, so this is not a
+    // new hazard — but a card showing "4 weeks → 1" and nothing else would let
+    // the athlete find out afterwards why their adherence fell, which is the
+    // uninformed yes the whole card exists to prevent.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nOne week it is.',
+            proposal: proposal({
+              kind: 'update_plan',
+              summary: summary({
+                kind: 'update_plan',
+                changes: [{ field: 'weeks', before: '4', after: '1' }],
+                stranded_sessions: 2,
+                weekly: [],
+                first_week: [],
+                remaining_weeks: 0,
+              }),
+            }),
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('proposal.stranded')).toBeInTheDocument()
+  })
+
+  it('says nothing about stranded sessions when a change strands none', () => {
+    render(
+      h(ChatThread, {
+        messages: [message({ content: 'MOOD:knowing\n\nDone.', proposal: proposal() })],
+      }),
+    )
+    expect(screen.queryByText('proposal.stranded')).not.toBeInTheDocument()
   })
 
   it('says when the weeks came from the builder rather than from Koutsi', () => {

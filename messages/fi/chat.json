@@ -122,6 +122,7 @@
       "expired": "Tarjous on vanhentunut. Pyydä Koutsilta uusi.",
       "decided": "Olet jo vastannut tähän.",
       "stale": "Ohjelmasi ovat muuttuneet sen jälkeen kun Koutsi laati tämän, joten se ei enää tekisi sitä mitä kortissa luki. Pyydä Koutsilta uusi."
-    }
+    },
+    "stranded": "Tämä lyhentää ohjelmaa, ja {count} suunniteltua harjoitusta jää sen uuden viimeisen päivän jälkeen. Niitä ei poisteta, ja ne lasketaan edelleen väliin jääneiksi — tyhjennä kyseiset päivät itse, jos et halua niitä pisteytettävän."
   }
 }

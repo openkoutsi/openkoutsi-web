@@ -122,6 +122,7 @@
       "expired": "That offer has expired. Ask Koutsi again and it will draft a fresh one.",
       "decided": "You have already answered that one.",
       "stale": "Your plans have changed since Koutsi drafted that, so it would no longer do what the card said. Ask Koutsi again."
-    }
+    },
+    "stranded": "This shortens the plan, and {count} planned session(s) fall past its new last day. They are not deleted, and they will still count as missed — clear those days yourself if you don't want them scored."
   }
 }
