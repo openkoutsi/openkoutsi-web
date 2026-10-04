@@ -33,6 +33,15 @@ import type { ChatMessage } from '@/lib/types'
  */
 const PLAN_TOOLS = new Set(['get_plan_status'])
 
+/**
+ * The tools whose success leaves a card under the turn. A settled turn that
+ * called one and carries no proposal is a draft the backend refused — a wrong
+ * id, a change that changes nothing — and Koutsi's prose may still say "accept
+ * the card below". Saying plainly that no offer was made beats leaving the
+ * athlete hunting for a button that is not there.
+ */
+const PROPOSE_TOOLS = new Set(['propose_plan_change', 'propose_training_plan'])
+
 /** How far off the bottom counts as "reading something else, leave me alone". */
 const STICK_TO_BOTTOM_PX = 120
 
@@ -186,6 +195,10 @@ function AssistantTurn({
       ? tools.slice(0, -1)
       : tools
   const proposal = message.proposal ?? null
+  const offerFailed =
+    message.status === 'complete' &&
+    !proposal &&
+    tools.some((name) => PROPOSE_TOOLS.has(name))
   const showPlanLink =
     message.status === 'complete' &&
     !proposal &&
@@ -230,6 +243,11 @@ function AssistantTurn({
           onApprove={() => onDecide?.(message.id, 'approve')}
           onDecline={() => onDecide?.(message.id, 'decline')}
         />
+      )}
+      {offerFailed && (
+        <p role="status" className="pl-13 text-xs text-muted-foreground">
+          {t('noOffer')}
+        </p>
       )}
       {showPlanLink && (
         <Link

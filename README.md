@@ -439,6 +439,11 @@ that drafted it **is the prompt** — the athlete answers with **Yes** or **No**
 never by typing "yes" into the thread, because a typed yes would put the decision
 back inside the very thing being gated.
 
+A turn that *called* a propose tool but carries no proposal is a draft the
+backend refused (a wrong id, a change that changes nothing, a taken day). The
+prose above it may still say "accept the card below", so the thread says under
+it that there is nothing to accept, instead of the usual plan link.
+
 The most important thing on the card is the archive warning. Creating a plan
 files away every active plan whose dates overlap it, so the card names those
 plans — by name and date range — *above* the buttons, along with the fact that

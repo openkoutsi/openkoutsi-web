@@ -27,6 +27,7 @@
   },
   "stepsLabel": "What Koutsi looked at",
   "planLink": "Open your plan",
+  "noOffer": "Koutsi could not draft this change, so there is nothing to accept. Ask again, or edit your plan yourself.",
   "retry": "Try again",
   "errors": {
     "busy": "Koutsi was busy with other work and couldn't get to this in time. Try again in a moment.",
