@@ -27,6 +27,7 @@
   },
   "stepsLabel": "Mitä Koutsi katsoi",
   "planLink": "Avaa ohjelmasi",
+  "noOffer": "Koutsi ei saanut tätä muutosta laadittua, joten hyväksyttävää ei ole. Pyydä uudelleen tai muokkaa ohjelmaasi itse.",
   "retry": "Yritä uudelleen",
   "errors": {
     "busy": "Koutsilla oli muuta työn alla eikä se ehtinyt tähän ajoissa. Yritä hetken kuluttua uudelleen.",

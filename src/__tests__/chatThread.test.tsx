@@ -267,6 +267,22 @@ describe('ChatThread', () => {
     expect(screen.getByText('planLink')).toHaveAttribute('href', '/plan')
   })
 
+  it('says so when a draft was attempted but no offer came of it', () => {
+    // A refused propose call leaves no proposal, yet the prose may still say
+    // "accept the card below". The thread must not leave that standing.
+    render(
+      h(ChatThread, {
+        messages: [
+          message({
+            content: 'MOOD:knowing\n\nAccept the card below.',
+            tool_names: ['get_plan_status', 'propose_plan_change'],
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('noOffer')).toBeInTheDocument()
+  })
+
   it('does not link to the plan when the answer was about something else', () => {
     render(
       h(ChatThread, {
