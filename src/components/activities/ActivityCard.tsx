@@ -5,6 +5,7 @@ import { Link } from '@/navigation'
 import type { Activity } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { SourceBadge } from '@/components/activities/SourceBadge'
 import { WorkoutCategoryBadge } from '@/components/activities/WorkoutCategoryBadge'
 import { formatDate, formatDuration, formatDistance, formatPower } from '@/lib/utils'
@@ -20,6 +21,13 @@ interface Props {
    * exactly what it was.
    */
   bikeNames?: Record<string, string>
+  /**
+   * Selection mode for the bulk edit. When `onToggleSelect` is given the card
+   * shows a checkbox and a click selects it instead of opening the activity —
+   * a list that navigated away on a mis-aimed click would lose the selection.
+   */
+  selected?: boolean
+  onToggleSelect?: () => void
 }
 
 const SPORT_ICONS: Record<string, React.ElementType> = {
@@ -28,17 +36,29 @@ const SPORT_ICONS: Record<string, React.ElementType> = {
   default: Zap,
 }
 
-export function ActivityCard({ activity, bikeNames }: Props) {
+export function ActivityCard({ activity, bikeNames, selected, onToggleSelect }: Props) {
   const t = useTranslations('activities')
   const Icon = SPORT_ICONS[activity.sport_type?.toLowerCase()] ?? SPORT_ICONS.default
   const bikeName = activity.bike_id ? bikeNames?.[activity.bike_id] : undefined
 
-  return (
-    <Link href={`/activities/${activity.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+  const selectable = onToggleSelect != null
+  const card = (
+      <Card
+        className={`hover:shadow-md transition-shadow cursor-pointer ${
+          selected ? 'ring-2 ring-primary' : ''
+        }`}
+      >
         <CardContent className="pt-4 pb-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
+              {selectable && (
+                <Checkbox
+                  checked={selected ?? false}
+                  onCheckedChange={onToggleSelect}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={activity.name}
+                />
+              )}
               <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
               <p className="font-medium text-sm truncate">{activity.name}</p>
             </div>
@@ -71,6 +91,25 @@ export function ActivityCard({ activity, bikeNames }: Props) {
           </div>
         </CardContent>
       </Card>
-    </Link>
   )
+
+  if (selectable) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        aria-pressed={selected ?? false}
+        onClick={onToggleSelect}
+        onKeyDown={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault()
+            onToggleSelect()
+          }
+        }}
+      >
+        {card}
+      </div>
+    )
+  }
+  return <Link href={`/activities/${activity.id}`}>{card}</Link>
 }

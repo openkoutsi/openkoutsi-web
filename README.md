@@ -335,6 +335,20 @@ answer, because a rule whose effect you cannot see is a rule you will set wrong.
 The match count is read from the server rather than recomputed here: the matcher
 is the backend's, and a second implementation in TypeScript would drift.
 
+## Bulk edit
+
+The activities list has a **Select** mode. Picking activities (across pages and
+filters — the selection is a set of ids, not rows) and choosing **Edit selected**
+opens one dialog for labels (add or remove each), the bike and the workout
+category, sent as a single `POST /api/activities/bulk`.
+
+Every picker starts at "Leave as is", which is *omitted* from the request; "None"
+/ "No bike" is an explicit `null` and clears the field. `src/lib/bulkEdit.ts`
+holds that mapping so it can be tested on its own — sending `null` for an
+untouched field would clear it on every selected activity. Labels are added and
+removed rather than replaced, so tagging a selection as commutes keeps the race
+label on the one that was also a race.
+
 ## The garage
 
 `/garage` (issue #64) is where the athlete's bikes live: what they own, how far
