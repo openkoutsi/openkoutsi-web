@@ -1329,6 +1329,21 @@ export interface AssignHistoryResult {
 }
 
 /**
+ * What `POST /api/bikes/assign-history` *would* do (`GET` on the same path),
+ * and how many earlier attachments `DELETE` would take back.
+ */
+export interface AssignHistoryPreview {
+  assignable: number
+  bikes: { bike_id: string; bike_name: string; rides: number }[]
+  revertable: number
+}
+
+/** What `DELETE /api/bikes/assign-history` took back. */
+export interface RevertHistoryResult {
+  reverted: number
+}
+
+/**
  * The suggested component vocabulary. Advisory — the server stores whatever it
  * is given, so this is what the picker offers rather than what it permits.
  */
