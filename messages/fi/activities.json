@@ -268,5 +268,28 @@
     "empty": "Mikään ei odota vastausta.",
     "editRules": "Muokkaa työmatkasääntöjä",
     "answerFailed": "Vastauksen tallennus epäonnistui"
+  },
+  "bulk": {
+    "select": "Valitse",
+    "done": "{count, plural, one {1 harjoitus päivitetty} other {# harjoitusta päivitetty}}",
+    "selected": "{count, plural, =0 {Ei valittuja} one {1 valittu} other {# valittu}}",
+    "selectPage": "Valitse tämä sivu",
+    "deselectPage": "Poista sivun valinnat",
+    "clear": "Tyhjennä valinta",
+    "edit": "Muokkaa valittuja",
+    "title": "Muokkaa {count, plural, one {1 harjoitusta} other {# harjoitusta}}",
+    "description": "Valitse, mitä muutetaan. Kaikki, minkä jätät ennalleen, pysyy jokaisessa harjoituksessa sellaisenaan.",
+    "keep": "Jätä ennalleen",
+    "addLabel": "Lisää",
+    "removeLabel": "Poista",
+    "bike": "Pyörä",
+    "noBike": "Ei pyörää",
+    "retiredBike": "{name} (poistettu käytöstä)",
+    "bikeHelp": "Tässä valittu pyörä on oma valintasi: automaattinen tunnistus ei muuta sitä myöhemmin.",
+    "cancel": "Peruuta",
+    "apply": "Käytä {count, plural, one {1 harjoitukseen} other {# harjoitukseen}}",
+    "applying": "Tallennetaan…",
+    "failed": "Harjoitusten päivitys ei onnistunut",
+    "finish": "Valmis"
   }
 }

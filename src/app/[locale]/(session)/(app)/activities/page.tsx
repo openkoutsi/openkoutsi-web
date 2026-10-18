@@ -7,13 +7,14 @@ import { useTranslations } from 'next-intl'
 import { fetcher } from '@/lib/api'
 import type { Bike, PaginatedActivities } from '@/lib/types'
 import { ActivityCard } from '@/components/activities/ActivityCard'
+import { BulkEditDialog } from '@/components/activities/BulkEditDialog'
 import { UploadDropzone } from '@/components/activities/UploadDropzone'
 import { ManualActivityForm } from '@/components/activities/ManualActivityForm'
 import { RpePrompt } from '@/components/activities/RpePrompt'
 import { ActivitySearchFilter, EMPTY_FILTERS } from '@/components/activities/ActivitySearchFilter'
 import type { ActivityFilters } from '@/components/activities/ActivitySearchFilter'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CheckSquare, ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 const PAGE_SIZE = 20
 
@@ -71,6 +72,12 @@ export default function ActivitiesPage() {
   const [page, setPage] = useState(() => Number(searchParams.get('page') ?? '1'))
   // Bumped after an upload/manual entry to re-prompt for RPE on new rides.
   const [rpeSignal, setRpeSignal] = useState(0)
+  // Bulk edit. The selection is a set of ids rather than of rows so it
+  // survives paging and filtering: "every commute this spring" is several pages
+  // of results, picked a page at a time.
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
+  const [bulkOpen, setBulkOpen] = useState(false)
 
   const apiParams = filtersToParams(filters, page)
   const apiUrl = `/api/activities?${apiParams.toString()}`
@@ -103,6 +110,32 @@ export default function ActivitiesPage() {
     router.replace(`?${urlParams.toString()}`, { scroll: false })
   }, [filters, router])
 
+  const toggleSelected = useCallback((id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const pageIds = data?.items.map((a) => a.id) ?? []
+  const pageAllSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id))
+
+  function togglePage() {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (pageAllSelected) pageIds.forEach((id) => next.delete(id))
+      else pageIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  function stopSelecting() {
+    setSelecting(false)
+    setSelected(new Set())
+  }
+
   // Keep state in sync when browser back/forward navigates
   useEffect(() => {
     setFilters(paramsToFilters(searchParams))
@@ -113,7 +146,23 @@ export default function ActivitiesPage() {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <ManualActivityForm onCreated={() => { mutate(); setRpeSignal((n) => n + 1) }} />
+        <div className="flex items-center gap-2">
+          {!hasNoActivities && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => (selecting ? stopSelecting() : setSelecting(true))}
+            >
+              {selecting ? (
+                <X className="mr-1 h-4 w-4" />
+              ) : (
+                <CheckSquare className="mr-1 h-4 w-4" />
+              )}
+              {selecting ? t('bulk.finish') : t('bulk.select')}
+            </Button>
+          )}
+          <ManualActivityForm onCreated={() => { mutate(); setRpeSignal((n) => n + 1) }} />
+        </div>
       </div>
 
       {/* An athlete with nothing here yet is being asked the hardest question
@@ -130,12 +179,54 @@ export default function ActivitiesPage() {
 
       <ActivitySearchFilter filters={filters} onChange={handleFiltersChange} />
 
+      {selecting && (
+        <div className="sticky top-2 z-10 flex flex-wrap items-center gap-2 rounded-md border bg-background p-2 shadow-sm">
+          <span className="text-sm font-medium">
+            {t('bulk.selected', { count: selected.size })}
+          </span>
+          <Button variant="ghost" size="sm" onClick={togglePage} disabled={pageIds.length === 0}>
+            {pageAllSelected ? t('bulk.deselectPage') : t('bulk.selectPage')}
+          </Button>
+          {selected.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+              {t('bulk.clear')}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            className="ml-auto"
+            disabled={selected.size === 0}
+            onClick={() => setBulkOpen(true)}
+          >
+            {t('bulk.edit')}
+          </Button>
+        </div>
+      )}
+
+      <BulkEditDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        activityIds={[...selected]}
+        bikes={bikes ?? []}
+        onApplied={() => {
+          setBulkOpen(false)
+          stopSelecting()
+          mutate()
+        }}
+      />
+
       <div className="space-y-2">
         {isLoading && (
           <p className="text-sm text-muted-foreground">{t('loading')}</p>
         )}
         {data?.items.map((a) => (
-          <ActivityCard key={a.id} activity={a} bikeNames={bikeNames} />
+          <ActivityCard
+            key={a.id}
+            activity={a}
+            bikeNames={bikeNames}
+            selected={selecting ? selected.has(a.id) : undefined}
+            onToggleSelect={selecting ? () => toggleSelected(a.id) : undefined}
+          />
         ))}
         {!isLoading && data?.items.length === 0 && (
           <p className="text-sm text-muted-foreground">{t('noActivities')}</p>

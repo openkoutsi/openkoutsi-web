@@ -22,7 +22,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   cross_training: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
 }
 
-const ALL_CATEGORIES = [
+export const ALL_CATEGORIES = [
   'recovery', 'endurance', 'tempo', 'threshold', 'vo2max',
   'anaerobic', 'sprint', 'strength', 'yoga', 'cross_training',
 ] as const

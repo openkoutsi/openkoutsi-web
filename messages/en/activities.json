@@ -268,5 +268,28 @@
     "empty": "Nothing is waiting for an answer.",
     "editRules": "Edit your commute rules",
     "answerFailed": "Could not save your answer"
+  },
+  "bulk": {
+    "select": "Select",
+    "done": "{count, plural, one {1 activity updated} other {# activities updated}}",
+    "selected": "{count, plural, =0 {Nothing selected} one {1 selected} other {# selected}}",
+    "selectPage": "Select this page",
+    "deselectPage": "Deselect this page",
+    "clear": "Clear selection",
+    "edit": "Edit selected",
+    "title": "Edit {count, plural, one {1 activity} other {# activities}}",
+    "description": "Choose what to change. Anything left as is stays exactly as it is on each activity.",
+    "keep": "Leave as is",
+    "addLabel": "Add",
+    "removeLabel": "Remove",
+    "bike": "Bike",
+    "noBike": "No bike",
+    "retiredBike": "{name} (retired)",
+    "bikeHelp": "A bike chosen here counts as your own choice: automatic matching will not change it later.",
+    "cancel": "Cancel",
+    "apply": "Apply to {count, plural, one {1 activity} other {# activities}}",
+    "applying": "Saving…",
+    "failed": "Could not update the activities",
+    "finish": "Done"
   }
 }
