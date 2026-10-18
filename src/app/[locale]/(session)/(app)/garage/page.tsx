@@ -5,7 +5,13 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 
 import { fetcher, apiFetch } from '@/lib/api'
-import type { AssignHistoryResult, Bike, BikeDetail } from '@/lib/types'
+import type {
+  AssignHistoryPreview,
+  AssignHistoryResult,
+  Bike,
+  BikeDetail,
+  RevertHistoryResult,
+} from '@/lib/types'
 import { formatGarageKm } from '@/lib/garage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,7 +31,7 @@ import { toast } from '@/components/ui/use-toast'
 import { BikeForm } from '@/components/garage/BikeForm'
 import { MaintenanceLog } from '@/components/garage/MaintenanceLog'
 import { AccessoryList } from '@/components/garage/AccessoryList'
-import { ChevronDown, History, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, History, Plus, Trash2, Undo2 } from 'lucide-react'
 
 /**
  * The garage (issue #64): the bikes an athlete owns, how far each has been
@@ -43,11 +49,28 @@ export default function GaragePage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
+  const [confirmingAssign, setConfirmingAssign] = useState(false)
+  const [reverting, setReverting] = useState(false)
 
   const { data: bikes, isLoading, mutate } = useSWR<Bike[]>('/api/bikes', fetcher)
   const list = bikes ?? []
+  // What "Attach past rides" would do, and what undoing it would take back.
+  // Read before the pass so the confirmation can name a number rather than
+  // "your whole history" — cheap on the server (grouped counts, no walk).
+  const { data: preview, mutate: mutatePreview } = useSWR<AssignHistoryPreview>(
+    '/api/bikes/assign-history',
+    fetcher,
+  )
+
+  function openAssignConfirm() {
+    // Refresh while the dialog opens: the count must be the one the pass is
+    // about to act on, not whatever was true when the page loaded.
+    mutatePreview()
+    setConfirmingAssign(true)
+  }
 
   async function handleAssignHistory() {
+    setConfirmingAssign(false)
     setScanning(true)
     try {
       const result = await apiFetch<AssignHistoryResult>('/api/bikes/assign-history', {
@@ -62,6 +85,7 @@ export default function GaragePage() {
           : t('assignHistory.nothing'),
       })
       mutate()
+      mutatePreview()
     } catch (err) {
       toast({
         title: t('assignHistory.failed'),
@@ -70,6 +94,26 @@ export default function GaragePage() {
       })
     } finally {
       setScanning(false)
+    }
+  }
+
+  async function handleRevertHistory() {
+    setReverting(true)
+    try {
+      const result = await apiFetch<RevertHistoryResult>('/api/bikes/assign-history', {
+        method: 'DELETE',
+      })
+      toast({ title: t('revertHistory.done', { count: result.reverted }) })
+      mutate()
+      mutatePreview()
+    } catch (err) {
+      toast({
+        title: t('revertHistory.failed'),
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      })
+    } finally {
+      setReverting(false)
     }
   }
 
@@ -110,19 +154,86 @@ export default function GaragePage() {
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {(preview?.revertable ?? 0) > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={reverting || scanning}
+                  title={t('revertHistory.help')}
+                >
+                  <Undo2 className="mr-1 h-4 w-4" />
+                  {t('revertHistory.action')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t('revertHistory.confirmTitle', { count: preview?.revertable ?? 0 })}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('revertHistory.confirmBody')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleRevertHistory}>
+                    {t('revertHistory.confirm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           {list.some((b) => b.default_sports.length > 0) && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleAssignHistory}
-              disabled={scanning}
+              onClick={openAssignConfirm}
+              disabled={scanning || reverting}
               title={t('assignHistory.help')}
             >
               <History className="mr-1 h-4 w-4" />
               {scanning ? t('assignHistory.running') : t('assignHistory.action')}
             </Button>
           )}
+          <AlertDialog open={confirmingAssign} onOpenChange={setConfirmingAssign}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {preview && preview.assignable === 0
+                    ? t('assignHistory.nothing')
+                    : t('assignHistory.confirmTitle', { count: preview?.assignable ?? 0 })}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {preview && preview.assignable > 0
+                    ? t('assignHistory.confirmBody')
+                    : !preview && t('assignHistory.counting')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {preview && preview.bikes.length > 0 && (
+                <ul className="space-y-1 text-sm">
+                  {preview.bikes.map((b) => (
+                    <li key={b.bike_id} className="flex justify-between gap-4">
+                      <span>{b.bike_name}</span>
+                      <span className="tabular-nums text-muted-foreground">
+                        {t('assignHistory.rides', { count: b.rides })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                {preview && preview.assignable > 0 && (
+                  <AlertDialogAction onClick={handleAssignHistory}>
+                    {t('assignHistory.confirm', { count: preview.assignable })}
+                  </AlertDialogAction>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {!adding && (
             <Button size="sm" onClick={() => setAdding(true)}>
               <Plus className="mr-1 h-4 w-4" />

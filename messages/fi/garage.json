@@ -51,7 +51,21 @@
     "done": "{assigned}/{scanned} liittämätöntä ajoa sai pyörän.",
     "nothing": "Yksikään liittämätön ajo ei osunut mihinkään pyörään.",
     "failed": "Historian läpikäynti ei onnistunut",
-    "running": "Käydään historiaa läpi…"
+    "running": "Käydään historiaa läpi…",
+    "confirmTitle": "Liitetäänkö {count, plural, one {1 aiempi ajo} other {# aiempaa ajoa}}?",
+    "confirmBody": "Ajot, joilla ei vielä ole pyörää, liitetään pyörään, jolle niiden laji kuuluu. Voit perua tämän jälkikäteen.",
+    "confirm": "Liitä {count, plural, one {1 ajo} other {# ajoa}}",
+    "rides": "{count, plural, one {1 ajo} other {# ajoa}}",
+    "counting": "Lasketaan liittämättömiä ajoja…"
+  },
+  "revertHistory": {
+    "action": "Peru liitetyt ajot",
+    "help": "Irrota ajot, jotka ”Liitä aiemmat ajot” liitti. Itse muuttamasi ja saapuessaan liitetyt ajot pysyvät ennallaan.",
+    "confirmTitle": "Irrotetaanko {count, plural, one {1 ajo} other {# ajoa}}?",
+    "confirmBody": "Jokainen ajo, jonka ”Liitä aiemmat ajot” liitti, jää taas ilman pyörää. Itse muuttamasi ja saapuessaan liitetyt ajot pysyvät ennallaan.",
+    "confirm": "Irrota",
+    "done": "{count, plural, =0 {Yhtään ajoa ei irrotettu.} one {1 ajolla ei enää ole pyörää.} other {# ajolla ei enää ole pyörää.}}",
+    "failed": "Liitettyjen ajojen peruminen ei onnistunut"
   },
   "retire": {
     "action": "Poista käytöstä",

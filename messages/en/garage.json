@@ -51,7 +51,21 @@
     "done": "{assigned} of {scanned} unattached rides now have a bike.",
     "nothing": "No unattached rides matched a bike.",
     "failed": "Could not go through your history",
-    "running": "Going through your history…"
+    "running": "Going through your history…",
+    "confirmTitle": "Attach {count, plural, one {1 past ride} other {# past rides}}?",
+    "confirmBody": "Rides with no bike yet will be attached to the bike that claims their type. You can undo this afterwards.",
+    "confirm": "Attach {count, plural, one {1 ride} other {# rides}}",
+    "rides": "{count, plural, one {1 ride} other {# rides}}",
+    "counting": "Counting your unattached rides…"
+  },
+  "revertHistory": {
+    "action": "Undo attached rides",
+    "help": "Take back the rides that “Attach past rides” attached. Rides you have changed by hand since, and rides matched as they arrived, stay as they are.",
+    "confirmTitle": "Detach {count, plural, one {1 ride} other {# rides}}?",
+    "confirmBody": "Every ride that “Attach past rides” attached goes back to having no bike. Rides you have changed by hand since, and rides matched as they arrived, stay as they are.",
+    "confirm": "Detach",
+    "done": "{count, plural, =0 {No rides were detached.} one {1 ride no longer has a bike.} other {# rides no longer have a bike.}}",
+    "failed": "Could not undo the attached rides"
   },
   "retire": {
     "action": "Retire",

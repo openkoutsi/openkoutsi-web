@@ -355,6 +355,13 @@ starting odometer the athlete typed in. The second is only shown when a baseline
 exists to make them differ — a garage that blurred them could not answer "where
 did that number come from?".
 
+"Attach past rides" asks first. The button reads `GET /api/bikes/assign-history`
+and the confirmation names how many rides would be attached, per bike, before
+`POST` touches anything. Once a pass has attached rides, an **Undo attached
+rides** button (`DELETE` on the same path) takes them back to having no bike —
+only rides still as the pass left them; hand corrections and rides matched on
+arrival stay put.
+
 The maintenance log is grouped **by component** rather than shown as one
 chronological list, because the question it exists to answer — "how long did
 these tyres last?" — is about consecutive entries of the same component, and a
