@@ -465,17 +465,6 @@
       "pendingHintBoth": "Both have to be opened before the change takes effect. The links expire 24 hours after they were sent.",
       "stepNew": "Confirm at {email}",
       "stepOld": "Approve from {email}"
-    },
-    "hammerhead": {
-      "push": "Push to Karoo",
-      "pushing": "Pushing…",
-      "pushDesc": "Send your FTP, weight, max and resting heart rate and training zones to your Karoo. Anything you have not set here stays editable on the Karoo.",
-      "pushDone": "Metrics sent to your Karoo",
-      "pushFailed": "Could not send metrics to Hammerhead",
-      "pushReconnect": "Hammerhead did not grant permission to update your metrics. Disconnect and reconnect Hammerhead, allowing training metrics.",
-      "pushNothing": "Set your FTP, weight, heart rate or zones first — there is nothing to send yet.",
-      "autoPush": "Send to the Karoo automatically whenever these change",
-      "disconnectWarning": "Disconnecting Hammerhead also deletes every route and workout openkoutsi sent to your Karoo. Your Karoo rides are not affected."
     }
   },
   "settings": {

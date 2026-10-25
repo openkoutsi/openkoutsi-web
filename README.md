@@ -66,23 +66,11 @@ already has.
 
 ## Hammerhead (Karoo)
 
-Hammerhead is the first **two-way** provider (openkoutsi#69). Activities come in
-like Strava's and Wahoo's, through the same provider card. What goes *out*:
-
-- **Metrics.** Under the Hammerhead card on the profile page, *Push to Karoo* sends
-  FTP, weight, max/resting heart rate and zones (`POST
-  /api/integrations/hammerhead/push-metrics`). Hammerhead has no way to read them
-  back, so there is no zone *sync* for it. A switch beside it stores
-  `app_settings.hammerhead_auto_push_metrics`, and the backend then pushes on every
-  change.
-- **Routes.** A course's detail view shows *Send to Karoo* once Hammerhead is
-  connected (`src/components/courses/PushToKarooButton.tsx`); pressing it again
-  replaces the route rather than adding another.
-
-Disconnecting Hammerhead deletes every route and workout we pushed, on
-Hammerhead's side. `ProviderCard` takes a `disconnectWarning` for exactly this,
-and shows it in the disconnect dialog. A refusal on Hammerhead's consent screen
-comes back as `?hammerhead=denied` and is shown as a neutral note, not an error.
+Hammerhead (openkoutsi#69) is a provider like Strava and Wahoo: it has a card on the
+profile page and in onboarding, and its rides carry a *Hammerhead* source badge. It
+is one-way, so nothing in the app sends anything to the Karoo. If the athlete
+declines on Hammerhead's consent screen, the callback returns `?hammerhead=denied`,
+which the profile shows as a neutral note rather than an error.
 
 ## When a provider import stops partway
 

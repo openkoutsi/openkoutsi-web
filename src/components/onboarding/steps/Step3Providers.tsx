@@ -21,7 +21,6 @@ const PROVIDERS = ['strava', 'wahoo', 'hammerhead']
 export function Step3Providers({ onNext, onBack, onSkip }: Props) {
   const t = useTranslations('onboarding')
   const tCommon = useTranslations('common')
-  const tApp = useTranslations('app')
   const { athlete, refreshAthlete } = useAuth()
   const completeOnboarding = useCompleteOnboarding()
   const { data: available } = useSWR<{ available: string[] }>('/api/integrations/available', fetcher)
@@ -73,9 +72,6 @@ export function Step3Providers({ onNext, onBack, onSkip }: Props) {
               onConnect={() => handleConnect(provider)}
               onSync={() => handleSync(provider)}
               onDisconnect={(deleteData) => handleDisconnect(provider, deleteData)}
-              disconnectWarning={
-                provider === 'hammerhead' ? tApp('profile.hammerhead.disconnectWarning') : undefined
-              }
               syncing={syncingProvider === provider}
             />
           ))}
