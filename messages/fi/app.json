@@ -382,6 +382,7 @@
     "deleteAccountFailed": "Tilin poistaminen epäonnistui",
     "providerConnected": "{name} yhdistetty onnistuneesti!",
     "providerError": "{name} yhdistäminen epäonnistui. Yritä uudelleen.",
+    "providerDenied": "Et sallinut palvelun {name} yhdistämistä. Mitään ei muutettu.",
     "provider": {
       "connected": "Yhdistetty",
       "notConnected": "Ei yhdistetty",
@@ -464,6 +465,17 @@
       "pendingHintBoth": "Molemmat on avattava ennen kuin muutos tulee voimaan. Linkit vanhenevat 24 tunnin kuluttua lähetyksestä.",
       "stepNew": "Vahvista osoitteessa {email}",
       "stepOld": "Hyväksy osoitteesta {email}"
+    },
+    "hammerhead": {
+      "push": "Lähetä Karoo-laitteelle",
+      "pushing": "Lähetetään…",
+      "pushDesc": "Lähetä FTP, paino, maksimi- ja leposyke sekä harjoitusalueet Karoo-laitteellesi. Arvoja, joita et ole asettanut täällä, voit edelleen muokata Karoossa.",
+      "pushDone": "Arvot lähetetty Karoo-laitteellesi",
+      "pushFailed": "Arvojen lähettäminen Hammerheadiin epäonnistui",
+      "pushReconnect": "Hammerhead ei antanut lupaa päivittää arvojasi. Katkaise Hammerhead-yhteys ja yhdistä uudelleen sallien harjoitusarvot.",
+      "pushNothing": "Aseta ensin FTP, paino, syke tai harjoitusalueet – lähetettävää ei vielä ole.",
+      "autoPush": "Lähetä Karoo-laitteelle automaattisesti aina, kun nämä muuttuvat",
+      "disconnectWarning": "Hammerhead-yhteyden katkaiseminen poistaa myös kaikki reitit ja harjoitukset, jotka openkoutsi on lähettänyt Karoo-laitteellesi. Karoolla tallennettuihin ajoihin tämä ei vaikuta."
     }
   },
   "settings": {

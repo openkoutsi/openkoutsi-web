@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { NextIntlClientProvider } from 'next-intl'
 
 import { syncNote } from '@/lib/providerSync'
@@ -170,6 +170,28 @@ describe('sync message catalogues', () => {
   it('has no key in one locale that the other lacks', () => {
     expect(Object.keys(appFi.profile.provider.sync).sort()).toEqual(
       Object.keys(appEn.profile.provider.sync).sort(),
+    )
+  })
+})
+
+describe('ProviderCard disconnect warning', () => {
+  it('shows a provider-side consequence before disconnecting', () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={{ app: appEn, common: commonEn }}>
+        <ProviderCard
+          name="Hammerhead"
+          connected
+          configured
+          onConnect={() => {}}
+          onSync={() => {}}
+          onDisconnect={() => {}}
+          disconnectWarning={appEn.profile.hammerhead.disconnectWarning}
+        />
+      </NextIntlClientProvider>,
+    )
+    fireEvent.click(screen.getByText('Disconnect'))
+    expect(screen.getByTestId('provider-disconnect-warning').textContent).toContain(
+      'deletes every route and workout',
     )
   })
 })

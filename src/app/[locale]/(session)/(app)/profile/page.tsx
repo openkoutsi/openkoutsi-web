@@ -44,7 +44,12 @@ import { useTranslations as useActivityTranslations } from 'next-intl'
 const PROVIDER_NAMES: Record<string, string> = {
   strava: 'Strava',
   wahoo: 'Wahoo',
+  hammerhead: 'Hammerhead',
 }
+
+/** The `app_settings` key that opts in to pushing metrics to the Karoo on change. */
+const HAMMERHEAD_AUTO_PUSH = 'hammerhead_auto_push_metrics'
+
 
 function ProviderNotice() {
   const t = useTranslations('app')
@@ -54,6 +59,14 @@ function ProviderNotice() {
       return (
         <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
           {t('profile.providerConnected', { name })}
+        </div>
+      )
+    }
+    // Declining on the provider's consent screen is an answer, not a fault.
+    if (params.get(key) === 'denied') {
+      return (
+        <div className="rounded-md bg-muted border px-4 py-3 text-sm text-muted-foreground">
+          {t('profile.providerDenied', { name })}
         </div>
       )
     }
@@ -122,6 +135,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [syncingProvider, setSyncingProvider] = useState<string | null>(null)
   const [syncingZones, setSyncingZones] = useState<string | null>(null)
+  const [pushingMetrics, setPushingMetrics] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [removingAvatar, setRemovingAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
@@ -334,6 +348,45 @@ export default function ProfilePage() {
         method: 'PATCH',
         body: JSON.stringify({
           app_settings: { ...(profile?.app_settings ?? {}), auto_training_status: checked },
+        }),
+      })
+      mutateProfile()
+    } catch (err) {
+      toast({
+        title: t('settings.analysis.saveFailed'),
+        description: err instanceof Error ? err.message : tCommon('unknownError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handlePushMetrics() {
+    setPushingMetrics(true)
+    try {
+      await apiFetch('/api/integrations/hammerhead/push-metrics', { method: 'POST' })
+      toast({ title: t('profile.hammerhead.pushDone') })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : tCommon('unknownError')
+      toast({
+        title: t('profile.hammerhead.pushFailed'),
+        description: msg.includes('insufficient_scope')
+          ? t('profile.hammerhead.pushReconnect')
+          : msg.includes('no_metrics_set')
+          ? t('profile.hammerhead.pushNothing')
+          : msg,
+        variant: 'destructive',
+      })
+    } finally {
+      setPushingMetrics(false)
+    }
+  }
+
+  async function handleAutoPushToggle(checked: boolean) {
+    try {
+      await apiFetch('/api/athlete', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          app_settings: { ...(profile?.app_settings ?? {}), [HAMMERHEAD_AUTO_PUSH]: checked },
         }),
       })
       mutateProfile()
@@ -860,6 +913,7 @@ export default function ProfilePage() {
             [
               { provider: 'strava', name: 'Strava' },
               { provider: 'wahoo',  name: 'Wahoo'  },
+              { provider: 'hammerhead', name: 'Hammerhead' },
             ] as const
           ).map(({ provider, name }) => (
             <div key={provider}>
@@ -873,7 +927,42 @@ export default function ProfilePage() {
                 onDisconnect={(deleteData) => handleProviderDisconnect(provider, deleteData)}
                 syncing={syncingProvider === provider}
                 sync={integrationsStatus?.sync?.[provider]}
+                disconnectWarning={
+                  provider === 'hammerhead' ? t('profile.hammerhead.disconnectWarning') : undefined
+                }
               />
+              {/* Metrics only ever go *to* the Karoo — Hammerhead has no way to
+                  read them back — so this is a push, not a zone sync. */}
+              {provider === 'hammerhead' && profile?.connected_providers?.includes('hammerhead') && (
+                <div className="mt-3 space-y-2 rounded-md border p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {t('profile.hammerhead.pushDesc')}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={pushingMetrics}
+                      onClick={handlePushMetrics}
+                      className="self-start sm:self-auto shrink-0"
+                    >
+                      {pushingMetrics ? t('profile.hammerhead.pushing') : t('profile.hammerhead.push')}
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="hammerhead-auto-push"
+                      checked={Boolean(
+                        (profile?.app_settings as Record<string, unknown> | undefined)?.[HAMMERHEAD_AUTO_PUSH],
+                      )}
+                      onCheckedChange={handleAutoPushToggle}
+                    />
+                    <Label htmlFor="hammerhead-auto-push" className="text-sm cursor-pointer">
+                      {t('profile.hammerhead.autoPush')}
+                    </Label>
+                  </div>
+                </div>
+              )}
               {provider === 'wahoo' && (
                 <div className="mt-2 flex items-center gap-2">
                   <Switch

@@ -147,5 +147,14 @@
       "unknown": "Tuntematon"
     }
   },
-  "stillAirMatched": "Kaikki nopeudet ja väliajat olettavat tyynen sään. Vastatuuli siirtää niitä, ja usein paljon. Pinnat tulevat OpenStreetMapista, ja arvioiksi merkityt ovat arvauksia."
+  "stillAirMatched": "Kaikki nopeudet ja väliajat olettavat tyynen sään. Vastatuuli siirtää niitä, ja usein paljon. Pinnat tulevat OpenStreetMapista, ja arvioiksi merkityt ovat arvauksia.",
+  "karoo": {
+    "send": "Lähetä Karoo-laitteelle",
+    "resend": "Päivitä Karoossa",
+    "sending": "Lähetetään…",
+    "sent": "Reitti lähetetty Karoo-laitteellesi",
+    "updated": "Reitti päivitetty Karoossa",
+    "failed": "Reitin lähettäminen Hammerheadiin epäonnistui",
+    "reconnect": "Hammerhead ei antanut lupaa lisätä reittejä. Katkaise Hammerhead-yhteys ja yhdistä uudelleen sallien reitit."
+  }
 }

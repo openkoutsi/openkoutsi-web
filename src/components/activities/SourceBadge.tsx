@@ -14,6 +14,7 @@ interface Props {
 const SOURCE_LABELS: Record<string, string> = {
   strava: 'Strava',
   wahoo: 'Wahoo',
+  hammerhead: 'Hammerhead',
   upload: 'FIT upload',
   manual: 'Manual',
 }

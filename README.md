@@ -64,6 +64,26 @@ all, as a hand-logged entry does. The two disagree on any ride with stops in it,
 so `avgSpeedMs` in `src/lib/utils.ts` never recomputes a figure the recording
 already has.
 
+## Hammerhead (Karoo)
+
+Hammerhead is the first **two-way** provider (openkoutsi#69). Activities come in
+like Strava's and Wahoo's, through the same provider card. What goes *out*:
+
+- **Metrics.** Under the Hammerhead card on the profile page, *Push to Karoo* sends
+  FTP, weight, max/resting heart rate and zones (`POST
+  /api/integrations/hammerhead/push-metrics`). Hammerhead has no way to read them
+  back, so there is no zone *sync* for it. A switch beside it stores
+  `app_settings.hammerhead_auto_push_metrics`, and the backend then pushes on every
+  change.
+- **Routes.** A course's detail view shows *Send to Karoo* once Hammerhead is
+  connected (`src/components/courses/PushToKarooButton.tsx`); pressing it again
+  replaces the route rather than adding another.
+
+Disconnecting Hammerhead deletes every route and workout we pushed, on
+Hammerhead's side. `ProviderCard` takes a `disconnectWarning` for exactly this,
+and shows it in the disconnect dialog. A refusal on Hammerhead's consent screen
+comes back as `?hammerhead=denied` and is shown as a neutral note, not an error.
+
 ## When a provider import stops partway
 
 A history import from Strava or Wahoo can end before it reaches the end of an

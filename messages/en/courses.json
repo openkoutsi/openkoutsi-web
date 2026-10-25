@@ -147,5 +147,14 @@
       "unknown": "Unknown"
     }
   },
-  "stillAirMatched": "Every speed and split assumes still air. A headwind will move them, and it can move them a lot. Surfaces come from OpenStreetMap, and the ones marked inferred are a guess."
+  "stillAirMatched": "Every speed and split assumes still air. A headwind will move them, and it can move them a lot. Surfaces come from OpenStreetMap, and the ones marked inferred are a guess.",
+  "karoo": {
+    "send": "Send to Karoo",
+    "resend": "Update on Karoo",
+    "sending": "Sending…",
+    "sent": "Course sent to your Karoo as a route",
+    "updated": "Route updated on your Karoo",
+    "failed": "Could not send the course to Hammerhead",
+    "reconnect": "Hammerhead did not grant permission to add routes. Disconnect and reconnect Hammerhead, allowing routes."
+  }
 }

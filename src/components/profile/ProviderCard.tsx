@@ -28,6 +28,11 @@ interface ProviderCardProps {
   syncing?: boolean
   /** What this provider's last history import did (issue #68). */
   sync?: ProviderSyncStatus
+  /**
+   * Something disconnecting does on the provider's side that the athlete must
+   * hear first — Hammerhead deletes every route and workout we pushed.
+   */
+  disconnectWarning?: string
 }
 
 export function ProviderCard({
@@ -39,6 +44,7 @@ export function ProviderCard({
   onDisconnect,
   syncing = false,
   sync,
+  disconnectWarning,
 }: ProviderCardProps) {
   const t = useTranslations('app')
   const tCommon = useTranslations('common')
@@ -164,6 +170,14 @@ export function ProviderCard({
             <AlertDialogDescription>
               {t('profile.provider.disconnectDesc', { name })}
             </AlertDialogDescription>
+            {disconnectWarning && (
+              <p
+                data-testid="provider-disconnect-warning"
+                className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+              >
+                {disconnectWarning}
+              </p>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
             <AlertDialogCancel className="mt-0 w-full">{tCommon('cancel')}</AlertDialogCancel>
