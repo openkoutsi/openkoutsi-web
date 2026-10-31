@@ -25,6 +25,15 @@ frontend talks to it purely over HTTP (`/api/*`) — the only coupling is config
 | i18n | next-intl (English + Finnish) |
 | Tests | Vitest · Testing Library |
 
+## Consent and age confirmation
+
+The first onboarding step (`Step0Consent`) asks for two confirmations before
+**Accept & continue** is enabled: consent to data processing, and the user's
+statement that they are at least 18. It posts `{ consent_version: "1.1",
+confirmed_adult: true }` to `POST /api/consent`; the backend refuses consent
+without `confirmed_adult`, and accounts that accepted version 1.0 are sent back
+through this step.
+
 ## Importing a training history
 
 Two upload paths, chosen by `src/lib/imports.ts` from what was dropped rather
