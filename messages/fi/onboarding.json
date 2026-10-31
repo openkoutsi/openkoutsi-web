@@ -17,7 +17,7 @@
       "profile": "Profiilikuva (jos haluat lisätä sellaisen)",
       "health": "Terveysdata: paino, sykkeen harjoitusalueet, tehon harjoitusalueet",
       "activities": "Harjoitukset ja suoritusdata",
-      "providers": "Harjoitusdata yhdistetyistä palveluista (Strava, Wahoo) – jos haluat yhdistää ne",
+      "providers": "Harjoitusdata yhdistetyistä palveluista (Strava, Wahoo, Hammerhead) – jos haluat yhdistää ne",
       "ai": "Harjoitusten tekoälyanalyysi – jos haluat ottaa sen käyttöön"
     },
     "checkboxLabel": "Hyväksyn, että palvelu tallentaa ja käsittelee henkilö- ja terveystietojani yllä kuvatulla tavalla.",
@@ -63,7 +63,7 @@
   },
   "step3": {
     "title": "Yhdistä palvelut",
-    "subtitle": "Yhdistä Strava tai Wahoo tuodaksesi harjoituksesi automaattisesti. Tämä vaihe on vapaaehtoinen – voit yhdistää ne myöhemmin profiilissasi."
+    "subtitle": "Yhdistä Strava, Wahoo tai Hammerhead tuodaksesi harjoituksesi automaattisesti. Tämä vaihe on vapaaehtoinen – voit yhdistää ne myöhemmin profiilissasi."
   },
   "step4": {
     "title": "Ominaisuudet",

@@ -73,6 +73,14 @@ all, as a hand-logged entry does. The two disagree on any ride with stops in it,
 so `avgSpeedMs` in `src/lib/utils.ts` never recomputes a figure the recording
 already has.
 
+## Hammerhead (Karoo)
+
+Hammerhead (openkoutsi#69) is a provider like Strava and Wahoo: it has a card on the
+profile page and in onboarding, and its rides carry a *Hammerhead* source badge. It
+is one-way, so nothing in the app sends anything to the Karoo. If the athlete
+declines on Hammerhead's consent screen, the callback returns `?hammerhead=denied`,
+which the profile shows as a neutral note rather than an error.
+
 ## When a provider import stops partway
 
 A history import from Strava or Wahoo can end before it reaches the end of an

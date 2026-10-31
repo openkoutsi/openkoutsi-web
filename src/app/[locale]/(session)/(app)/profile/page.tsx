@@ -44,6 +44,7 @@ import { useTranslations as useActivityTranslations } from 'next-intl'
 const PROVIDER_NAMES: Record<string, string> = {
   strava: 'Strava',
   wahoo: 'Wahoo',
+  hammerhead: 'Hammerhead',
 }
 
 function ProviderNotice() {
@@ -54,6 +55,14 @@ function ProviderNotice() {
       return (
         <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
           {t('profile.providerConnected', { name })}
+        </div>
+      )
+    }
+    // Declining on the provider's consent screen is an answer, not a fault.
+    if (params.get(key) === 'denied') {
+      return (
+        <div className="rounded-md bg-muted border px-4 py-3 text-sm text-muted-foreground">
+          {t('profile.providerDenied', { name })}
         </div>
       )
     }
@@ -860,6 +869,7 @@ export default function ProfilePage() {
             [
               { provider: 'strava', name: 'Strava' },
               { provider: 'wahoo',  name: 'Wahoo'  },
+              { provider: 'hammerhead', name: 'Hammerhead' },
             ] as const
           ).map(({ provider, name }) => (
             <div key={provider}>

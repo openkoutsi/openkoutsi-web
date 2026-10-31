@@ -382,6 +382,7 @@
     "deleteAccountFailed": "Tilin poistaminen epäonnistui",
     "providerConnected": "{name} yhdistetty onnistuneesti!",
     "providerError": "{name} yhdistäminen epäonnistui. Yritä uudelleen.",
+    "providerDenied": "Et sallinut palvelun {name} yhdistämistä. Mitään ei muutettu.",
     "provider": {
       "connected": "Yhdistetty",
       "notConnected": "Ei yhdistetty",

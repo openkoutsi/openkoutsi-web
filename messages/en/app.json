@@ -382,6 +382,7 @@
     "deleteAccountFailed": "Account deletion failed",
     "providerConnected": "{name} connected successfully!",
     "providerError": "Could not connect {name}. Please try again.",
+    "providerDenied": "You declined to connect {name}. Nothing was changed.",
     "provider": {
       "connected": "Connected",
       "notConnected": "Not connected",

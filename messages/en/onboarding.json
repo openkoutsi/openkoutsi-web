@@ -17,7 +17,7 @@
       "profile": "Profile picture (if you choose to upload one)",
       "health": "Health metrics: weight, heart rate zones, power zones",
       "activities": "Training activities and performance data",
-      "providers": "Activity data from connected services (Strava, Wahoo) — if you choose to connect them",
+      "providers": "Activity data from connected services (Strava, Wahoo, Hammerhead) — if you choose to connect them",
       "ai": "AI analysis of your workouts — if you choose to enable it"
     },
     "checkboxLabel": "I accept that this service stores and processes my personal and health-related data as described above.",
@@ -63,7 +63,7 @@
   },
   "step3": {
     "title": "Connect services",
-    "subtitle": "Connect Strava or Wahoo to automatically import your workouts. This step is optional — you can connect them later in your profile."
+    "subtitle": "Connect Strava, Wahoo or Hammerhead to automatically import your workouts. This step is optional — you can connect them later in your profile."
   },
   "step4": {
     "title": "Features",

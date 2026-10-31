@@ -16,7 +16,7 @@ interface Props {
   onSkip: () => void
 }
 
-const PROVIDERS = ['strava', 'wahoo']
+const PROVIDERS = ['strava', 'wahoo', 'hammerhead']
 
 export function Step3Providers({ onNext, onBack, onSkip }: Props) {
   const t = useTranslations('onboarding')
