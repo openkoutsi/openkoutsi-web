@@ -21,6 +21,7 @@
       "ai": "AI analysis of your workouts — if you choose to enable it"
     },
     "checkboxLabel": "I accept that this service stores and processes my personal and health-related data as described above.",
+    "adultCheckboxLabel": "I confirm that I am at least 18 years old.",
     "accept": "Accept & continue",
     "decline": {
       "button": "Decline",

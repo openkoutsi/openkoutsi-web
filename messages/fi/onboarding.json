@@ -21,6 +21,7 @@
       "ai": "Harjoitusten tekoälyanalyysi – jos haluat ottaa sen käyttöön"
     },
     "checkboxLabel": "Hyväksyn, että palvelu tallentaa ja käsittelee henkilö- ja terveystietojani yllä kuvatulla tavalla.",
+    "adultCheckboxLabel": "Vahvistan olevani vähintään 18-vuotias.",
     "accept": "Hyväksy ja jatka",
     "decline": {
       "button": "Kieltäydy",

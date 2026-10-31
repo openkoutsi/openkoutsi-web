@@ -12,6 +12,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+export const CONSENT_VERSION = '1.1'
+
 interface Props {
   onAccepted: () => void
 }
@@ -22,6 +24,7 @@ export function Step0Consent({ onAccepted }: Props) {
   const { data: instanceInfo } = useSWR<InstanceInfoResponse>('/api/public/instance-info', fetcher)
   const privacyPolicyUrl = instanceInfo?.privacy_policy_url
   const [accepted, setAccepted] = useState(false)
+  const [isAdult, setIsAdult] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showDeclinePanel, setShowDeclinePanel] = useState(false)
   const [showDeleteForm, setShowDeleteForm] = useState(false)
@@ -35,7 +38,9 @@ export function Step0Consent({ onAccepted }: Props) {
     try {
       await apiFetch(`/api/consent`, {
         method: 'POST',
-        body: JSON.stringify({ consent_version: '1.0' }),
+        // Version 1.1 added the age confirmation; the backend refuses consent
+        // without `confirmed_adult: true`.
+        body: JSON.stringify({ consent_version: CONSENT_VERSION, confirmed_adult: true }),
       })
       onAccepted()
     } finally {
@@ -198,6 +203,17 @@ export function Step0Consent({ onAccepted }: Props) {
           </Label>
         </div>
 
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="adult-check"
+            checked={isAdult}
+            onCheckedChange={(v) => setIsAdult(Boolean(v))}
+          />
+          <Label htmlFor="adult-check" className="text-sm leading-snug cursor-pointer">
+            {t('consent.adultCheckboxLabel')}
+          </Label>
+        </div>
+
         <div className="flex gap-2 pt-2">
           <Button
             type="button"
@@ -208,7 +224,7 @@ export function Step0Consent({ onAccepted }: Props) {
           </Button>
           <Button
             type="button"
-            disabled={!accepted || saving}
+            disabled={!accepted || !isAdult || saving}
             onClick={handleAccept}
             className="flex-1"
           >
