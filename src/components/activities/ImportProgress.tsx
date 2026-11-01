@@ -97,7 +97,7 @@ export function ImportProgress({ jobId, onFinished, onDismiss }: Props) {
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {finished && job.status !== 'failed' && (
-            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+            <CheckCircle2 className="h-5 w-5 text-success" />
           )}
           {finished && onDismiss && (
             <Button variant="ghost" size="icon" onClick={onDismiss} aria-label={t('dismiss')}>
@@ -190,7 +190,7 @@ function ResultRow({ result }: { result: ImportFileResult }) {
             'text-xs whitespace-nowrap',
             result.outcome === 'failed' && 'text-destructive',
             result.outcome === 'skipped_duplicate' && 'text-muted-foreground',
-            result.outcome === 'imported' && 'text-emerald-600 dark:text-emerald-500',
+            result.outcome === 'imported' && 'text-success',
           )}
         >
           {result.outcome === 'imported' && result.activity_id ? (

@@ -651,7 +651,7 @@ function RampWarning({
 
   const steepest = ramp.weeks.reduce((a, b) => (b.risePct > a.risePct ? b : a))
   return (
-    <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
+    <div className="mb-3 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
       <div>
         <p className="font-medium">{t('plan.rampWarning.title')}</p>

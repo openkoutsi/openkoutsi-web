@@ -76,7 +76,7 @@ export function GenerateWorkoutsDialog({ planId, onGenerated }: Props) {
     failed: t('plan.statusFailed'),
   }
   const statusColor: Record<GenerateResultItem['status'], string> = {
-    generated: 'text-green-600',
+    generated: 'text-success',
     skipped: 'text-muted-foreground',
     failed: 'text-destructive',
   }

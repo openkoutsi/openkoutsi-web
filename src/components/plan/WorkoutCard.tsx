@@ -120,7 +120,7 @@ export function WorkoutCard({ workout, compact = false, onClearSkip }: Props) {
             </Badge>
           )}
           {workout.skip_reason != null && !completed && (
-            <Badge className="text-xs h-5 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
+            <Badge className="text-xs h-5 bg-warning/15 text-warning border-warning/30 hover:bg-warning/15">
               {t('plan.skipped')}
             </Badge>
           )}

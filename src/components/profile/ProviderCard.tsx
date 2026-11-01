@@ -79,7 +79,7 @@ export function ProviderCard({
         {connected ? (
           <>
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-500 shrink-0" />
+              <span className="inline-block h-2 w-2 rounded-full bg-success shrink-0" />
               <span className="text-sm">{t('profile.provider.connected')}</span>
             </div>
             <div className="flex gap-2 sm:ml-auto">
@@ -99,7 +99,7 @@ export function ProviderCard({
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-gray-300 shrink-0" />
+              <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/40 shrink-0" />
               <span className="text-sm text-muted-foreground">{t('profile.provider.notConnected')}</span>
             </div>
             {name === 'Strava' ? (

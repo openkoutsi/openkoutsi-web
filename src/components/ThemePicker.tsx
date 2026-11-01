@@ -9,6 +9,7 @@ const THEMES = [
   { id: 'light-warm',      label: 'Warm',     color: 'oklch(0.6 0.22 50)' },
   { id: 'light-sage',      label: 'Sage',     color: 'oklch(0.5 0.2 152)' },
   { id: 'light-lavender',  label: 'Lavender', color: 'oklch(0.53 0.26 278)' },
+  { id: 'graphite',        label: 'Graphite', color: 'oklch(0.62 0.19 25)' },
 ] as const
 
 interface ThemePickerProps {

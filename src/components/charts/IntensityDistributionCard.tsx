@@ -139,7 +139,7 @@ export function IntensityDistributionCard({ title, days, start, end }: Props) {
             )}
 
             {data?.zone_definitions_changed && (
-              <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+              <p className="flex items-start gap-1.5 text-xs text-warning">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>{t('intensity.zonesChanged')}</span>
               </p>

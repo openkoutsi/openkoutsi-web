@@ -53,11 +53,40 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        // Named apart from Tailwind's own `shadow-sm`/`shadow-md` so picking
+        // these up is opt-in per component instead of silently reshadowing
+        // every existing `shadow-sm` in the app.
+        card: 'var(--shadow-card)',
+        'card-lg': 'var(--shadow-card-lg)',
+      },
+      fontFamily: {
+        // These three are already loaded as CSS variables in
+        // `[locale]/layout.tsx` (next/font/google) but were never wired into
+        // Tailwind, so `font-mono` fell back to the browser default and
+        // `font-display` didn't exist — Space Grotesk was shipped to the
+        // client and never actually used anywhere.
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-space-grotesk)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
     },
   },

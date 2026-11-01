@@ -77,7 +77,7 @@ export function PushToWahooDialog({ workoutId }: Props) {
             <DialogTitle>{t('sendToWahoo')}</DialogTitle>
           </DialogHeader>
           {success ? (
-            <p className="text-sm text-green-600">{t('pushSuccess')}</p>
+            <p className="text-sm text-success">{t('pushSuccess')}</p>
           ) : (
             <div className="space-y-2">
               <Label htmlFor="wahoo-date">{t('pushDate')}</Label>

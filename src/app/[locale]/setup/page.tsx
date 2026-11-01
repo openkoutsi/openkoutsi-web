@@ -56,7 +56,7 @@ export default function SetupPage() {
         </div>
 
         {done ? (
-          <p className="text-center text-sm text-green-600">{t('success')}</p>
+          <p className="text-center text-sm text-success">{t('success')}</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">

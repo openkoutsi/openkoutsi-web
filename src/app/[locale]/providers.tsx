@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="data-theme" defaultTheme="light-warm" disableTransitionOnChange>
+    <ThemeProvider attribute="data-theme" defaultTheme="graphite" disableTransitionOnChange>
       {/* `revalidateOnFocus` stays off: it fires on every window focus, which
           on desktop means a refetch each time the user clicks back into the
           browser. `ResumeRefresher` covers what actually matters — the app
