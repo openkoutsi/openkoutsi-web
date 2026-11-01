@@ -204,9 +204,18 @@ export function CombinedStreamChart({
     })
   }
 
+  // ReferenceLine/ReferenceArea below need *some* existing yAxisId to attach
+  // to even when every checkbox is unchecked (leftKey/rightKey both null) —
+  // Recharts throws if the id doesn't match a rendered <YAxis>, and only
+  // `presentKeys` are ever rendered, which may not include 'power' (a
+  // power-less GPX import, say). Falling back to the first present stream
+  // keeps the id always valid instead of guessing a literal that might not
+  // exist.
+  const fallbackKey = STREAM_KEYS.find((k) => presentKeys.has(k)) ?? null
   const refLineAxisId =
     (leftKey && STREAM_CONFIG[leftKey].yAxisId) ||
     (rightKey && STREAM_CONFIG[rightKey].yAxisId) ||
+    (fallbackKey && STREAM_CONFIG[fallbackKey].yAxisId) ||
     'power'
 
   const handleMouseDown = useCallback(
