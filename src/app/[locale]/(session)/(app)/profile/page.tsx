@@ -53,7 +53,7 @@ function ProviderNotice() {
   for (const [key, name] of Object.entries(PROVIDER_NAMES)) {
     if (params.get(key) === 'connected') {
       return (
-        <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+        <div className="rounded-md bg-success/10 border border-success/30 px-4 py-3 text-sm text-success">
           {t('profile.providerConnected', { name })}
         </div>
       )
@@ -68,7 +68,7 @@ function ProviderNotice() {
     }
     if (params.get(key) === 'error') {
       return (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+        <div className="rounded-md bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive">
           {t('profile.providerError', { name })}
         </div>
       )

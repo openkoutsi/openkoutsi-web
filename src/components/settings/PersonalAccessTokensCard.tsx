@@ -138,7 +138,7 @@ function CreateTokenDialog({ onCreated }: { onCreated: () => void }) {
                 {copied ? t('settings.tokens.copied') : t('settings.tokens.copy')}
               </Button>
             </div>
-            <p className="text-xs text-amber-600 dark:text-amber-500">
+            <p className="text-xs text-warning">
               {t('settings.tokens.copyOnceWarning')}
             </p>
           </div>
@@ -190,7 +190,7 @@ function CreateTokenDialog({ onCreated }: { onCreated: () => void }) {
                   {sensitive.map((scope) => (
                     <label
                       key={scope.name}
-                      className="flex items-start gap-2 rounded-md border border-amber-500/60 bg-amber-500/5 p-2 cursor-pointer"
+                      className="flex items-start gap-2 rounded-md border border-warning/60 bg-warning/5 p-2 cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -203,7 +203,7 @@ function CreateTokenDialog({ onCreated }: { onCreated: () => void }) {
                         <span className="block text-xs text-muted-foreground">
                           {scope.description}
                         </span>
-                        <span className="block text-xs text-amber-600 dark:text-amber-500">
+                        <span className="block text-xs text-warning">
                           {t('settings.tokens.exportWarning')}
                         </span>
                       </span>

@@ -147,7 +147,7 @@ export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingP
                 {t('calendar.performed')}
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full border border-amber-500/80" />
+                <span className="h-2 w-2 rounded-full border border-warning/80" />
                 {t('calendar.planned')}
               </span>
               <span className="flex items-center gap-1">
@@ -225,7 +225,7 @@ export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingP
                       hasActivities
                         ? 'cursor-pointer bg-primary/10 border border-primary/20 hover:bg-primary/20'
                         : hasPending
-                          ? 'cursor-pointer bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20'
+                          ? 'cursor-pointer bg-warning/10 border border-warning/30 hover:bg-warning/20'
                           : hasSkipped
                             ? 'cursor-pointer bg-muted/40 border border-muted-foreground/20 hover:bg-muted/60'
                             : planned.length > 0
@@ -238,7 +238,7 @@ export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingP
                       hasActivities && inMonth
                         ? 'text-primary'
                         : hasPending && inMonth
-                          ? 'text-amber-700 dark:text-amber-400'
+                          ? 'text-warning'
                           : 'text-muted-foreground',
                     ].join(' ')}>
                       {format(day, 'd')}
@@ -259,7 +259,7 @@ export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingP
                               'h-1.5 w-full rounded-full border',
                               plannedWorkoutStatus(w) === 'skipped'
                                 ? 'border-dashed border-muted-foreground/40'
-                                : 'border-amber-500/80',
+                                : 'border-warning/80',
                             ].join(' ')}
                             title={w.description ?? w.workout_type}
                           />
@@ -270,7 +270,7 @@ export function ActivityCalendar({ activePlans = [] }: { activePlans?: TrainingP
                           </span>
                         )}
                         {plannedOverflow > 0 && (
-                          <span className="text-[9px] text-amber-600 dark:text-amber-400 leading-none font-medium">
+                          <span className="text-[9px] text-warning leading-none font-medium">
                             +{plannedOverflow}
                           </span>
                         )}

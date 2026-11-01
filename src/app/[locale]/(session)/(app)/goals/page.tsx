@@ -192,7 +192,7 @@ function GoalCompleteDialog({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-green-600"
+          className="h-8 w-8 text-success"
           title={t('goals.markAchieved')}
         >
           <CheckCircle2 className="h-4 w-4" />

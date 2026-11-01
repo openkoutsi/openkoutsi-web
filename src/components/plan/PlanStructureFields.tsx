@@ -227,7 +227,7 @@ export function PlanStructureFields({
           </div>
           <p className="text-xs text-muted-foreground">{t('plan.generate.weeklyHoursHelp')}</p>
           {hoursMin && hoursMax && parseFloat(hoursMin) > parseFloat(hoursMax) && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <p className="text-xs text-warning">
               {t('plan.generate.hoursRangeHint')}
             </p>
           )}

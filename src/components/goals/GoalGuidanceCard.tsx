@@ -23,14 +23,14 @@ const VERDICT_MOOD: Record<string, string> = {
 }
 
 const VERDICT_BADGE: Record<string, string> = {
-  realistic: 'bg-green-100 text-green-800',
-  ambitious: 'bg-yellow-100 text-yellow-800',
-  unrealistic: 'bg-red-100 text-red-800',
+  realistic: 'bg-success/15 text-success',
+  ambitious: 'bg-warning/15 text-warning',
+  unrealistic: 'bg-destructive/15 text-destructive',
 }
 
 function VerdictBadge({ verdict }: { verdict: string }) {
   const t = useTranslations('app')
-  const cls = VERDICT_BADGE[verdict] ?? 'bg-gray-100 text-gray-800'
+  const cls = VERDICT_BADGE[verdict] ?? 'bg-muted text-muted-foreground'
   const label = t.has(`goals.guidance.verdict.${verdict}` as never)
     ? t(`goals.guidance.verdict.${verdict}` as never)
     : verdict

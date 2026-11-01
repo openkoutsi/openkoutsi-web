@@ -158,7 +158,7 @@ export function LlmSettingsCard() {
           <div
             className={`rounded-md border px-3 py-2 text-sm ${
               usingOwn
-                ? 'border-green-500/40 bg-green-500/5 text-green-700 dark:text-green-400'
+                ? 'border-success/40 bg-success/5 text-success'
                 : 'border-input bg-muted/40 text-muted-foreground'
             }`}
           >
@@ -216,7 +216,7 @@ export function LlmSettingsCard() {
               </>
             )}
             {isHttp && pageHttps && (
-              <p className="text-xs text-amber-600 dark:text-amber-500">{t('settings.llm.mixedContent')}</p>
+              <p className="text-xs text-warning">{t('settings.llm.mixedContent')}</p>
             )}
           </div>
 
@@ -283,15 +283,15 @@ export function LlmSettingsCard() {
           {testResult && (
             <div
               className={`mt-2 rounded-lg border p-4 text-sm space-y-2 ${
-                testResult.ok ? 'border-green-500/40 bg-green-500/5' : 'border-destructive/40 bg-destructive/5'
+                testResult.ok ? 'border-success/40 bg-success/5' : 'border-destructive/40 bg-destructive/5'
               }`}
             >
-              <p className={`font-medium ${testResult.ok ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+              <p className={`font-medium ${testResult.ok ? 'text-success' : 'text-destructive'}`}>
                 {testResult.ok ? t('settings.llm.testOk') : t('settings.llm.testFailed')}
               </p>
               {testResult.error && <p className="text-muted-foreground">{testResult.error}</p>}
               {testResult.ok && testResult.model_configured && (
-                <p className="text-green-700 dark:text-green-400">
+                <p className="text-success">
                   {t('settings.llm.testModelReplied')} ({testResult.model_configured})
                 </p>
               )}

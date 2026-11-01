@@ -70,14 +70,14 @@ function EmailConfirmationBadge({ user }: { user: UserResponse }) {
   if (!user.email) return null
   if (!user.email_verified_at) {
     return (
-      <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-500">
+      <span className="inline-flex items-center rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
         {t('users.emailUnconfirmed')}
       </span>
     )
   }
   return (
     <span
-      className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400"
+      className="inline-flex items-center rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success"
       title={t('users.emailConfirmedOn', {
         date: new Date(user.email_verified_at).toLocaleDateString(),
       })}
@@ -90,7 +90,7 @@ function EmailConfirmationBadge({ user }: { user: UserResponse }) {
 function RoleBadge({ role }: { role: string }) {
   const color =
     role === 'administrator'
-      ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+      ? 'bg-destructive/15 text-destructive'
       : 'bg-muted text-muted-foreground'
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
@@ -465,7 +465,7 @@ function UsersTab() {
                 <div className="flex items-center gap-2">
                   {u.llm_entitlement?.active ? (
                     <>
-                      <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
                         {t('users.llmGranted')}
                       </span>
                       <Button size="sm" variant="ghost" onClick={() => setEntitlement(u.id, 'revoked')}>
@@ -1169,7 +1169,7 @@ function SettingsTab() {
               {!allowTokens && (
                 // Turning it off refuses authentication, not just issuance —
                 // say so, or the switch is a comforting untruth.
-                <p className="text-xs text-amber-600 dark:text-amber-500">
+                <p className="text-xs text-warning">
                   {t('settings.allowTokensWarning')}
                 </p>
               )}
@@ -1188,7 +1188,7 @@ function SettingsTab() {
                 // Off is a 404 on the handshake, not merely on the tool calls,
                 // and it withdraws an interface rather than an exposure — both
                 // worth saying where the decision is made.
-                <p className="text-xs text-amber-600 dark:text-amber-500">
+                <p className="text-xs text-warning">
                   {t('settings.allowMcpWarning')}
                 </p>
               )}
@@ -1197,7 +1197,7 @@ function SettingsTab() {
                 // hour; without personal access tokens there is no credential an
                 // external client can hold, so the switch above is on in name
                 // only.
-                <p className="text-xs text-amber-600 dark:text-amber-500">
+                <p className="text-xs text-warning">
                   {t('settings.allowMcpNeedsTokens')}
                 </p>
               )}
@@ -1249,7 +1249,7 @@ function SettingsTab() {
               <Label htmlFor="requires-subscription">{t('settings.requiresSubscription')}</Label>
               <p className="text-xs text-muted-foreground">{t('settings.requiresSubscriptionDesc')}</p>
               {requiresSubscription && (
-                <p className="text-xs text-amber-600 dark:text-amber-500">
+                <p className="text-xs text-warning">
                   {t('settings.requiresSubscriptionWarning')}
                 </p>
               )}
@@ -1420,15 +1420,15 @@ function SettingsTab() {
           </div>
 
         {testResult && (
-          <div className={`mt-4 max-w-md rounded-lg border p-4 text-sm space-y-2 ${testResult.ok ? 'border-green-500/40 bg-green-500/5' : 'border-destructive/40 bg-destructive/5'}`}>
-            <p className={`font-medium ${testResult.ok ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+          <div className={`mt-4 max-w-md rounded-lg border p-4 text-sm space-y-2 ${testResult.ok ? 'border-success/40 bg-success/5' : 'border-destructive/40 bg-destructive/5'}`}>
+            <p className={`font-medium ${testResult.ok ? 'text-success' : 'text-destructive'}`}>
               {testResult.ok ? t('settings.testConnectionOk') : t('settings.testConnectionFailed')}
             </p>
             {testResult.error && (
               <p className="text-muted-foreground">{testResult.error}</p>
             )}
             {testResult.ok && testResult.model_configured && (
-              <p className="text-green-700 dark:text-green-400">
+              <p className="text-success">
                 {t('settings.testModelReplied')}
                 {' '}({testResult.model_configured})
               </p>
