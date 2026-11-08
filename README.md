@@ -558,6 +558,16 @@ npx vitest run         # run tests once
 npm run test:coverage  # run tests with coverage
 ```
 
+## Active users in the admin console
+
+A small table at the top of the admin page, above the tabs, shows unique active
+users for today, the last 7 days and the last 30 days. A user is active on a day
+once they load the dashboard (personal access tokens don't count). Each figure is
+one call to `GET /api/admin/active-users/summary` with that window's `from`/`to`,
+read from `total_active_users`, so weekly and monthly are distinct counts rather
+than sums of daily ones. Windows are UTC dates, matching how the backend records
+days (`src/lib/activeUsers.ts`).
+
 ## Third-party API usage in the admin console
 
 The **Usage** tab leads with a **quota headroom** panel and the volume tables sit
