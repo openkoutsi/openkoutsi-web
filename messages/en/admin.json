@@ -6,6 +6,16 @@
     "settings": "Settings",
     "usage": "Usage"
   },
+  "activeUsers": {
+    "title": "Active users",
+    "desc": "Unique users who opened the dashboard in each period (UTC days).",
+    "daily": "Daily",
+    "dailyRange": "today",
+    "weekly": "Weekly",
+    "weeklyRange": "last 7 days",
+    "monthly": "Monthly",
+    "monthlyRange": "last 30 days"
+  },
   "users": {
     "username": "Username",
     "account": "Account",

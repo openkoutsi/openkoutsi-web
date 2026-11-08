@@ -126,6 +126,24 @@ export interface LlmUsageSummaryResponse {
   buckets: LlmUsageBucket[]
 }
 
+// ── Active users ──────────────────────────────────────────────────────────────
+
+// Distinct users who loaded the dashboard in each bucket (UTC). For week/month
+// buckets a user counts once however many days they were active.
+export interface ActiveUsersBucket {
+  key: string
+  active_users: number
+}
+
+export interface ActiveUsersSummaryResponse {
+  group_by: string
+  from?: string | null
+  to?: string | null
+  // Distinct users active anywhere in the requested range.
+  total_active_users: number
+  buckets: ActiveUsersBucket[]
+}
+
 // ── Third-party API usage and quota headroom (issue #66) ─────────────────────
 
 // One aggregation row of the outbound third-party API-usage summary. `calls`

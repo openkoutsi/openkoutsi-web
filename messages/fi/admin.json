@@ -6,6 +6,16 @@
     "settings": "Asetukset",
     "usage": "Käyttö"
   },
+  "activeUsers": {
+    "title": "Aktiiviset käyttäjät",
+    "desc": "Eri käyttäjät, jotka avasivat Kojelaudan kunkin jakson aikana (UTC-päivinä).",
+    "daily": "Päivittäin",
+    "dailyRange": "tänään",
+    "weekly": "Viikoittain",
+    "weeklyRange": "viimeiset 7 päivää",
+    "monthly": "Kuukausittain",
+    "monthlyRange": "viimeiset 30 päivää"
+  },
   "users": {
     "username": "Käyttäjätunnus",
     "account": "Tili",

@@ -7,7 +7,9 @@ import useSWR from 'swr'
 import { useAuth } from '@/lib/auth'
 import { apiFetch, fetcher } from '@/lib/api'
 import { observationAge, quotaBarPercent, quotaSeverity } from '@/lib/quota'
+import { ACTIVE_USER_WINDOWS, activeUsersUrl } from '@/lib/activeUsers'
 import type {
+  ActiveUsersSummaryResponse,
   AdminPersonalAccessTokenResponse,
   UserResponse,
   InvitationResponse,
@@ -1840,6 +1842,58 @@ function UsageTab() {
   )
 }
 
+// ── Active users ───────────────────────────────────────────────────────────────
+//
+// Distinct users who loaded the dashboard today, in the last 7 days and in the
+// last 30 days (UTC). Each window is its own request because a weekly or
+// monthly figure is a distinct count over the whole range — summing daily
+// counts would count a returning user once per visit day.
+
+function ActiveUsersCount({ days }: { days: number }) {
+  const { data, error } = useSWR<ActiveUsersSummaryResponse>(activeUsersUrl(days), fetcher)
+  if (error) return <span className="text-muted-foreground">—</span>
+  if (data === undefined) return <span className="text-muted-foreground">…</span>
+  const n = data.total_active_users
+  return <>{typeof n === 'number' ? n.toLocaleString() : '—'}</>
+}
+
+function ActiveUsersTable() {
+  const t = useTranslations('admin')
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{t('activeUsers.title')}</CardTitle>
+        <CardDescription>{t('activeUsers.desc')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" aria-label={t('activeUsers.title')}>
+            <thead>
+              <tr className="border-b text-left text-muted-foreground">
+                {ACTIVE_USER_WINDOWS.map((w) => (
+                  <th key={w.key} className="pb-2 pr-4 font-medium last:pr-0">
+                    {t(`activeUsers.${w.key}`)}
+                    <span className="block text-xs font-normal">{t(`activeUsers.${w.key}Range`)}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {ACTIVE_USER_WINDOWS.map((w) => (
+                  <td key={w.key} className="pt-2 pr-4 text-2xl font-semibold tabular-nums last:pr-0">
+                    <ActiveUsersCount days={w.days} />
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -1858,6 +1912,7 @@ export default function AdminPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <h1 className="text-2xl font-semibold">{t('title')}</h1>
+      <ActiveUsersTable />
       <Tabs defaultValue="users">
         <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="users">{t('tabs.users')}</TabsTrigger>
