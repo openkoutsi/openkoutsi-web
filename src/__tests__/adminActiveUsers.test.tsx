@@ -33,7 +33,14 @@ function mount(totals: Record<string, number> | 'error') {
     if (url.startsWith('/api/admin/active-users/summary')) {
       if (totals === 'error') throw new Error('boom')
       const from = new URL(url, 'http://x').searchParams.get('from')!
-      return { group_by: 'day', from, to: null, total_active_users: totals[from], buckets: [] }
+      return {
+        group_by: 'day',
+        from,
+        to: null,
+        total_active_users: totals[from],
+        confirmed_email_accounts: 57,
+        buckets: [],
+      }
     }
     if (url.startsWith('/api/admin/')) return { items: [], total: 0, page: 1, page_size: 100 }
     throw new Error(`unexpected fetch: ${url}`)
@@ -73,6 +80,16 @@ describe('activeUsersRange', () => {
 })
 
 describe('active users table', () => {
+  it('fetches the confirmed-account count with the daily request, not a fourth one', async () => {
+    mount({})
+    await screen.findByRole('table', { name: 'activeUsers.title' })
+    await screen.findAllByText('—')
+    const summaryCalls = mocks.fetcher.mock.calls.filter(([u]) =>
+      String(u).startsWith('/api/admin/active-users/summary'),
+    )
+    expect(new Set(summaryCalls.map(([u]) => u)).size).toBe(3)
+  })
+
   it('shows daily, weekly and monthly unique users above the tabs', async () => {
     const today = new Date()
     mount({
@@ -87,6 +104,8 @@ describe('active users table', () => {
     expect(await within(table).findByText('3')).toBeTruthy()
     expect(await within(table).findByText('12')).toBeTruthy()
     expect(await within(table).findByText((1234).toLocaleString())).toBeTruthy()
+    expect(within(table).getByText('activeUsers.confirmed')).toBeTruthy()
+    expect(await within(table).findByText('57')).toBeTruthy()
 
     // It sits above the tab bar, visible whichever tab is open.
     const tabs = screen.getByRole('tablist')
@@ -96,7 +115,7 @@ describe('active users table', () => {
   it('shows a dash rather than breaking the page when the summary fails', async () => {
     mount('error')
     const table = await screen.findByRole('table', { name: 'activeUsers.title' })
-    expect((await within(table).findAllByText('—')).length).toBe(3)
+    expect((await within(table).findAllByText('—')).length).toBe(4)
     expect(screen.getByText('tabs.users')).toBeTruthy()
   })
 })

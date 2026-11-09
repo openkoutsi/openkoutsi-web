@@ -141,6 +141,8 @@ export interface ActiveUsersSummaryResponse {
   to?: string | null
   // Distinct users active anywhere in the requested range.
   total_active_users: number
+  // Existing accounts with a confirmed email address, right now (ignores from/to).
+  confirmed_email_accounts: number
   buckets: ActiveUsersBucket[]
 }
 

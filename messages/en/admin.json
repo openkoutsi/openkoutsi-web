@@ -8,13 +8,15 @@
   },
   "activeUsers": {
     "title": "Active users",
-    "desc": "Unique users who opened the dashboard in each period (UTC days).",
+    "desc": "Unique users who opened the dashboard in each period (UTC days), and how many accounts have a confirmed email address.",
     "daily": "Daily",
     "dailyRange": "today",
     "weekly": "Weekly",
     "weeklyRange": "last 7 days",
     "monthly": "Monthly",
-    "monthlyRange": "last 30 days"
+    "monthlyRange": "last 30 days",
+    "confirmed": "Confirmed accounts",
+    "confirmedRange": "with confirmed email"
   },
   "users": {
     "username": "Username",
