@@ -568,6 +568,10 @@ read from `total_active_users`, so weekly and monthly are distinct counts rather
 than sums of daily ones. Windows are UTC dates, matching how the backend records
 days (`src/lib/activeUsers.ts`).
 
+A fourth cell shows how many existing accounts have a confirmed email address,
+from the same response's `confirmed_email_accounts` (read off the daily request,
+so it costs no extra fetch). It is a current total, not bounded by any window.
+
 ## Third-party API usage in the admin console
 
 The **Usage** tab leads with a **quota headroom** panel and the volume tables sit

@@ -1849,11 +1849,17 @@ function UsageTab() {
 // monthly figure is a distinct count over the whole range — summing daily
 // counts would count a returning user once per visit day.
 
-function ActiveUsersCount({ days }: { days: number }) {
+function ActiveUsersCount({
+  days,
+  field = 'total_active_users',
+}: {
+  days: number
+  field?: 'total_active_users' | 'confirmed_email_accounts'
+}) {
   const { data, error } = useSWR<ActiveUsersSummaryResponse>(activeUsersUrl(days), fetcher)
   if (error) return <span className="text-muted-foreground">—</span>
   if (data === undefined) return <span className="text-muted-foreground">…</span>
-  const n = data.total_active_users
+  const n = data[field]
   return <>{typeof n === 'number' ? n.toLocaleString() : '—'}</>
 }
 
@@ -1871,20 +1877,28 @@ function ActiveUsersTable() {
             <thead>
               <tr className="border-b text-left text-muted-foreground">
                 {ACTIVE_USER_WINDOWS.map((w) => (
-                  <th key={w.key} className="pb-2 pr-4 font-medium last:pr-0">
+                  <th key={w.key} className="pb-2 pr-4 font-medium">
                     {t(`activeUsers.${w.key}`)}
                     <span className="block text-xs font-normal">{t(`activeUsers.${w.key}Range`)}</span>
                   </th>
                 ))}
+                <th className="pb-2 font-medium">
+                  {t('activeUsers.confirmed')}
+                  <span className="block text-xs font-normal">{t('activeUsers.confirmedRange')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 {ACTIVE_USER_WINDOWS.map((w) => (
-                  <td key={w.key} className="pt-2 pr-4 text-2xl font-semibold tabular-nums last:pr-0">
+                  <td key={w.key} className="pt-2 pr-4 text-2xl font-semibold tabular-nums">
                     <ActiveUsersCount days={w.days} />
                   </td>
                 ))}
+                <td className="pt-2 text-2xl font-semibold tabular-nums">
+                  {/* Same request as the daily cell, so SWR serves both from one fetch. */}
+                  <ActiveUsersCount days={1} field="confirmed_email_accounts" />
+                </td>
               </tr>
             </tbody>
           </table>
